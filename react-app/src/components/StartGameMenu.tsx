@@ -4,26 +4,39 @@ import InputForm from './InputForm';
 
 function MainMenu() {
   const [username, setUsername] = useState("");
-  const [inputFormValue, setInputFormValue] = useState("");
   const [activeButton, setActiveButton] = useState(false);
   const minUsernameLength: number = 5;
 
   const handleInputFormChange = (value: string) => {
-    setInputFormValue(value.trim());
+    setUsername(value.trim());
   }
 
   const handleStartGameButtonClick = () => {
-    //TODO
+    fetch('http://localhost:5159/api/Game', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        HostUsername: username
+      })
+    })
+      .then(data => {
+        console.log('Response data:', data);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
   }
 
   useEffect(() => {
-    if (inputFormValue.length >= minUsernameLength) {
+    if (username.length >= minUsernameLength) {
       setActiveButton(true);
     } 
     else {
       setActiveButton(false);
     }
-  }, [inputFormValue]);
+  }, [username]);
 
   return (
     <div className="container">
