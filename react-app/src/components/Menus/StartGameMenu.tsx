@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import StartGameButton from './StartGameButton';
-import InputForm from './InputForm';
+import GreenButton from '../GreenButton';
+import Form from '../Form';
+import GameSettingsBoard from '../GameSettingsBoard';
 
-function MainMenu() {
+function StartGameMenu() {
   const [username, setUsername] = useState("");
   const [activeButton, setActiveButton] = useState(false);
   const minUsernameLength: number = 5;
@@ -41,12 +42,22 @@ function MainMenu() {
   return (
     <div className="container">
       <div className="col-lg-4 col-sm-5 col-xs-6 mx-auto mt-3 text-center">
-        <h1>Scribbly</h1>
-        <InputForm placeholderValue="Enter username" smallTextValue={`Minimum username length ${minUsernameLength}`} onChange={handleInputFormChange}/>
-        <StartGameButton active={activeButton} onClick={handleStartGameButtonClick}/>
+        <h1 className="text-success">Scribbly</h1>
+        <Form
+          placeholderValue="Enter username"
+          smallTextValue={`Minimum username length ${minUsernameLength}`}
+          onChange={handleInputFormChange}
+        />
+        <GreenButton
+          active={activeButton}
+          onClick={handleStartGameButtonClick}
+        />
+      </div>
+      <div className="col-lg-5 col-md-7 col-sm-5 col-xs-5 mt-5 mx-auto">
+        <GameSettingsBoard />
       </div>
     </div>
   );
 }
 
-export default MainMenu
+export default StartGameMenu
