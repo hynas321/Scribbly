@@ -1,34 +1,52 @@
-import { useState } from 'react';
 import Range from './Range';
-import CheckBox from './Checkbox';
 import CheckForm from './CheckForm';
+import CheckBox from './CheckBox';
+import Settings from '../interfaces/Settings';
 
-function GameSettingsBoard() {
-  const [roundsCount, setRoundsCount] = useState(1);
-  const [nonAbstractNounsChecked, setNonAbstractNounsChecked] = useState(false);
+interface GameSettingsBoardProps {
+  defaultSettings: Settings;
+  onChange: (settings: Settings) => void;
+};
 
-  const handleInputRangeChange = (value: number) => {
-    setRoundsCount(value);
-  }
+function GameSettingsBoard({onChange, defaultSettings}: GameSettingsBoardProps) {
+  let settings = defaultSettings;
 
   const handleCheckBoxChange = (checked: boolean) => {
-    setNonAbstractNounsChecked(checked);
+    settings.nonAbstractNounsChecked = checked;
+    onChange(settings);
+  }
+
+  const handleRangeChange = (value: number) => {
+    settings.drawingTimespanSeconds = value;
+    onChange(settings);
+  }
+
+  const handleCheckFormChange = (value: number) => {
+    settings.roundsCount = value;
+    onChange(settings);
   }
 
   return (
     <div className="bg-light px-5 pt-3 pb-3">
       <h2 className="text-center">Game Settings</h2>
       <CheckBox
-        checkedByDefault={true}
+        checkedByDefault={settings.nonAbstractNounsChecked}
         onChange={handleCheckBoxChange}
       />
       <Range
-        title={"Number of rounds: " + roundsCount}
-        minValue={1}
-        maxValue={6}
-        onChange={handleInputRangeChange} 
+        title={`Drawing timespan`}
+        minValue={30}
+        maxValue={120}
+        step={15}
+        defaultValue={settings.drawingTimespanSeconds}
+        onChange={handleRangeChange} 
       />
-      <CheckForm />
+      <CheckForm
+        title={"Number of rounds"}
+        radioCount={6}
+        radioCheckedByDefault={settings.roundsCount}
+        onChange={handleCheckFormChange}
+      />
     </div>
   );
 }

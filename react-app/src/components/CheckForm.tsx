@@ -1,20 +1,45 @@
+import { useEffect, useState } from "react";
+
 interface CheckFormProps {
-  value: number;
+  title: string;
+  radioCount: number;
+  radioCheckedByDefault: number;
   onChange: (value: number) => void;
 }
 
-function CheckForm() {
+function CheckForm({title, radioCount, radioCheckedByDefault, onChange}: CheckFormProps) {
+    const [checkedValue, setCheckedValue] = useState(radioCheckedByDefault);
+    const radios = Array.from({length: radioCount}, (_, index) => index + 1);
+
+    const handleChange = (event: any) => {
+      setCheckedValue(event.target.value);
+    }
+
+    useEffect(() => {
+      onChange(checkedValue)
+    }, [checkedValue]);
+
+    const radiosList = radios.map((num) => (
+      <div className="form-check form-check-inline" key={num}>
+        <input 
+          className="form-check-input"
+          type="radio"
+          name="radioOption"
+          value={num}
+          onChange={handleChange}
+          checked={num == checkedValue}
+        />
+        <label className="form-check-label">{num}</label>
+      </div>
+    ));
+
     return (
-      <>
-        <div className="form-check form-check-inline">
-          <input className="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1"/>
-          <label className="form-check-label">1</label>
+        <div className="mt-4">
+          <div>
+            <label className="form-label">{title}</label>
+            <div>{radiosList}</div>
+          </div>
         </div>
-        <div className="form-check form-check-inline">
-          <input className="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2"/>
-          <label className="form-check-label">2</label>
-        </div>
-      </>
     )
 }
 

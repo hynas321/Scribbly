@@ -2,14 +2,27 @@ import { useEffect, useState } from 'react';
 import GreenButton from '../GreenButton';
 import Form from '../Form';
 import GameSettingsBoard from '../GameSettingsBoard';
+import Settings from '../../interfaces/Settings';
 
 function StartGameMenu() {
+  const minUsernameLength: number = 5;
+
+  let settings: Settings = {
+    nonAbstractNounsChecked: true,
+    drawingTimespanSeconds: 75,
+    roundsCount: 4
+  };
+
   const [username, setUsername] = useState("");
   const [activeButton, setActiveButton] = useState(false);
-  const minUsernameLength: number = 5;
 
   const handleInputFormChange = (value: string) => {
     setUsername(value.trim());
+  }
+
+  const handleSettingsChange = (settingsObj: Settings) => {
+    settings = settingsObj;
+    console.log(settings);
   }
 
   const handleStartGameButtonClick = () => {
@@ -54,7 +67,10 @@ function StartGameMenu() {
         />
       </div>
       <div className="col-lg-5 col-md-7 col-sm-5 col-xs-5 mt-5 mx-auto">
-        <GameSettingsBoard />
+        <GameSettingsBoard
+          defaultSettings={settings}
+          onChange={handleSettingsChange}
+        />
       </div>
     </div>
   );
