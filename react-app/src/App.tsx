@@ -3,7 +3,9 @@ import 'bootstrap/dist/css/bootstrap.css'
 
 function App() {
   return (
-    <StartGameMenu />
+    <>
+      <StartGameMenu />
+    </>
   )
 }
 

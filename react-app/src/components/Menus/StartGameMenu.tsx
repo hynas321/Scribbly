@@ -2,55 +2,37 @@ import { useEffect, useState } from 'react';
 import GreenButton from '../GreenButton';
 import Form from '../Form';
 import GameSettingsBoard from '../GameSettingsBoard';
-import Settings from '../../interfaces/Settings';
+import { useAppSelector } from '../../redux/hooks'
+import EndpointHandler from "../../utils/EndpointHandler";
 
 function StartGameMenu() {
   const minUsernameLength: number = 5;
-
-  let settings: Settings = {
-    nonAbstractNounsChecked: true,
-    drawingTimespanSeconds: 75,
-    roundsCount: 4
-  };
-
-  const [username, setUsername] = useState("");
+  const endpointHandler = new EndpointHandler();
+  const gameSettings = useAppSelector((state) => state.gameSettings)
+  
+  const [hostUsername, setHostUsername] = useState("");
   const [activeButton, setActiveButton] = useState(false);
 
   const handleInputFormChange = (value: string) => {
-    setUsername(value.trim());
-  }
-
-  const handleSettingsChange = (settingsObj: Settings) => {
-    settings = settingsObj;
-    console.log(settings);
+    setHostUsername(value.trim());
   }
 
   const handleStartGameButtonClick = () => {
-    fetch('http://localhost:5159/api/Game', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        HostUsername: username
-      })
-    })
-      .then(data => {
-        console.log('Response data:', data);
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
+    endpointHandler.createGame(
+      'http://localhost:5159/api/Game/GetExistingGames',
+      hostUsername,
+      gameSettings
+    );
   }
 
   useEffect(() => {
-    if (username.length >= minUsernameLength) {
+    if (hostUsername.length >= minUsernameLength) {
       setActiveButton(true);
     } 
     else {
       setActiveButton(false);
     }
-  }, [username]);
+  }, [hostUsername]);
 
   return (
     <div className="container">
@@ -67,10 +49,7 @@ function StartGameMenu() {
         />
       </div>
       <div className="col-lg-5 col-md-7 col-sm-5 col-xs-5 mt-5 mx-auto">
-        <GameSettingsBoard
-          defaultSettings={settings}
-          onChange={handleSettingsChange}
-        />
+        <GameSettingsBoard />
       </div>
     </div>
   );

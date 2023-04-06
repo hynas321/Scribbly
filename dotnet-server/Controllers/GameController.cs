@@ -8,7 +8,7 @@ namespace dotnet_server.Controllers;
 [EnableCors("AllowReactApp")]
 public class GameController : ControllerBase
 {
-    private readonly List<Game> Games = new List<Game>();
+    private readonly List<Game> games = new List<Game>();
     private readonly ILogger<GameController> _logger;
 
     public GameController(ILogger<GameController> logger)
@@ -24,7 +24,12 @@ public class GameController : ControllerBase
             HostUsername = request.HostUsername
         };
 
-        Games.Add(game);
+        games.Add(game);
+    }
+
+    [HttpGet(Name = "GetExistingGames")]
+    public List<Game> GetExistingGames() {
+        return games;
     }
 }
 

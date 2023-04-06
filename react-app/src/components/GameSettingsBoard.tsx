@@ -1,36 +1,35 @@
 import Range from './Range';
 import CheckForm from './CheckForm';
 import CheckBox from './CheckBox';
-import Settings from '../interfaces/Settings';
+import { useAppDispatch, useAppSelector } from '../redux/hooks'
+import { updatedDrawingTimespanSeconds, updatedNonAbstractNounsOnly, updatedRoundsCount } from '../redux/slices/game-settings-slice'
 
-interface GameSettingsBoardProps {
-  defaultSettings: Settings;
-  onChange: (settings: Settings) => void;
-};
+function GameSettingsBoard() {
+  const dispatch = useAppDispatch();
 
-function GameSettingsBoard({onChange, defaultSettings}: GameSettingsBoardProps) {
-  let settings = defaultSettings;
+  const settings = {
+    nonAbstractNounsOnly: useAppSelector((state) => state.gameSettings.nonAbstractNounsOnly),
+    drawingTimespanSeconds: useAppSelector((state) => state.gameSettings.drawingTimespanSeconds),
+    roundsCount: useAppSelector((state) => state.gameSettings.roundsCount)
+  }
 
   const handleCheckBoxChange = (checked: boolean) => {
-    settings.nonAbstractNounsChecked = checked;
-    onChange(settings);
+    dispatch(updatedNonAbstractNounsOnly(checked));
   }
 
   const handleRangeChange = (value: number) => {
-    settings.drawingTimespanSeconds = value;
-    onChange(settings);
+    dispatch(updatedDrawingTimespanSeconds(value));
   }
 
   const handleCheckFormChange = (value: number) => {
-    settings.roundsCount = value;
-    onChange(settings);
+    dispatch(updatedRoundsCount(value));
   }
 
   return (
     <div className="bg-light px-5 pt-3 pb-3">
       <h2 className="text-center">Game Settings</h2>
       <CheckBox
-        checkedByDefault={settings.nonAbstractNounsChecked}
+        checkedByDefault={settings.nonAbstractNounsOnly}
         onChange={handleCheckBoxChange}
       />
       <Range
