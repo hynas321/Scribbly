@@ -18,7 +18,7 @@ function Range({title, minValue, maxValue, step, defaultValue, onChange}: RangeP
 
   useEffect(() => {
     onChange(value)
-  }, [value, onChange]);
+  }, [value]);
   
   return (
     <div className="mt-4">
