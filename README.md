@@ -5,19 +5,19 @@ Scribbly is a website that allows users to play a word guessing game. One user h
 
 Host is able to set:
 + number of rounds
-+ types/categories of random words
++ type of random words
 + timespan of each round
 
 ## Technological specification
 
-Websockets are used for the client-server communication.
+Websockets are used for managing chat and the drawn image.
 
 #Frontend
 + `React` with `Typescript` (built with Vite)
 + `Bootstrap` library for styling
 
 #Backend
-+ `ASP.NET Core Web API` (REST API)
++ `ASP.NET Core` (REST API)
 + `MySQL` database
 + `Dapper` ORM framework
 + `Wordnik API` to fetch random word
