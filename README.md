@@ -18,6 +18,6 @@ Websockets are used for the client-server communication.
 
 #Backend
 + `ASP.NET Core Web API` (REST API)
-+ `MS SQL Server` to manage number of rounds, player's score etc.
++ `MySQL` database
 + `Dapper` ORM framework
 + `Wordnik API` to fetch random word
