@@ -1,12 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
-interface Settings {
+export interface GameSettings {
   nonAbstractNounsOnly: boolean;
   drawingTimespanSeconds: number;
   roundsCount: number;
 };
 
-const initialState: Settings = {
+const initialState: GameSettings = {
   nonAbstractNounsOnly: true,
   drawingTimespanSeconds: 75,
   roundsCount: 4

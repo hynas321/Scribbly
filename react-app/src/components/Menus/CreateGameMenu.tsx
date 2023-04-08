@@ -4,8 +4,9 @@ import Form from '../Form';
 import GameSettingsBoard from '../GameSettingsBoard';
 import { useAppSelector } from '../../redux/hooks'
 import EndpointHandler from "../../utils/EndpointHandler";
+import config from '../../../config.json'
 
-function StartGameMenu() {
+function CreateGameMenu() {
   const minUsernameLength: number = 5;
   const endpointHandler = new EndpointHandler();
   const gameSettings = useAppSelector((state) => state.gameSettings)
@@ -19,7 +20,7 @@ function StartGameMenu() {
 
   const handleStartGameButtonClick = () => {
     endpointHandler.createGame(
-      'http://localhost:5159/api/Game/GetExistingGames',
+      config.createGameEndpoint,
       hostUsername,
       gameSettings
     );
@@ -44,6 +45,7 @@ function StartGameMenu() {
           onChange={handleInputFormChange}
         />
         <GreenButton
+          text="Create new game"
           active={activeButton}
           onClick={handleStartGameButtonClick}
         />
@@ -55,4 +57,4 @@ function StartGameMenu() {
   );
 }
 
-export default StartGameMenu
+export default CreateGameMenu

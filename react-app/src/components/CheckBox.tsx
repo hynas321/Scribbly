@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 
 interface CheckBoxProps {
+  text: string;
   checkedByDefault: boolean;
   onChange: (checked: boolean) => void;
 }
 
-function CheckBox({checkedByDefault, onChange}: CheckBoxProps) {
+function CheckBox({text, checkedByDefault, onChange}: CheckBoxProps) {
   const [checked, setChecked] = useState(checkedByDefault);
 
   const handleChange = (event: any) => {
@@ -24,7 +25,7 @@ function CheckBox({checkedByDefault, onChange}: CheckBoxProps) {
         checked={checked}
         onChange={handleChange}
       />
-      <label className="form-check-label">Allow only non-abstract nouns</label>
+      <label className="form-check-label">{text}</label>
     </div>
     )
 }

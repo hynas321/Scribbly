@@ -2,16 +2,21 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options => 
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = new PascalCaseNamingPolicy();
+    });
+    
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options => 
 {
-	options.AddPolicy("AllowReactApp",
-		builder => builder.WithOrigins("http://localhost:5173")
-			.AllowAnyHeader()
-			.AllowAnyMethod());
+    options.AddPolicy("AllowReactApp",
+        builder => builder.WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod());
 });
 
 var app = builder.Build();
@@ -27,6 +32,4 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 app.UseCors("AllowReactApp");
-
-
 app.Run();

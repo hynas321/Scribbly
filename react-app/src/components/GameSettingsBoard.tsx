@@ -29,6 +29,7 @@ function GameSettingsBoard() {
     <div className="bg-light px-5 pt-3 pb-3">
       <h2 className="text-center">Game Settings</h2>
       <CheckBox
+        text="Allow only non-abstract nouns"
         checkedByDefault={settings.nonAbstractNounsOnly}
         onChange={handleCheckBoxChange}
       />

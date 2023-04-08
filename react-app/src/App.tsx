@@ -1,10 +1,10 @@
-import StartGameMenu from './components/Menus/StartGameMenu'
+import CreateGameMenu from './components/Menus/CreateGameMenu'
 import 'bootstrap/dist/css/bootstrap.css'
 
 function App() {
   return (
     <>
-      <StartGameMenu />
+      <CreateGameMenu />
     </>
   )
 }

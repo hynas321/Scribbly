@@ -1,38 +1,54 @@
-using Microsoft.AspNetCore.Cors;
+using dotnet_server.Models;
 using Microsoft.AspNetCore.Mvc;
+using HttpRequests;
 
 namespace dotnet_server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[EnableCors("AllowReactApp")]
 public class GameController : ControllerBase
 {
-    private readonly List<Game> games = new List<Game>();
-    private readonly ILogger<GameController> _logger;
+    private readonly List<Game> Games = new List<Game>();
+    private readonly ILogger<GameController> logger;
 
     public GameController(ILogger<GameController> logger)
     {
-        _logger = logger;
+        this.logger = logger;
     }
 
-    [HttpPost(Name = "CreateGame")]
-    public void CreateGame([FromBody] CreateGameRequest request) {
-        Game game = new Game() 
+    [HttpPost("Create")]
+    public IActionResult Create([FromBody] CreateGameRequestBody requestBody)
+    {
+        try 
         {
-            Id = new Random().Next(1000),
-            HostUsername = request.HostUsername
-        };
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest);
+            }
 
-        games.Add(game);
+            Game game = new Game() 
+            {
+                Id = Guid.NewGuid().ToString(),
+                HostUsername = requestBody.HostUsername,
+                NonAbstractNounsOnly = requestBody.NonAbstractNounsOnly,
+                DrawingTimespanSeconds = requestBody.DrawingTimespanSeconds,
+                RoundsCount = requestBody.RoundsCount
+            };
+
+            Games.Add(game);
+
+            return StatusCode(StatusCodes.Status201Created);
+        }
+        catch
+        {   
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+
     }
 
-    [HttpGet(Name = "GetExistingGames")]
-    public List<Game> GetExistingGames() {
-        return games;
+    [HttpGet("GetAll")]
+    public IActionResult GetAll()
+    {
+        return StatusCode(StatusCodes.Status200OK, Games);
     }
-}
-
-public class CreateGameRequest {
-    public string? HostUsername { get; set; }
 }
