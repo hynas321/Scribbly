@@ -74,7 +74,7 @@ function CreateGameMenu() {
           onChange={handleInputFormChange}
         />
         <Button
-          text="Create new game"
+          text="Create new match"
           type="success"
           active={activeButton}
           onClick={handleStartGameButtonClick}
