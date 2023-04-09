@@ -1,8 +1,8 @@
 import Range from './Range';
 import CheckForm from './CheckForm';
 import CheckBox from './CheckBox';
-import { useAppDispatch, useAppSelector } from '../redux/hooks'
-import { updatedDrawingTimespanSeconds, updatedNonAbstractNounsOnly, updatedRoundsCount } from '../redux/slices/game-settings-slice'
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
+import { updatedDrawingTimespanSeconds, updatedNonAbstractNounsOnly, updatedRoundsCount } from '../redux/slices/game-settings-slice';
 
 function GameSettingsBoard() {
   const dispatch = useAppDispatch();
@@ -11,7 +11,7 @@ function GameSettingsBoard() {
     nonAbstractNounsOnly: useAppSelector((state) => state.gameSettings.nonAbstractNounsOnly),
     drawingTimespanSeconds: useAppSelector((state) => state.gameSettings.drawingTimespanSeconds),
     roundsCount: useAppSelector((state) => state.gameSettings.roundsCount)
-  }
+  };
 
   const handleCheckBoxChange = (checked: boolean) => {
     dispatch(updatedNonAbstractNounsOnly(checked));

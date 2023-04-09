@@ -1,6 +1,6 @@
-import sadFace from '../../assets/sad-face.png'
+import sadFace from '../../assets/sad-face.png';
 import Button from '../GreenButton';
-import config from '../../../config.json'
+import config from '../../../config.json';
 import { Link } from 'react-router-dom';
 
 function PageNotFound() {

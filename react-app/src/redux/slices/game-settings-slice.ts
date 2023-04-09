@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface GameSettings {
   nonAbstractNounsOnly: boolean;
@@ -10,7 +10,7 @@ const initialState: GameSettings = {
   nonAbstractNounsOnly: true,
   drawingTimespanSeconds: 75,
   roundsCount: 4
-}
+};
 
 const gameSettingsSlice = createSlice({
   name: "gameSettings",

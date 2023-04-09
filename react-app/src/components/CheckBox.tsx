@@ -10,7 +10,7 @@ function CheckBox({text, checkedByDefault, onChange}: CheckBoxProps) {
   const [checked, setChecked] = useState(checkedByDefault);
 
   const handleChange = (event: any) => {
-    setChecked(event.target.checked)
+    setChecked(event.target.checked);
   }
 
   useEffect(() => {
@@ -30,4 +30,4 @@ function CheckBox({text, checkedByDefault, onChange}: CheckBoxProps) {
     )
 }
 
-export default CheckBox
+export default CheckBox;

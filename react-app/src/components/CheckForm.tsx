@@ -16,7 +16,7 @@ function CheckForm({title, radioCount, radioCheckedByDefault, onChange}: CheckFo
     }
 
     useEffect(() => {
-      onChange(checkedValue)
+      onChange(checkedValue);
     }, [checkedValue]);
 
     const radiosList = radios.map((num) => (
@@ -43,4 +43,4 @@ function CheckForm({title, radioCount, radioCheckedByDefault, onChange}: CheckFo
     )
 }
 
-export default CheckForm
+export default CheckForm;

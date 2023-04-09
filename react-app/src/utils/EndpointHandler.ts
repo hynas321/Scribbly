@@ -1,9 +1,9 @@
-import axios from 'axios'
-import config from '../../config.json'
-import { GameSettings } from '../redux/slices/game-settings-slice'
+import axios from 'axios';
+import config from '../../config.json';
+import { GameSettings } from '../redux/slices/game-settings-slice';
 
 class EndpointHandler {
-    private serverUrl: string = config.serverUrl
+    private serverUrl: string = config.serverUrl;
 
     async createGame(
         endpoint: string,
@@ -32,6 +32,6 @@ interface CreateGameRequestBody {
     nonAbstractNounsOnly: boolean,
     drawingTimespanSeconds: number,
     roundsCount: number
-}
+};
 
-export default EndpointHandler
+export default EndpointHandler;

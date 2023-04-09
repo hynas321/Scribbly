@@ -18,4 +18,4 @@ function Button({text, active, type, onClick}: ButtonProps) {
   );
 }
 
-export default Button
+export default Button;

@@ -2,15 +2,15 @@ import { useEffect, useState } from 'react';
 import Button from '../GreenButton';
 import Form from '../Form';
 import GameSettingsBoard from '../GameSettingsBoard';
-import { useAppSelector } from '../../redux/hooks'
+import { useAppSelector } from '../../redux/hooks';
 import EndpointHandler from "../../utils/EndpointHandler";
-import config from '../../../config.json'
+import config from '../../../config.json';
 import { Link } from 'react-router-dom';
 
 function CreateGameMenu() {
   const minUsernameLength: number = 5;
   const endpointHandler = new EndpointHandler();
-  const gameSettings = useAppSelector((state) => state.gameSettings)
+  const gameSettings = useAppSelector((state) => state.gameSettings);
   
   const [hostUsername, setHostUsername] = useState("");
   const [activeButton, setActiveButton] = useState(false);
@@ -60,4 +60,4 @@ function CreateGameMenu() {
   );
 }
 
-export default CreateGameMenu
+export default CreateGameMenu;

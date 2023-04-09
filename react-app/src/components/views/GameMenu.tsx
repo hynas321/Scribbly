@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
-import DrawingBoard from '../DrawingBoard';
 import Button from '../GreenButton';
-import config from '../../../config.json'
+import config from '../../../config.json';
 
 function GameMenu() {
   return (
@@ -9,9 +8,8 @@ function GameMenu() {
       <Link to={config.createGameClientEndpoint}>
         <Button
           text="Go back"
-          type="danger"
           active={true}
-          onClick={() => {}}
+          type="danger"
         />
       </Link>
     </div>

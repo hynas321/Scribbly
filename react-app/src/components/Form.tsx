@@ -14,7 +14,7 @@ function Form({placeholderValue, smallTextValue, onChange}: FormProps) {
   }
 
   useEffect(() => {
-    onChange(value)
+    onChange(value);
   }, [value]);
 
   return (
@@ -29,4 +29,4 @@ function Form({placeholderValue, smallTextValue, onChange}: FormProps) {
   );
 }
 
-export default Form
+export default Form;
