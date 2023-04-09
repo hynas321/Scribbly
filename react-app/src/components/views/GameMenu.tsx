@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import Button from '../GreenButton';
+import Button from '../Button';
 import config from '../../../config.json';
 
 function GameMenu() {

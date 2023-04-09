@@ -8,7 +8,7 @@ class EndpointHandler {
     async createGame(
         endpoint: string,
         hostUsername: string,
-        gameSettings: GameSettings) {
+        gameSettings: GameSettings): Promise<any> {
 
         const requestBody: CreateGameRequestBody = {
             hostUsername: hostUsername,
@@ -17,12 +17,12 @@ class EndpointHandler {
             roundsCount: gameSettings.roundsCount
         }
 
-        await axios.post(`${this.serverUrl}${endpoint}`, requestBody)
+        return await axios.post(`${this.serverUrl}${endpoint}`, requestBody)
         .then(response => {
-            console.log(response);
+            return response;
         })
         .catch(error => {
-            console.error(error);
+            return error;
         });
     }
 }

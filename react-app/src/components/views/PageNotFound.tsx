@@ -1,5 +1,5 @@
 import sadFace from '../../assets/sad-face.png';
-import Button from '../GreenButton';
+import Button from '../Button';
 import config from '../../../config.json';
 import { Link } from 'react-router-dom';
 
