@@ -1,14 +1,16 @@
-interface GreenButtonProps {
+interface ButtonProps {
   text: string;
   active: boolean;
-  onClick: () => void;
+  type?: string;
+  onClick?: () => void;
 }
 
-function GreenButton({text, active, onClick}: GreenButtonProps) {
+function Button({text, active, type, onClick}: ButtonProps) {
 
   return (
       <button 
-        className={active ? "btn btn-success btn-lg mt-4" : "btn btn-success btn-lg mt-4 disabled"} 
+        className={active ? `btn btn-${type == undefined ? "primary" : type} btn-lg mt-4` :
+          `btn btn-${type == undefined ? "primary" : type} btn-lg mt-4 disabled`} 
         onClick={onClick}
       >
         {text}
@@ -16,4 +18,4 @@ function GreenButton({text, active, onClick}: GreenButtonProps) {
   );
 }
 
-export default GreenButton
+export default Button
