@@ -5,7 +5,7 @@ import { GameSettings } from '../redux/slices/game-settings-slice'
 class EndpointHandler {
     private serverUrl: string = config.serverUrl
 
-    createGame(
+    async createGame(
         endpoint: string,
         hostUsername: string,
         gameSettings: GameSettings) {
@@ -17,7 +17,7 @@ class EndpointHandler {
             roundsCount: gameSettings.roundsCount
         }
 
-        axios.post(`${this.serverUrl}${endpoint}`, requestBody)
+        await axios.post(`${this.serverUrl}${endpoint}`, requestBody)
         .then(response => {
             console.log(response);
         })

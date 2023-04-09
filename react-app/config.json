@@ -1,4 +1,6 @@
 {
     "serverUrl": "http://localhost:5159",
-    "createGameEndpoint": "/api/Game/Create"
+    "createGameServerEndpoint": "/api/Game/Create",
+    "createGameClientEndpoint": "/",
+    "gameClientEndpoint": "/game"
 }
