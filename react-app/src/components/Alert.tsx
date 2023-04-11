@@ -11,7 +11,7 @@ function Alert({title, text, visible, type}: AlertProps) {
       {visible && (
         <div className={`alert alert-${ type == undefined ? "primary" : type }`} role="alert">
           { title && <h3>{title}</h3> }
-          <p>{text}</p>
+          <h6>{text}</h6>
         </div>
       )}
     </>

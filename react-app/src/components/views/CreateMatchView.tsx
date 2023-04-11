@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react';
 import Button from '../Button';
-import Form from '../Form';
+import InputForm from '../InputForm';
 import GameSettingsBoard from '../GameSettingsBoard';
-import { useAppSelector } from '../../redux/hooks';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import EndpointHandler from "../../utils/EndpointHandler";
 import config from '../../../config.json';
 import Alert from '../Alert';
 import { useNavigate } from 'react-router-dom';
+import { updatedUsername } from '../../redux/slices/player-slice';
 
-function CreateGameMenu() {
+function CreateMatchView() {
   const minUsernameLength: number = 5;
   const endpointHandler = new EndpointHandler();
   const gameSettings = useAppSelector((state) => state.gameSettings);
+  const dispatch = useAppDispatch();
 
   const navigate = useNavigate();
   const [hostUsername, setHostUsername] = useState("");
@@ -47,7 +49,7 @@ function CreateGameMenu() {
       return;
     }
 
-
+    dispatch(updatedUsername(hostUsername));
     navigate(config.gameClientEndpoint);
   }
 
@@ -68,7 +70,7 @@ function CreateGameMenu() {
             text={alertText}
             type={alertType}
         />
-        <Form
+        <InputForm
           placeholderValue="Enter username"
           smallTextValue={`Minimum username length ${minUsernameLength}`}
           onChange={handleInputFormChange}
@@ -87,4 +89,4 @@ function CreateGameMenu() {
   );
 }
 
-export default CreateGameMenu;
+export default CreateMatchView;

@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 function PageNotFound() {
   return (
-    <div className="text-center mt-3">
+    <div className="container text-center mt-3">
       <h3 className="mt-3">Page not found</h3>
       <div>
         <Link to={config.createGameClientEndpoint}>
@@ -16,7 +16,7 @@ function PageNotFound() {
           />
           </Link>
       </div>
-      <img src={sadFace} alt="Logo" />
+      <img src={sadFace} alt="Logo" className="img-fluid"/>
     </div>
   )
 }

@@ -4,8 +4,8 @@ import { Provider } from 'react-redux';
 import { store } from './redux/store';
 import 'bootstrap/dist/css/bootstrap.css'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import CreateGameMenu from './components/views/CreateMatchView';
-import GameMenu from './components/views/MatchView';
+import CreateMatchView from './components/views/CreateMatchView';
+import MatchView from './components/views/MatchView';
 import Logo from './components/Logo';
 import PageNotFound from './components/views/PageNotFound';
 import config from '../config.json';
@@ -13,11 +13,11 @@ import config from '../config.json';
 const router = createBrowserRouter([
   {
     path: config.createGameClientEndpoint,
-    element: <CreateGameMenu />,
+    element: <CreateMatchView />,
   },
   {
     path: config.gameClientEndpoint,
-    element: <GameMenu />
+    element: <MatchView />
   },
   {
     path: "*",
