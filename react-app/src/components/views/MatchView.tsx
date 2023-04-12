@@ -7,6 +7,7 @@ import Canvas from '../Canvas';
 import MatchInfo from '../MatchInfo';
 import { useState } from 'react';
 import { Player } from '../../redux/slices/player-slice';
+import ControlPanel from '../ControlPanel';
 
 function MatchView() {
   const player: Player = {
@@ -34,21 +35,13 @@ function MatchView() {
           <PlayerList 
             players={players} 
           />
+          <ControlPanel />
         </div>
         <div className="col-7">
           <Canvas />
         </div>
         <div className="col-3">
           <Chat />
-        </div>
-        <div>
-          <Link to={config.createGameClientEndpoint}>
-            <Button
-              text="Leave"
-              active={true}
-              type="danger"
-            />
-          </Link>
         </div>
       </div>
     </div>
