@@ -13,7 +13,7 @@ class EndpointHandler {
         const requestBody: CreateGameRequestBody = {
             hostUsername: hostUsername,
             nonAbstractNounsOnly: gameSettings.nonAbstractNounsOnly,
-            drawingTimespanSeconds: gameSettings.drawingTimespanSeconds,
+            drawingTimespanSeconds: gameSettings.drawingTimeSeconds,
             roundsCount: gameSettings.roundsCount
         }
 

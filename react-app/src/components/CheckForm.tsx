@@ -34,12 +34,12 @@ function CheckForm({title, radioCount, radioCheckedByDefault, onChange}: CheckFo
     ));
 
     return (
-        <div className="mt-4">
-          <div>
-            <label className="form-label">{title}</label>
-            <div>{radiosList}</div>
-          </div>
+      <div className="mt-4">
+        <div>
+          <label className="form-label">{title}</label>
+          <div>{radiosList}</div>
         </div>
+      </div>
     )
 }
 

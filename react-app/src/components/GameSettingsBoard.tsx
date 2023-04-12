@@ -2,14 +2,14 @@ import Range from './Range';
 import CheckForm from './CheckForm';
 import CheckBox from './CheckBox';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
-import { updatedDrawingTimespanSeconds, updatedNonAbstractNounsOnly, updatedRoundsCount } from '../redux/slices/game-settings-slice';
+import { updatedDrawingTimeSeconds, updatedNonAbstractNounsOnly, updatedRoundsCount } from '../redux/slices/game-settings-slice';
 
 function GameSettingsBoard() {
   const dispatch = useAppDispatch();
 
   const settings = {
     nonAbstractNounsOnly: useAppSelector((state) => state.gameSettings.nonAbstractNounsOnly),
-    drawingTimespanSeconds: useAppSelector((state) => state.gameSettings.drawingTimespanSeconds),
+    drawingTimespanSeconds: useAppSelector((state) => state.gameSettings.drawingTimeSeconds),
     roundsCount: useAppSelector((state) => state.gameSettings.roundsCount)
   };
 
@@ -18,7 +18,7 @@ function GameSettingsBoard() {
   }
 
   const handleRangeChange = (value: number) => {
-    dispatch(updatedDrawingTimespanSeconds(value));
+    dispatch(updatedDrawingTimeSeconds(value));
   }
 
   const handleCheckFormChange = (value: number) => {

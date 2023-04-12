@@ -9,7 +9,7 @@ import Alert from '../Alert';
 import { useNavigate } from 'react-router-dom';
 import { updatedUsername } from '../../redux/slices/player-slice';
 
-function CreateMatchView() {
+function CreateGameView() {
   const minUsernameLength: number = 5;
   const endpointHandler = new EndpointHandler();
   const gameSettings = useAppSelector((state) => state.gameSettings);
@@ -89,4 +89,4 @@ function CreateMatchView() {
   );
 }
 
-export default CreateMatchView;
+export default CreateGameView;

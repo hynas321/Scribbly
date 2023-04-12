@@ -4,13 +4,20 @@ import InputForm from './InputForm';
 import Button from './Button';
 import { useAppSelector } from '../redux/hooks';
 
-function Chat() {
+interface ChatProps {
+  wordLength: number;
+}
+
+function Chat({wordLength}: ChatProps) {
   const username = useAppSelector((state) => state.player.username);
   const [messages, setMessages] = useState<ChatMessageProps[]>([]);
   const [inputFormValue, setInputFormValue] = useState("");
   const [activeButton, setActiveButton] = useState(false);
   const inputFormRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
+
+  const character = '_';
+  const characters = new Array(wordLength).fill(character);
 
   const handleButtonPress = () => {
     const chatMessageProp: ChatMessageProps = {
@@ -59,6 +66,10 @@ function Chat() {
 
   return (
     <div>
+      <h5>
+        {characters.map(c => <text key={c}>{c} </text>)}
+        {`${wordLength}`}
+      </h5>
       <div id="messages" className="p-3 bg-light">
         <div ref={messagesRef} style={{height: "400px", overflowY: "auto"}}>
           {messages.map((chatMessageProp, index) => (
