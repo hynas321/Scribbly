@@ -6,22 +6,22 @@ interface PlayerListProps {
 }
 
 function PlayerList({players, round}: PlayerListProps) {
-    return (
-      <>
-        <h5>Round {round.currentRound}/{round.roundCount}</h5>
-        <ul className="list-group">
-          <li className="list-group-item justify-content-between align-items-center">
-              Players
+  return (
+    <>
+      <h5>Round {round.currentRound}/{round.roundCount}</h5>
+      <ul className="list-group">
+        <li className="list-group-item justify-content-between align-items-center">
+            Players
+        </li>
+        {players.map((player, index) => (
+          <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+            {player.username}
+            <span className="badge rounded-pill bg-dark">{player.points}</span>
           </li>
-          {players.map((player, index) => (
-            <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-              {player.username}
-              <span className="badge rounded-pill bg-dark">{player.points}</span>
-            </li>
-            ))}
-        </ul>
-      </>
-    )
+          ))}
+      </ul>
+    </>
+  )
 }
 
 export default PlayerList;

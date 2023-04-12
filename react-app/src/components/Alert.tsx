@@ -1,8 +1,8 @@
 interface AlertProps {
-    title?: string;
-    text: string;
-    visible: boolean;
-    type?: string;
+  title?: string;
+  text: string;
+  visible: boolean;
+  type?: string;
 }
 
 function Alert({title, text, visible, type}: AlertProps) {

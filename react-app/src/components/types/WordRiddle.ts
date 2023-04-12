@@ -1,3 +1,3 @@
 type WordRiddle = {
-    length: number
+  length: number
 }

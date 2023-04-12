@@ -1,6 +1,6 @@
 export interface ChatMessageProps {
-    username: string;
-    text: string;
+  username: string;
+  text: string;
 }
 
 function ChatMessage({username, text}: ChatMessageProps) {
