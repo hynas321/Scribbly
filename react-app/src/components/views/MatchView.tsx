@@ -7,7 +7,7 @@ import DrawingBoard from '../DrawingBoard';
 
 function MatchView() {
   return (
-    <div className="container-fluid text-center">
+    <div className="container text-center">
       <div className="row">
         <div className="col-2">
           <PlayerList />

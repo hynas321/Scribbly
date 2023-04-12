@@ -4,7 +4,6 @@ import InputForm from './InputForm';
 import Button from './Button';
 import { useAppSelector } from '../redux/hooks';
 
-
 function Chat() {
   const username = useAppSelector((state) => state.player.username);
   const [messages, setMessages] = useState<ChatMessageProps[]>([]);
