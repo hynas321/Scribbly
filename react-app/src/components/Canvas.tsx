@@ -2,9 +2,9 @@ import { useState } from "react";
 import { useDraw } from "./hooks/useDraw";
 import { ChromePicker } from "react-color"
 
-function DrawingBoard() {
+function Canvas() {
   const { canvasRef, onMouseDown } = useDraw(draw);
-  const [color, setColor] = useState("#000");
+  const [color, setColor] = useState("#000000");
 
   function draw({
     canvasContext,
@@ -47,4 +47,4 @@ function DrawingBoard() {
   )
 }
 
-export default DrawingBoard;
+export default Canvas;
