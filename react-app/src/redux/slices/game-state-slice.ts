@@ -9,7 +9,7 @@ export interface GameState {
 };
 
 const initialState: GameState = {
-    currentDrawingTimeSeconds: 75,
+    currentDrawingTimeSeconds: 50,
     currentRound: 1,
     players: [],
     onlinePlayersUsernames: []

@@ -59,7 +59,7 @@ function Canvas({progressBarProperties}: CanvasProps) {
         onChange={(e) => setColor(e.hex)}
       />
       <Button 
-        text={"Clean canvas"}
+        text={"Clear canvas"}
         active={true}
         onClick={clearCanvas}
       />

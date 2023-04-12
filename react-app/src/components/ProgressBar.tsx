@@ -5,11 +5,11 @@ interface ProgressBarProps {
 
 function ProgressBar({progressProperties, text}: ProgressBarProps) {
   return (
-    <div className="progress" style={{height: "75%"}}>
+    <div className="progress" style={{height: "110%"}}>
       <div
         className="progress-bar"
         role="progressbar"
-        style={{ width: `${progressProperties.currentProgress}%` }}
+        style={{ width: `${progressProperties.currentProgress}%`}}
         aria-valuenow={progressProperties.currentProgress}
         aria-valuemin={progressProperties.minProgress}
         aria-valuemax={progressProperties.maxProgress}
