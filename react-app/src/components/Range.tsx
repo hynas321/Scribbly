@@ -17,7 +17,7 @@ function Range({title, minValue, maxValue, step, defaultValue, onChange}: RangeP
   }
 
   useEffect(() => {
-    onChange(value)
+    onChange(value);
   }, [value]);
   
   return (
@@ -36,4 +36,4 @@ function Range({title, minValue, maxValue, step, defaultValue, onChange}: RangeP
   )
 }
 
-export default Range
+export default Range;
