@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useDraw } from "./hooks/useDraw";
-import { ChromePicker } from "react-color"
+import { CirclePicker } from "react-color"
+import Button from "./Button";
 
 function Canvas() {
-  const { canvasRef, onMouseDown } = useDraw(draw);
+  const { canvasRef, onMouseDown, clearCanvas } = useDraw(draw);
   const [color, setColor] = useState("#000000");
 
   function draw({
@@ -29,20 +30,26 @@ function Canvas() {
   }
 
   return (
-    <div className="d-flex">
+    <div className="">
       <canvas
         ref={canvasRef}
-        width={500}
+        width={700}
         height={500}
         className="border border-black rounded-md"
         onMouseDown={onMouseDown}
       />
       <div>
-        <ChromePicker
+      </div>
+      <CirclePicker
           color={color}
+          width="100"
           onChange={(e) => setColor(e.hex)}
         />
-      </div>
+        <Button 
+          text={"Clean canvas"}
+          active={true}
+          onClick={clearCanvas}
+        />
     </div>
   )
 }
