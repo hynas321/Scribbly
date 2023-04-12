@@ -9,7 +9,8 @@ function Chat() {
   const [messages, setMessages] = useState<ChatMessageProps[]>([]);
   const [inputFormValue, setInputFormValue] = useState("");
   const [activeButton, setActiveButton] = useState(false);
-  const ref = useRef<HTMLInputElement>(null);
+  const inputFormRef = useRef<HTMLInputElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
 
   const handleButtonPress = () => {
     const chatMessageProp: ChatMessageProps = {
@@ -24,8 +25,8 @@ function Chat() {
     setMessages(messages.concat(chatMessageProp))
     setInputFormValue("");
 
-    if (ref && ref.current) {
-      ref.current.value = "";
+    if (inputFormRef && inputFormRef.current) {
+      inputFormRef.current.value = "";
     }
   }
 
@@ -48,10 +49,18 @@ function Chat() {
     }
   }, [inputFormValue]);
 
+  useEffect(() => {
+    if (!messagesRef.current) {
+      return;
+    }
+
+    messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+  }, [messages]);
+
   return (
     <div>
       <div id="messages" className="p-3 bg-light">
-        <div style={{height: "400px", overflowY: "auto"}}>
+        <div ref={messagesRef} style={{height: "400px", overflowY: "auto"}}>
           {messages.map((chatMessageProp, index) => (
             <ChatMessage
               key={index}
@@ -71,7 +80,7 @@ function Chat() {
           placeholderValue={"Enter your guess"}
           onChange={handleInputFormChange}
           onKeyDown={handleEnterPress}
-          ref={ref}
+          ref={inputFormRef}
         />
       </div>
     </div>
