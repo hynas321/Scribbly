@@ -2,14 +2,13 @@ import { Player } from "../redux/slices/player-slice";
 
 interface PlayerListProps {
   players: Player[],
-  currentRound: number,
-  roundCount: number
+  round: Round
 }
 
-function PlayerList({players, currentRound, roundCount}: PlayerListProps) {
+function PlayerList({players, round}: PlayerListProps) {
     return (
       <>
-        <h5>Round {currentRound}/{roundCount}</h5>
+        <h5>Round {round.currentRound}/{round.roundCount}</h5>
         <ul className="list-group">
           <li className="list-group-item justify-content-between align-items-center">
               Players

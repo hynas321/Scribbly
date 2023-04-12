@@ -5,12 +5,10 @@ import Button from "./Button";
 import ProgressBar from "./ProgressBar";
 
 interface CanvasProps {
-  currentProgress: number,
-  minProgress: number,
-  maxProgress: number
+  progressBarProperties: ProgressProperties
 }
 
-function Canvas({currentProgress, minProgress, maxProgress}: CanvasProps) {
+function Canvas({progressBarProperties}: CanvasProps) {
   const { canvasRef, onMouseDown, clearCanvas } = useDraw(draw);
   const [color, setColor] = useState("#000000");
 
@@ -41,9 +39,7 @@ function Canvas({currentProgress, minProgress, maxProgress}: CanvasProps) {
       <div className="d-flex justify-content-center">
         <div className="mb-3 col-10">
           <ProgressBar
-            currentProgress={currentProgress}
-            minProgress={minProgress}
-            maxProgress={maxProgress}
+            progressProperties={progressBarProperties}
             text="s"
           />
         </div>

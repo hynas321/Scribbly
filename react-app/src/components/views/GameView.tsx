@@ -16,8 +16,9 @@ function GameView() {
   const gameState = useAppSelector((state) => state.gameState);
   const dispatch = useAppDispatch();
 
-  const wordLength = "Testing".length; //will be fetched from the word API
-  const [players, setPlayers] = useState<Player[]>([player, player, player, player, player, player, player, player]);
+  const [players, setPlayers] =
+    useState<Player[]>([player, player, player, player, player, player, player, player]); // will be fetched from the server
+  const wordRiddleLength = 10; //will be fetched from the server
 
   return (
     <div className="container text-center">
@@ -25,21 +26,27 @@ function GameView() {
         <div className="col-2">
           <PlayerList 
             players={players}
-            currentRound={gameState.currentRound}
-            roundCount={gameSettings.roundsCount}
+            round={{
+              currentRound: gameState.currentRound,
+              roundCount: gameSettings.roundsCount
+            }}
           />
           <ControlPanel />
         </div>
         <div className="col-7">
           <Canvas
-            currentProgress={gameState.currentDrawingTimeSeconds}
-            minProgress={0}
-            maxProgress={gameSettings.drawingTimeSeconds}
+            progressBarProperties={{
+              currentProgress: gameState.currentDrawingTimeSeconds,
+              minProgress: gameSettings.finishRoundSeconds,
+              maxProgress: gameSettings.drawingTimeSeconds
+            }}
           />
         </div>
         <div className="col-3">
           <Chat
-            wordLength={wordLength}
+            wordRiddle={{
+              length: wordRiddleLength
+            }}
           />
         </div>
       </div>

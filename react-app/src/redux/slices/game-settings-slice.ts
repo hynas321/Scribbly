@@ -3,13 +3,15 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 export interface GameSettings {
   nonAbstractNounsOnly: boolean;
   drawingTimeSeconds: number;
+  finishRoundSeconds: number,
   roundsCount: number;
 };
 
 const initialState: GameSettings = {
   nonAbstractNounsOnly: true,
   drawingTimeSeconds: 75,
-  roundsCount: 4
+  finishRoundSeconds: 0,
+  roundsCount: 6
 };
 
 const gameSettingsSlice = createSlice({
@@ -24,9 +26,12 @@ const gameSettingsSlice = createSlice({
     },
     updatedRoundsCount(state, action: PayloadAction<number>) {
       state.roundsCount = action.payload;
+    },
+    updatedFinishRoundSeconds(state, action: PayloadAction<number>) {
+      state.finishRoundSeconds = action.payload
     }
   }
 })
 
-export const { updatedNonAbstractNounsOnly, updatedDrawingTimeSeconds: updatedDrawingTimeSeconds, updatedRoundsCount } = gameSettingsSlice.actions;
+export const { updatedNonAbstractNounsOnly, updatedDrawingTimeSeconds, updatedFinishRoundSeconds, updatedRoundsCount } = gameSettingsSlice.actions;
 export default gameSettingsSlice.reducer;
