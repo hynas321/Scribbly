@@ -67,7 +67,7 @@ function Chat({wordRiddle}: ChatProps) {
   return (
     <div>
       <h5>
-        {characters.map(c => <text key={c}>{c} </text>)}
+        {characters.map((c, index) => <span key={index}>{c} </span>)}
         {`${wordRiddle.length}`}
       </h5>
       <div id="messages" className="p-3 bg-light">
