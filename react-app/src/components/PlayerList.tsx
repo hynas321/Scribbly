@@ -1,4 +1,5 @@
 import { Player } from "../redux/slices/player-slice";
+import { BsPerson } from "react-icons/bs";
 
 interface PlayerListProps {
   title: string,
@@ -17,7 +18,7 @@ function PlayerList({title, players, displayPoints, round}: PlayerListProps) {
         </li>
         {players.map((player, index) => (
           <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-            {player.username}
+            <BsPerson/>{player.username}
             { displayPoints && <span className="badge rounded-pill bg-dark">{player.points}</span> }
           </li>
           ))}

@@ -9,6 +9,7 @@ import Alert from '../Alert';
 import { Link, useNavigate } from 'react-router-dom';
 import { Player, updatedUsername } from '../../redux/slices/player-slice';
 import PlayerList from '../PlayerList';
+import Popup from '../Popup';
 
 function MainView() {
   const minUsernameLength: number = 5;
@@ -21,7 +22,7 @@ function MainView() {
   const [alertText, setAlertText] = useState("");
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertType, setAlertType] = useState("primary");
-  const [modalVisible, setModalVisible] = useState(false);
+  const [popupVisible, setPopupVisible] = useState(false);
 
   const player: Player = {
     username: "Test",
@@ -45,9 +46,15 @@ function MainView() {
       return;
     }
 
-    dispatch(updatedUsername(username));
+    setPopupVisible(true);
+  }
+
+  const handleClosePopup = () => {
+    setPopupVisible(false);
+  }
+
+  const handleOnSubmitPopup = (value: string) => {
     navigate(config.createGameClientEndpoint);
-    //TODO
   }
 
   useEffect(() => {
@@ -64,6 +71,13 @@ function MainView() {
   return (
     <div className="container">
       <div className="col-lg-4 col-sm-5 col-xs-6 mx-auto text-center">
+        <Popup 
+          title={"Join the lobby"}
+          inputFormPlaceholderText={"Paste the invitation URL here"}
+          visible={popupVisible}
+          onSubmit={handleOnSubmitPopup}
+          onClose={handleClosePopup}
+        />
         <Alert
             visible={alertVisible}
             text={alertText}
@@ -75,7 +89,7 @@ function MainView() {
           onChange={handleInputFormChange}
         />
         <Button
-          text="Create the lobby"
+          text={"Create the lobby"}
           type="success"
           active={createLobbyActiveButton}
           onClick={handleCreateLobbyButtonClick}

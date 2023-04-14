@@ -3,6 +3,7 @@ import CheckForm from './CheckForm';
 import CheckBox from './CheckBox';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { updatedDrawingTimeSeconds, updatedNonAbstractNounsOnly, updatedRoundsCount } from '../redux/slices/game-settings-slice';
+import { BsGearFill } from 'react-icons/bs';
 
 function GameSettingsBoard() {
   const dispatch = useAppDispatch();
@@ -27,14 +28,14 @@ function GameSettingsBoard() {
 
   return (
     <div className="bg-light px-5 pt-3 pb-3">
-      <h2 className="text-center">Game Settings</h2>
+      <h2 className="text-center">Game Settings <BsGearFill/></h2>
       <CheckBox
         text="Allow only non-abstract nouns"
         checkedByDefault={settings.nonAbstractNounsOnly}
         onChange={handleCheckBoxChange}
       />
       <Range
-        title={`Drawing timespan`}
+        title={"Drawing time"}
         minValue={30}
         maxValue={120}
         step={15}
