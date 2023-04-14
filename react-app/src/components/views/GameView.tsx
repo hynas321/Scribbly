@@ -24,8 +24,10 @@ function GameView() {
     <div className="container text-center">
       <div className="row">
         <div className="col-2">
-          <PlayerList 
+          <PlayerList
+            title={"Players"}
             players={players}
+            displayPoints={true}
             round={{
               currentRound: gameState.currentRound,
               roundCount: gameSettings.roundsCount
@@ -44,6 +46,7 @@ function GameView() {
         </div>
         <div className="col-3">
           <Chat
+            placeholderValue="Enter your guess"
             wordRiddle={{
               length: wordRiddleLength
             }}

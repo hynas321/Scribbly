@@ -5,10 +5,11 @@ import Button from './Button';
 import { useAppSelector } from '../redux/hooks';
 
 interface ChatProps {
-  wordRiddle: WordRiddle;
+  placeholderValue: string;
+  wordRiddle?: WordRiddle;
 }
 
-function Chat({wordRiddle}: ChatProps) {
+function Chat({placeholderValue, wordRiddle}: ChatProps) {
   const username = useAppSelector((state) => state.player.username);
   const [messages, setMessages] = useState<ChatMessageProps[]>([]);
   const [inputFormValue, setInputFormValue] = useState("");
@@ -16,8 +17,12 @@ function Chat({wordRiddle}: ChatProps) {
   const inputFormRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
 
-  const character = '_';
-  const characters = new Array(wordRiddle.length).fill(character);
+  let characters: any[] = [];
+
+  if (wordRiddle) {
+    const character = '_';
+    characters = new Array(wordRiddle.length).fill(character);
+  }
 
   const handleButtonPress = () => {
     const chatMessageProp: ChatMessageProps = {
@@ -68,7 +73,7 @@ function Chat({wordRiddle}: ChatProps) {
     <div>
       <h5>
         {characters.map((c, index) => <span key={index}>{c} </span>)}
-        {`${wordRiddle.length}`}
+        { wordRiddle &&`${wordRiddle.length}`}
       </h5>
       <div id="messages" className="p-3 bg-light">
         <div ref={messagesRef} style={{height: "400px", overflowY: "auto"}}>
@@ -88,7 +93,7 @@ function Chat({wordRiddle}: ChatProps) {
           onClick={handleButtonPress}
         />
         <InputForm 
-          placeholderValue={"Enter your guess"}
+          placeholderValue={placeholderValue}
           onChange={handleInputFormChange}
           onKeyDown={handleEnterPress}
           ref={inputFormRef}

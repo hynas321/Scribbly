@@ -1,22 +1,24 @@
 import { Player } from "../redux/slices/player-slice";
 
 interface PlayerListProps {
+  title: string,
   players: Player[],
-  round: Round
+  displayPoints: boolean,
+  round?: Round
 }
 
-function PlayerList({players, round}: PlayerListProps) {
+function PlayerList({title, players, displayPoints, round}: PlayerListProps) {
   return (
     <>
-      <h5>Round {round.currentRound}/{round.roundCount}</h5>
+      { round && <h5>Round {round.currentRound}/{round.roundCount}</h5>}
       <ul className="list-group">
         <li className="list-group-item justify-content-between align-items-center">
-            Players
+            <b>{title}</b>
         </li>
         {players.map((player, index) => (
           <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
             {player.username}
-            <span className="badge rounded-pill bg-dark">{player.points}</span>
+            { displayPoints && <span className="badge rounded-pill bg-dark">{player.points}</span> }
           </li>
           ))}
       </ul>

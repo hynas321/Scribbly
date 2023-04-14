@@ -9,8 +9,8 @@ function Button({text, active, type, onClick}: ButtonProps) {
   return (
     <button 
       className={
-        active ? `btn btn-${type == undefined ? "primary" : type} mt-3` :
-        `btn btn-${type == undefined ? "primary" : type} mt-3 disabled`
+        active ? `btn btn-${type == undefined ? "primary" : type} mt-3 mx-1` :
+        `btn btn-${type == undefined ? "primary" : type} mt-3 mx-1 disabled`
       } 
       onClick={onClick}
     >

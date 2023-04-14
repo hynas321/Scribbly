@@ -5,9 +5,9 @@ import config from "./../../config.json"
 function ControlPanel() {
   return (
     <>
-      <Link to={config.createGameClientEndpoint}>
+      <Link to={config.mainClientEndpoint}>
         <Button
-          text="Leave"
+          text="Leave the game"
           active={true}
           type="danger"
         />

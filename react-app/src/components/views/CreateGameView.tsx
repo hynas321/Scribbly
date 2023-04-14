@@ -1,37 +1,29 @@
-import { useEffect, useState } from 'react';
+import {useState } from 'react';
 import Button from '../Button';
-import InputForm from '../InputForm';
 import GameSettingsBoard from '../GameSettingsBoard';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import EndpointHandler from "../../utils/EndpointHandler";
 import config from '../../../config.json';
 import Alert from '../Alert';
-import { useNavigate } from 'react-router-dom';
-import { updatedUsername } from '../../redux/slices/player-slice';
+import { Link, useNavigate } from 'react-router-dom';
+import PlayerList from '../PlayerList';
+import Chat from '../Chat';
 
 function CreateGameView() {
-  const minUsernameLength: number = 5;
-  const endpointHandler = new EndpointHandler();
-  const gameSettings = useAppSelector((state) => state.gameSettings);
-  const dispatch = useAppDispatch();
-
+  const player = useAppSelector((state) => state.player);
   const navigate = useNavigate();
-  const [hostUsername, setHostUsername] = useState("");
-  const [activeButton, setActiveButton] = useState(false);
+  const [activeButton, setActiveButton] = useState(true);
   const [alertText, setAlertText] = useState("");
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertType, setAlertType] = useState("primary");
 
-  const handleInputFormChange = (value: string) => {
-    setHostUsername(value.trim());
-  }
-
   const handleStartGameButtonClick = async () => {
+    /*
     setActiveButton(false);
-
+    
     const response = await endpointHandler.createGame(
       config.createGameServerEndpoint,
-      hostUsername,
+      player.username,
       gameSettings
     );
 
@@ -48,42 +40,52 @@ function CreateGameView() {
 
       return;
     }
+    */
 
-    dispatch(updatedUsername(hostUsername));
     navigate(config.gameClientEndpoint);
   }
 
-  useEffect(() => {
-    if (hostUsername.length >= minUsernameLength) {
-      setActiveButton(true);
-    } 
-    else {
-      setActiveButton(false);
-    }
-  }, [hostUsername]);
-
   return (
     <div className="container">
-      <div className="col-lg-4 col-sm-5 col-xs-6 mx-auto text-center">
+      <div className="row col-6 mx-auto text-center">
         <Alert
-            visible={alertVisible}
-            text={alertText}
-            type={alertType}
-        />
-        <InputForm
-          placeholderValue="Enter username"
-          smallTextValue={`Minimum username length ${minUsernameLength}`}
-          onChange={handleInputFormChange}
-        />
-        <Button
-          text="Create new match"
-          type="success"
-          active={activeButton}
-          onClick={handleStartGameButtonClick}
+          visible={alertVisible}
+          text={alertText}
+          type={alertType}
         />
       </div>
-      <div className="col-lg-5 col-md-7 col-sm-5 col-xs-5 mt-5 mx-auto">
-        <GameSettingsBoard />
+      <div className="row">
+        <div className="col-2 mx-auto text-center">
+        <PlayerList
+          title={"Players in the lobby"}
+          players={[player, player, player, player, player, player, player, player]}
+          displayPoints={false}
+        />
+        </div>
+        <div className="col-2"/>
+        <div className="col-4 mx-auto text-center">
+          <h5>Host username: {player.username}</h5>
+          <Button
+            text="Start the game"
+            type="success"
+            active={activeButton}
+            onClick={handleStartGameButtonClick}
+          />
+          <Link to={config.mainClientEndpoint}>
+            <Button
+              text={"Leave the lobby"}
+              active={true}
+              type={"danger"}
+            />
+          </Link>
+          <div className="mt-3">
+            <GameSettingsBoard />
+          </div>
+        </div>
+        <div className="col-1"/>
+        <div className="col-3">
+          <Chat placeholderValue={"Enter your message"} />
+        </div>
       </div>
     </div>
   );
