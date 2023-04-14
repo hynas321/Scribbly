@@ -6,10 +6,10 @@ import { useAppSelector } from '../redux/hooks';
 
 interface ChatProps {
   placeholderValue: string;
-  wordRiddle?: WordRiddle;
+  wordLength?: number;
 }
 
-function Chat({placeholderValue, wordRiddle}: ChatProps) {
+function Chat({placeholderValue, wordLength}: ChatProps) {
   const username = useAppSelector((state) => state.player.username);
   const [messages, setMessages] = useState<ChatMessageProps[]>([]);
   const [inputFormValue, setInputFormValue] = useState("");
@@ -19,9 +19,9 @@ function Chat({placeholderValue, wordRiddle}: ChatProps) {
 
   let characters: any[] = [];
 
-  if (wordRiddle) {
+  if (wordLength) {
     const character = '_';
-    characters = new Array(wordRiddle.length).fill(character);
+    characters = new Array(wordLength).fill(character);
   }
 
   const handleButtonPress = () => {
@@ -73,7 +73,7 @@ function Chat({placeholderValue, wordRiddle}: ChatProps) {
     <div>
       <h5>
         {characters.map((c, index) => <span key={index}>{c} </span>)}
-        { wordRiddle &&`${wordRiddle.length}`}
+        { wordLength &&`${wordLength}` }
       </h5>
       <div id="messages" className="p-3 bg-light">
         <div ref={messagesRef} style={{height: "400px", overflowY: "auto"}}>

@@ -47,9 +47,7 @@ function GameView() {
         <div className="col-3">
           <Chat
             placeholderValue="Enter your guess"
-            wordRiddle={{
-              length: wordRiddleLength
-            }}
+            wordLength={wordRiddleLength}
           />
         </div>
       </div>
