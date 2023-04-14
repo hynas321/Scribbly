@@ -6,12 +6,21 @@ import { updatedDrawingTimeSeconds, updatedNonAbstractNounsOnly, updatedRoundsCo
 import { BsGearFill } from 'react-icons/bs';
 import InputSelect from './InputSelect';
 
-function GameSettingsBoard() {
+interface GameSettingsBoardProps {
+  isPlayerHost: boolean;
+}
+
+function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
   const dispatch = useAppDispatch();
+
+  const nonAbstractNounsOnlyText = "Allow only non-abstract nouns";
+  const drawingTimeText = "Drawing time";
+  const numberOfRoundsText = "Number of rounds";
+  const chooseLanguageText = "Language of random words";
 
   const settings = {
     nonAbstractNounsOnly: useAppSelector((state) => state.gameSettings.nonAbstractNounsOnly),
-    drawingTimespanSeconds: useAppSelector((state) => state.gameSettings.drawingTimeSeconds),
+    drawingTimeSeconds: useAppSelector((state) => state.gameSettings.drawingTimeSeconds),
     roundsCount: useAppSelector((state) => state.gameSettings.roundsCount),
     wordLanguage: useAppSelector((state) => state.gameSettings.wordLanguage)
   };
@@ -36,36 +45,56 @@ function GameSettingsBoard() {
     <div className="bg-light px-5 pt-3 pb-3">
       <h4 className="text-center">Game Settings <BsGearFill/></h4>
       <div className="mt-4">
-        <CheckBox
-          text="Allow only non-abstract nouns"
-          defaultValue={settings.nonAbstractNounsOnly}
-          onChange={handleCheckBoxChange}
-        />
+        { isPlayerHost ?
+          <CheckBox
+            text={nonAbstractNounsOnlyText}
+            defaultValue={settings.nonAbstractNounsOnly}
+            onChange={handleCheckBoxChange}
+          /> :
+          <label className="form-check-label">
+            {nonAbstractNounsOnlyText}: <b>{settings.nonAbstractNounsOnly.valueOf().toString()}</b>
+          </label>
+        }
       </div>
       <div className="mt-4">
-        <Range
-          title={"Drawing time"}
-          minValue={30}
-          maxValue={120}
-          step={15}
-          defaultValue={settings.drawingTimespanSeconds}
-          onChange={handleRangeChange} 
-        />
+        { isPlayerHost ?
+          <Range
+            title={drawingTimeText}
+            minValue={30}
+            maxValue={120}
+            step={15}
+            defaultValue={settings.drawingTimeSeconds}
+            onChange={handleRangeChange} 
+          /> :
+          <label className="form-check-label">
+            {drawingTimeText}:<b>{settings.drawingTimeSeconds.valueOf().toString()}s</b>
+          </label>
+        }
       </div>
       <div className="mt-4">
-        <CheckForm
-          title={"Number of rounds"}
-          radioCount={6}
-          defaultValue={settings.roundsCount}
-          onChange={handleCheckFormChange}
-        />
+        { isPlayerHost ?
+          <CheckForm
+            title={numberOfRoundsText}
+            radioCount={6}
+            defaultValue={settings.roundsCount}
+            onChange={handleCheckFormChange}
+          /> :
+          <label className="form-check-label">
+            {numberOfRoundsText}: <b>{settings.roundsCount.valueOf().toString()}</b>
+          </label>
+        }
       </div>
       <div className="mt-4">
-        <InputSelect
-          title={"Choose the language of random words"}
-          defaultValue={settings.wordLanguage}
-          onChange={handleInputSelectChange}
-        />
+        { isPlayerHost ?
+          <InputSelect
+            title={chooseLanguageText}
+            defaultValue={settings.wordLanguage}
+            onChange={handleInputSelectChange}
+          /> :
+          <label className="form-check-label">
+            {chooseLanguageText}: <b>{settings.wordLanguage.valueOf().toString()}</b>
+        </label>
+        }
       </div>
     </div>
   );

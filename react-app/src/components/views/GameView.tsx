@@ -9,7 +9,7 @@ import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 function GameView() {
   const player: Player = {
     username: "Player",
-    points: 100
+    score: 100
   }
 
   const gameSettings = useAppSelector((state) => state.gameSettings);

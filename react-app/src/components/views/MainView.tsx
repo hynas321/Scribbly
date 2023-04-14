@@ -26,7 +26,7 @@ function MainView() {
 
   const player: Player = {
     username: "Test",
-    points: 100
+    score: 100
   }
   const handleInputFormChange = (value: string) => {
     setUsername(value.trim());
@@ -100,9 +100,9 @@ function MainView() {
           onClick={handleJoinLobbyButtonClick}
         />
       </div>
-      <div className="col-2 mt-4 text-center mx-auto">
+      <div className="col-3 mt-5 text-center mx-auto">
         <PlayerList
-          title={"Top 10 players"}
+          title="Top 10 players"
           players={[player, player, player, player, player, player, player, player]}
           displayPoints={true}
         />

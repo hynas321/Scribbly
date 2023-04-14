@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import { store } from './redux/store';
 import 'bootstrap/dist/css/bootstrap.css'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import CreateGameView from './components/views/CreateGameView';
+import CreateGameView from './components/views/LobbyView';
 import GameView from './components/views/GameView';
 import Logo from './components/Logo';
 import PageNotFound from './components/views/PageNotFound';

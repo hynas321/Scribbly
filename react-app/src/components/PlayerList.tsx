@@ -19,7 +19,7 @@ function PlayerList({title, players, displayPoints, round}: PlayerListProps) {
         {players.map((player, index) => (
           <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
             <BsPerson/>{player.username}
-            { displayPoints && <span className="badge rounded-pill bg-dark">{player.points}</span> }
+            { displayPoints && <span className="badge rounded-pill bg-dark">{player.score}</span> }
           </li>
           ))}
       </ul>
