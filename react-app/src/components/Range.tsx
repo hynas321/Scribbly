@@ -21,7 +21,7 @@ function Range({title, minValue, maxValue, step, defaultValue, onChange}: RangeP
   }, [value]);
   
   return (
-    <div className="mt-4">
+    <>
       <label className="form-label">{`${title}: ${value} seconds`}</label>
       <input 
         className="form-range"
@@ -32,7 +32,7 @@ function Range({title, minValue, maxValue, step, defaultValue, onChange}: RangeP
         step={step}
         onChange={handleChange}
       /> 
-    </div>
+    </>
   )
 }
 
