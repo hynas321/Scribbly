@@ -1,22 +1,26 @@
 import { Player } from "../redux/slices/player-slice";
+import { BsPerson } from "react-icons/bs";
 
 interface PlayerListProps {
+  title: string,
   players: Player[],
-  round: Round
+  displayPoints: boolean,
+  displayIndex: boolean,
+  round?: Round
 }
 
-function PlayerList({players, round}: PlayerListProps) {
+function PlayerList({title, players, displayPoints, displayIndex, round}: PlayerListProps) {
   return (
     <>
-      <h5>Round {round.currentRound}/{round.roundCount}</h5>
+      { round && <h5>Round {round.currentRound}/{round.roundCount}</h5>}
       <ul className="list-group">
         <li className="list-group-item justify-content-between align-items-center">
-            Players
+            <b>{title}</b>
         </li>
         {players.map((player, index) => (
           <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-            {player.username}
-            <span className="badge rounded-pill bg-dark">{player.points}</span>
+            { displayIndex && index + 1 + "."} {player.username}
+            { displayPoints && <span className="badge rounded-pill bg-dark">{player.score}</span> }
           </li>
           ))}
       </ul>

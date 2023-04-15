@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 
 interface CheckBoxProps {
   text: string;
-  checkedByDefault: boolean;
+  defaultValue: boolean;
   onChange: (checked: boolean) => void;
 }
 
-function CheckBox({text, checkedByDefault, onChange}: CheckBoxProps) {
-  const [checked, setChecked] = useState(checkedByDefault);
+function CheckBox({text, defaultValue, onChange}: CheckBoxProps) {
+  const [checked, setChecked] = useState(defaultValue);
 
   const handleChange = (event: any) => {
     setChecked(event.target.checked);
@@ -18,7 +18,7 @@ function CheckBox({text, checkedByDefault, onChange}: CheckBoxProps) {
   }, [checked]);
 
   return (
-    <div className="form-check form-switch mt-3">
+    <div className="form-check form-switch">
       <input 
         className="form-check-input"
         type="checkbox"

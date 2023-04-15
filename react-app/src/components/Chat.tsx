@@ -3,12 +3,14 @@ import ChatMessage, { ChatMessageProps } from './ChatMessage';
 import InputForm from './InputForm';
 import Button from './Button';
 import { useAppSelector } from '../redux/hooks';
+import { BsSend } from 'react-icons/bs';
 
 interface ChatProps {
-  wordRiddle: WordRiddle;
+  placeholderValue: string;
+  wordLength?: number;
 }
 
-function Chat({wordRiddle}: ChatProps) {
+function Chat({placeholderValue, wordLength}: ChatProps) {
   const username = useAppSelector((state) => state.player.username);
   const [messages, setMessages] = useState<ChatMessageProps[]>([]);
   const [inputFormValue, setInputFormValue] = useState("");
@@ -16,8 +18,12 @@ function Chat({wordRiddle}: ChatProps) {
   const inputFormRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
 
-  const character = '_';
-  const characters = new Array(wordRiddle.length).fill(character);
+  let characters: any[] = [];
+
+  if (wordLength) {
+    const character = '_';
+    characters = new Array(wordLength).fill(character);
+  }
 
   const handleButtonPress = () => {
     const chatMessageProp: ChatMessageProps = {
@@ -68,7 +74,7 @@ function Chat({wordRiddle}: ChatProps) {
     <div>
       <h5>
         {characters.map((c, index) => <span key={index}>{c} </span>)}
-        {`${wordRiddle.length}`}
+        { wordLength &&`${wordLength}` }
       </h5>
       <div id="messages" className="p-3 bg-light">
         <div ref={messagesRef} style={{height: "400px", overflowY: "auto"}}>
@@ -81,14 +87,14 @@ function Chat({wordRiddle}: ChatProps) {
           ))}
         </div>
       </div>
-      <div className="input-group justify-content-center">
+      <div className="d-flex justify-content-center align-items-center">
         <Button
           text={"Send"}
           active={activeButton}
           onClick={handleButtonPress}
         />
         <InputForm 
-          placeholderValue={"Enter your guess"}
+          placeholderValue={placeholderValue}
           onChange={handleInputFormChange}
           onKeyDown={handleEnterPress}
           ref={inputFormRef}

@@ -9,7 +9,8 @@ import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 function GameView() {
   const player: Player = {
     username: "Player",
-    points: 100
+    score: 100,
+    host: false
   }
 
   const gameSettings = useAppSelector((state) => state.gameSettings);
@@ -24,8 +25,11 @@ function GameView() {
     <div className="container text-center">
       <div className="row">
         <div className="col-2">
-          <PlayerList 
+          <PlayerList
+            title={"Players"}
             players={players}
+            displayPoints={true}
+            displayIndex={true}
             round={{
               currentRound: gameState.currentRound,
               roundCount: gameSettings.roundsCount
@@ -44,9 +48,8 @@ function GameView() {
         </div>
         <div className="col-3">
           <Chat
-            wordRiddle={{
-              length: wordRiddleLength
-            }}
+            placeholderValue="Enter your guess"
+            wordLength={wordRiddleLength}
           />
         </div>
       </div>

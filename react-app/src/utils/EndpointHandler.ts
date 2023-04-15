@@ -13,8 +13,10 @@ class EndpointHandler {
     const requestBody: CreateGameRequestBody = {
         hostUsername: hostUsername,
         nonAbstractNounsOnly: gameSettings.nonAbstractNounsOnly,
-        drawingTimespanSeconds: gameSettings.drawingTimeSeconds,
-        roundsCount: gameSettings.roundsCount
+        drawingTimeSeconds: gameSettings.drawingTimeSeconds,
+        finishRoundSeconds: gameSettings.finishRoundSeconds,
+        roundsCount: gameSettings.roundsCount,
+        wordLanguage: gameSettings.wordLanguage
     }
 
     return await axios.post(`${this.serverUrl}${endpoint}`, requestBody)
@@ -28,10 +30,12 @@ class EndpointHandler {
 }
 
 interface CreateGameRequestBody {
-  hostUsername: string,
-  nonAbstractNounsOnly: boolean,
-  drawingTimespanSeconds: number,
-  roundsCount: number
+  hostUsername: string;
+  nonAbstractNounsOnly: boolean;
+  drawingTimeSeconds: number;
+  finishRoundSeconds: number;
+  roundsCount: number;
+  wordLanguage: string;
 };
 
 export default EndpointHandler;

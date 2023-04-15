@@ -5,13 +5,15 @@ export interface GameSettings {
   drawingTimeSeconds: number;
   finishRoundSeconds: number,
   roundsCount: number;
+  wordLanguage: string;
 };
 
 const initialState: GameSettings = {
   nonAbstractNounsOnly: true,
   drawingTimeSeconds: 75,
   finishRoundSeconds: 0,
-  roundsCount: 6
+  roundsCount: 6,
+  wordLanguage: "en"
 };
 
 const gameSettingsSlice = createSlice({
@@ -28,10 +30,13 @@ const gameSettingsSlice = createSlice({
       state.roundsCount = action.payload;
     },
     updatedFinishRoundSeconds(state, action: PayloadAction<number>) {
-      state.finishRoundSeconds = action.payload
+      state.finishRoundSeconds = action.payload;
+    },
+    updatedWordLanguage(state, action: PayloadAction<string>) {
+      state.wordLanguage = action.payload;
     }
   }
 })
 
-export const { updatedNonAbstractNounsOnly, updatedDrawingTimeSeconds, updatedFinishRoundSeconds, updatedRoundsCount } = gameSettingsSlice.actions;
+export const { updatedNonAbstractNounsOnly, updatedDrawingTimeSeconds, updatedFinishRoundSeconds, updatedRoundsCount, updatedWordLanguage } = gameSettingsSlice.actions;
 export default gameSettingsSlice.reducer;
