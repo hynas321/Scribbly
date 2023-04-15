@@ -1,6 +1,6 @@
 import { useState } from "react";
 import CopyToClipboard from "react-copy-to-clipboard";
-import { BsEmojiSmile, BsPersonAdd } from "react-icons/bs";
+import { BsClipboard, BsEmojiSmile, BsPersonAdd } from "react-icons/bs";
 import Button from "./Button";
 
 interface ClipboardBarProps {
@@ -32,8 +32,9 @@ function ClipboardBar({invitationUrl}: ClipboardBarProps) {
           <Button
             text={"Copy to clipboard"}
             active={true}
+            icon={<BsClipboard />}
           />
-        { copiedToClipboardVisible && <h4 className="text-success mx-5">Copied! <BsEmojiSmile /></h4>}
+          { copiedToClipboardVisible && <h4 className="text-success mx-5">Copied! <BsEmojiSmile /></h4>}
         </div>
       </CopyToClipboard>
     </>

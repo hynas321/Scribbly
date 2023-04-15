@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react';
 import Button from '../Button';
 import InputForm from '../InputForm';
-import GameSettingsBoard from '../GameSettingsBoard';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import EndpointHandler from "../../utils/EndpointHandler";
 import config from '../../../config.json';
 import Alert from '../Alert';
-import { Link, useNavigate } from 'react-router-dom';
-import { Player, updatedUsername } from '../../redux/slices/player-slice';
+import { useNavigate } from 'react-router-dom';
+import { Player, updatedHost, updatedUsername } from '../../redux/slices/player-slice';
 import PlayerList from '../PlayerList';
 import Popup from '../Popup';
 
@@ -26,7 +24,8 @@ function MainView() {
 
   const player: Player = {
     username: "Test",
-    score: 100
+    score: 100,
+    host: false
   }
   const handleInputFormChange = (value: string) => {
     setUsername(value.trim());
@@ -38,6 +37,7 @@ function MainView() {
     }
 
     dispatch(updatedUsername(username));
+    dispatch(updatedHost(true));
     navigate(config.createGameClientEndpoint);
   }
 
@@ -55,6 +55,7 @@ function MainView() {
 
   const handleOnSubmitPopup = (value: string) => {
     navigate(config.createGameClientEndpoint);
+    dispatch(updatedHost(false));
   }
 
   useEffect(() => {
@@ -103,8 +104,9 @@ function MainView() {
       <div className="col-3 mt-5 text-center mx-auto">
         <PlayerList
           title="Top 10 players"
-          players={[player, player, player, player, player, player, player, player]}
+          players={[player, player, player, player, player, player, player, player, player, player]}
           displayPoints={true}
+          displayIndex={true}
         />
       </div>
     </div>

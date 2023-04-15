@@ -1,15 +1,13 @@
 import {useState } from 'react';
 import Button from '../Button';
 import GameSettingsBoard from '../GameSettingsBoard';
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import EndpointHandler from "../../utils/EndpointHandler";
+import { useAppSelector } from '../../redux/hooks';
 import config from '../../../config.json';
 import Alert from '../Alert';
 import { Link, useNavigate } from 'react-router-dom';
 import PlayerList from '../PlayerList';
 import Chat from '../Chat';
-import {CopyToClipboard} from 'react-copy-to-clipboard';
-import { BsPersonAdd, BsEmojiSmile } from 'react-icons/bs';
+import { BsPlayCircle, BsDoorOpen } from 'react-icons/bs';
 import ClipboardBar from '../ClipboardBar';
 
 function LobbyView() {
@@ -21,7 +19,7 @@ function LobbyView() {
   const [alertType, setAlertType] = useState("primary");
 
   const invitationUrl: string = "http://www.example.com"; //will be fetched from the server
-  const isPlayerHost = false; //will be determined on the backend
+  const isPlayerHost: boolean = useAppSelector((state) => state.player.host);
 
   const handleStartGameButtonClick = async () => {
     /*
@@ -66,6 +64,7 @@ function LobbyView() {
             title={"Players in the lobby"}
             players={[player, player, player, player, player, player, player, player]}
             displayPoints={false}
+            displayIndex={false}
           />
         </div>
         <div className="col-2"/>
@@ -76,6 +75,7 @@ function LobbyView() {
               text="Start the game"
               type="success"
               active={activeButton}
+              icon={<BsPlayCircle/>}
               onClick={handleStartGameButtonClick}
             />
           }
@@ -84,6 +84,7 @@ function LobbyView() {
             <Button
               text="Leave the lobby"
               active={true}
+              icon={<BsDoorOpen/>}
               type={"danger"}
             />
           </Link>

@@ -18,7 +18,7 @@ function Button({text, active, type, icon, onClick}: ButtonProps) {
         } 
         onClick={onClick}
       > 
-        {icon} {text}
+        <span>{icon} {text}</span> 
       </button>
     </>
   );

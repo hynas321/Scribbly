@@ -3,11 +3,13 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 export interface Player {
   username: string;
   score: number;
+  host: boolean;
 };
 
 const initialState: Player = {
   username: "Test",
-  score: 0
+  score: 0,
+  host: false
 };
 
 const playerSlice = createSlice({
@@ -19,9 +21,12 @@ const playerSlice = createSlice({
     },
     updatedPoints(state, action: PayloadAction<number>) {
       state.score += action.payload;
+    },
+    updatedHost(state, action: PayloadAction<boolean>) {
+      state.host = action.payload;
     }
   }
 })
 
-export const { updatedUsername, updatedPoints } = playerSlice.actions;
+export const { updatedUsername, updatedPoints, updatedHost } = playerSlice.actions;
 export default playerSlice.reducer;

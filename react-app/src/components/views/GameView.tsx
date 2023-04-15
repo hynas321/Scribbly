@@ -9,7 +9,8 @@ import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 function GameView() {
   const player: Player = {
     username: "Player",
-    score: 100
+    score: 100,
+    host: false
   }
 
   const gameSettings = useAppSelector((state) => state.gameSettings);
@@ -28,6 +29,7 @@ function GameView() {
             title={"Players"}
             players={players}
             displayPoints={true}
+            displayIndex={true}
             round={{
               currentRound: gameState.currentRound,
               roundCount: gameSettings.roundsCount

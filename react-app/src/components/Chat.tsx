@@ -3,6 +3,7 @@ import ChatMessage, { ChatMessageProps } from './ChatMessage';
 import InputForm from './InputForm';
 import Button from './Button';
 import { useAppSelector } from '../redux/hooks';
+import { BsSend } from 'react-icons/bs';
 
 interface ChatProps {
   placeholderValue: string;
@@ -86,7 +87,7 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
           ))}
         </div>
       </div>
-      <div className="input-group justify-content-center">
+      <div className="d-flex justify-content-center align-items-center">
         <Button
           text={"Send"}
           active={activeButton}
