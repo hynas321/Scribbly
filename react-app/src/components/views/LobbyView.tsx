@@ -11,6 +11,7 @@ import { BsPlayCircle, BsDoorOpen } from 'react-icons/bs';
 import ClipboardBar from '../ClipboardBar';
 import * as signalR from '@microsoft/signalr'
 import Hub from '../Hubs/Hub';
+import { Player } from '../../redux/slices/player-slice';
 
 function LobbyView() {
   const lobbyHub: Hub = new Hub();
@@ -22,6 +23,7 @@ function LobbyView() {
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertType, setAlertType] = useState("primary");
   const [lobbyHubConnection, setLobbyHubConnection] = useState<signalR.HubConnection | null>(null);
+  const [playerList, setPlayerList] = useState<Player[]>([]);
 
   const invitationUrl: string = "http://www.example.com"; //will be fetched from the server
   const isPlayerHost: boolean = useAppSelector((state) => state.player.host);
@@ -56,7 +58,15 @@ function LobbyView() {
 
   useEffect(() => {
     const setLobbyHub = async () => {
-      lobbyHub.on("PlayerJoinedLobby", (username) => console.log(`Player: ${username} joined the lobby`));
+      lobbyHub.on("PlayerJoinedLobby", (username) => {
+        const player: Player = {
+          username: username,
+          score: 0,
+          host: false
+        }
+
+        setPlayerList([...playerList, player]);
+      });
 
       await lobbyHub.start();
       await lobbyHub.invoke("JoinLobby", player.username);
@@ -82,7 +92,7 @@ function LobbyView() {
         <div className="col-2 mx-auto text-center">
           <PlayerList
             title={"Players in the lobby"}
-            players={[player, player, player, player, player, player, player, player]}
+            players={playerList}
             displayPoints={false}
             displayIndex={false}
           />

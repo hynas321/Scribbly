@@ -1,5 +1,4 @@
 import { Player } from "../redux/slices/player-slice";
-import { BsPerson } from "react-icons/bs";
 
 interface PlayerListProps {
   title: string,

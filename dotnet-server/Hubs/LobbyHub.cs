@@ -20,12 +20,12 @@ public class LobbyHub : Hub
 
     public override async Task OnConnectedAsync()
     {
-        logger.LogInformation("Client connected: {ConnectionId}", Context.ConnectionId);
+        logger.LogInformation($"New client connected: {Context.ConnectionId}");
 
         await base.OnConnectedAsync();
     }
 
-    public override async Task OnDisconnectedAsync(Exception exception)
+    public override async Task OnDisconnectedAsync(Exception? exception)
     {
         logger.LogInformation("Client disconnected: {ConnectionId}", Context.ConnectionId);
 
