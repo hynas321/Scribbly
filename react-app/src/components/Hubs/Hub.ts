@@ -1,7 +1,7 @@
 import * as signalR from "@microsoft/signalr";
 import config from "../../../config.json"
 
-class LobbyHub {
+class Hub {
     private connection: signalR.HubConnection
 
     constructor() {
@@ -32,11 +32,9 @@ class LobbyHub {
       }
     }
 
-    on() {
-      this.connection.on("PlayerJoinedLobby", () => {
-        console.log("Player joined lobby")
-      });
+    on(name: string, callback: (...args: any[]) => any) {
+      this.connection.on(name, callback);
     }
 }
 
-export default LobbyHub;
+export default Hub;

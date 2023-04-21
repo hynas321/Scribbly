@@ -10,10 +10,10 @@ import Chat from '../Chat';
 import { BsPlayCircle, BsDoorOpen } from 'react-icons/bs';
 import ClipboardBar from '../ClipboardBar';
 import * as signalR from '@microsoft/signalr'
-import LobbyHub from '../Hubs/LobbyHub';
+import Hub from '../Hubs/Hub';
 
 function LobbyView() {
-  const lobbyHub: LobbyHub = new LobbyHub();
+  const lobbyHub: Hub = new Hub();
   const player = useAppSelector((state) => state.player);
   const navigate = useNavigate();
 
@@ -56,7 +56,7 @@ function LobbyView() {
 
   useEffect(() => {
     const setLobbyHub = async () => {
-      lobbyHub.on();
+      lobbyHub.on("PlayerJoinedLobby", (username) => console.log(`Player: ${username} joined the lobby`));
 
       await lobbyHub.start();
       await lobbyHub.invoke("JoinLobby", player.username);

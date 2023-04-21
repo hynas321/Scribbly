@@ -11,12 +11,11 @@ public class LobbyHub : Hub
         this.logger = logger;
     }
 
-    public async Task JoinLobby(string message)
+    public async Task JoinLobby(string username)
     {
-        var userName = Context?.User?.Identity?.Name;
-        logger.LogInformation("{UserName} sent message: {Message}", userName, message);
+        logger.LogInformation($"Player {username}");
 
-        await Clients.All.SendAsync("PlayerJoinedLobby", userName, message);
+        await Clients.All.SendAsync("PlayerJoinedLobby", username);
     }
 
     public override async Task OnConnectedAsync()
