@@ -2,8 +2,8 @@ import axios from 'axios';
 import config from '../../config.json';
 import { GameSettings } from '../redux/slices/game-settings-slice';
 
-class EndpointHandler {
-  private serverUrl: string = config.serverUrl;
+class HttpRequestHandler {
+  private httpServerUrl: string = config.httpServerUrl;
 
   async createGame(
     endpoint: string,
@@ -19,7 +19,7 @@ class EndpointHandler {
         wordLanguage: gameSettings.wordLanguage
     }
 
-    return await axios.post(`${this.serverUrl}${endpoint}`, requestBody)
+    return await axios.post(`${this.httpServerUrl}${endpoint}`, requestBody)
     .then(response => {
         return response;
     })
@@ -38,4 +38,4 @@ interface CreateGameRequestBody {
   wordLanguage: string;
 };
 
-export default EndpointHandler;
+export default HttpRequestHandler;

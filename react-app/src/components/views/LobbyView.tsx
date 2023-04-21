@@ -1,4 +1,4 @@
-import {useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from '../Button';
 import GameSettingsBoard from '../GameSettingsBoard';
 import { useAppSelector } from '../../redux/hooks';
@@ -9,14 +9,19 @@ import PlayerList from '../PlayerList';
 import Chat from '../Chat';
 import { BsPlayCircle, BsDoorOpen } from 'react-icons/bs';
 import ClipboardBar from '../ClipboardBar';
+import * as signalR from '@microsoft/signalr'
+import LobbyHub from '../Hubs/LobbyHub';
 
 function LobbyView() {
+  const lobbyHub: LobbyHub = new LobbyHub(`${config.httpServerUrl}${config.hubLobbyEndpoint}`);
   const player = useAppSelector((state) => state.player);
   const navigate = useNavigate();
+
   const [activeButton, setActiveButton] = useState(true);
   const [alertText, setAlertText] = useState("");
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertType, setAlertType] = useState("primary");
+  const [lobbyHubConnection, setLobbyHubConnection] = useState<signalR.HubConnection | null>(null);
 
   const invitationUrl: string = "http://www.example.com"; //will be fetched from the server
   const isPlayerHost: boolean = useAppSelector((state) => state.player.host);
@@ -48,6 +53,14 @@ function LobbyView() {
 
     navigate(config.gameClientEndpoint);
   }
+
+  useEffect(() => {
+    lobbyHub.start();
+
+    return() => {
+      lobbyHub.stop();
+    }
+  }, []);
 
   return (
     <div className="container">

@@ -1,4 +1,4 @@
-namespace dotnet_server.Models;
+namespace Dotnet.Server.Models;
 
 public class Game
 {

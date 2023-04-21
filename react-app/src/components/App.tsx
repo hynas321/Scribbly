@@ -6,7 +6,8 @@ import GameView from './views/GameView';
 import config from '../../config.json'
 import PageNotFound from './views/PageNotFound';
 import Logo from './Logo';
-import { useAppSelector } from '../redux/hooks';
+import { Provider } from 'react-redux';
+import { store } from '../redux/store';
 
 function App() {
     const router = createBrowserRouter([
@@ -50,10 +51,10 @@ function App() {
   ]);
 
   return (
-    <>
-      <Logo />
-      <RouterProvider router={router} />
-    </>
+      <Provider store={store}>
+          <Logo />
+          <RouterProvider router={router}/>
+      </Provider>
   )
 }
 

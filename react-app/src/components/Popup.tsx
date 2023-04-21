@@ -44,6 +44,7 @@ function Popup({title, inputFormPlaceholderText, visible, onSubmit, onClose}: Po
     <Modal
       isOpen={visible}
       style={customStyles}
+      ariaHideApp={false}
     >
       <div className="container">
         <h5>{title}</h5>
