@@ -13,7 +13,7 @@ import * as signalR from '@microsoft/signalr'
 import LobbyHub from '../Hubs/LobbyHub';
 
 function LobbyView() {
-  const lobbyHub: LobbyHub = new LobbyHub(`${config.httpServerUrl}${config.hubLobbyEndpoint}`);
+  const lobbyHub: LobbyHub = new LobbyHub();
   const player = useAppSelector((state) => state.player);
   const navigate = useNavigate();
 
@@ -55,7 +55,14 @@ function LobbyView() {
   }
 
   useEffect(() => {
-    lobbyHub.start();
+    const setLobbyHub = async () => {
+      lobbyHub.on();
+
+      await lobbyHub.start();
+      await lobbyHub.invoke("JoinLobby", player.username);
+    }
+
+    setLobbyHub();
 
     return() => {
       lobbyHub.stop();
