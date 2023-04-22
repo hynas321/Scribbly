@@ -9,12 +9,11 @@ import PlayerList from '../PlayerList';
 import Chat from '../Chat';
 import { BsPlayCircle, BsDoorOpen } from 'react-icons/bs';
 import ClipboardBar from '../ClipboardBar';
-import * as signalR from '@microsoft/signalr'
 import Hub from '../Hubs/Hub';
 import { Player } from '../../redux/slices/player-slice';
 
 function LobbyView() {
-  const lobbyHub: Hub = new Hub();
+  const lobbyHub: Hub = new Hub(`${config.httpServerUrl}${config.hubLobbyEndpoint}`);
   const player = useAppSelector((state) => state.player);
   const navigate = useNavigate();
 
@@ -22,9 +21,10 @@ function LobbyView() {
   const [alertText, setAlertText] = useState("");
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertType, setAlertType] = useState("primary");
-  const [lobbyHubConnection, setLobbyHubConnection] = useState<signalR.HubConnection | null>(null);
   const [playerList, setPlayerList] = useState<Player[]>([]);
+  const [messageList, setMessageList] = useState<ChatMessage[]>([]);
 
+  const testLobbyUrl = "TestLobbyUrl";
   const invitationUrl: string = "http://www.example.com"; //will be fetched from the server
   const isPlayerHost: boolean = useAppSelector((state) => state.player.host);
 
@@ -58,26 +58,38 @@ function LobbyView() {
 
   useEffect(() => {
     const setLobbyHub = async () => {
-      lobbyHub.on("PlayerJoinedLobby", (username) => {
-        const player: Player = {
-          username: username,
-          score: 0,
-          host: false
-        }
+      lobbyHub.on("PlayerJoinedLobby", (playerListSerialized) => {
+        const playerList = JSON.parse(playerListSerialized) as Player[];
+        console.log(playerList);
+        setPlayerList(playerList);
+      });
 
-        setPlayerList([...playerList, player]);
+      lobbyHub.on("PlayerLeftLobby", (playerListSerialized) => {
+        const playerList = JSON.parse(playerListSerialized) as Player[];
+        console.log(playerList);
+        setPlayerList(playerList);
       });
 
       await lobbyHub.start();
-      await lobbyHub.invoke("JoinLobby", player.username);
+      await lobbyHub.invoke("JoinLobby", testLobbyUrl, player.username);
     }
 
     setLobbyHub();
 
-    return() => {
+    const cleanBeforeUnload = () => {
+      lobbyHub.off("PlayerJoinedLobby");
+      lobbyHub.off("PlayerLeftLobby");
+      lobbyHub.send("LeaveLobby", testLobbyUrl, player.username);
       lobbyHub.stop();
     }
-  }, []);
+
+    window.addEventListener("beforeunload", cleanBeforeUnload);
+
+    return () => {
+      cleanBeforeUnload();
+      window.removeEventListener("beforeunload", cleanBeforeUnload);
+    }
+    }, []);
 
   return (
     <div className="container">
@@ -124,7 +136,10 @@ function LobbyView() {
         </div>
         <div className="col-1"/>
         <div className="col-3">
-          <Chat placeholderValue={"Enter your message"} />
+          <Chat
+            hub={lobbyHub}
+            placeholderValue={"Enter your message"} 
+          />
         </div>
         <div>
           <ClipboardBar invitationUrl={invitationUrl} />

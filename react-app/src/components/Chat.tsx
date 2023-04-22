@@ -3,16 +3,17 @@ import ChatMessage, { ChatMessageProps } from './ChatMessage';
 import InputForm from './InputForm';
 import Button from './Button';
 import { useAppSelector } from '../redux/hooks';
-import { BsSend } from 'react-icons/bs';
+import Hub from './Hubs/Hub';
 
 interface ChatProps {
+  hub: Hub
   placeholderValue: string;
   wordLength?: number;
 }
 
-function Chat({placeholderValue, wordLength}: ChatProps) {
+function Chat({hub, placeholderValue, wordLength}: ChatProps) {
   const username = useAppSelector((state) => state.player.username);
-  const [messages, setMessages] = useState<ChatMessageProps[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputFormValue, setInputFormValue] = useState("");
   const [activeButton, setActiveButton] = useState(false);
   const inputFormRef = useRef<HTMLInputElement>(null);
@@ -26,17 +27,16 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
   }
 
   const handleButtonPress = () => {
-    const chatMessageProp: ChatMessageProps = {
+    const chatMessage: ChatMessage = {
       username: username,
       text: inputFormValue
     }
 
-    if (chatMessageProp.username == "" || chatMessageProp.text == "") {
+    if (chatMessage.username == "" || chatMessage.text == "") {
       return;
     }
 
-    setMessages(messages.concat(chatMessageProp))
-    setInputFormValue("");
+    hub.invoke("SendChatMessage", chatMessage.text).then(() => console.log("sent")).catch((e) => console.log(e));
 
     if (inputFormRef && inputFormRef.current) {
       inputFormRef.current.value = "";
@@ -70,6 +70,22 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
     messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
   }, [messages]);
 
+  useEffect(() => {
+    hub.on("ChatMessageReceived", (text) => {
+      const chatMessage: ChatMessage = {
+        username: username,
+        text: text
+      }
+
+      console.log("Message delivered");
+      setMessages(messages.concat(chatMessage))
+    });
+
+    return() => {
+      hub.off("ChatMessageReceived");
+    }
+  }, []);
+
   return (
     <div>
       <h5>
@@ -78,11 +94,10 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
       </h5>
       <div id="messages" className="p-3 bg-light">
         <div ref={messagesRef} style={{height: "400px", overflowY: "auto"}}>
-          {messages.map((chatMessageProp, index) => (
+          {messages.map((chatMessage, index) => (
             <ChatMessage
               key={index}
-              username={chatMessageProp.username}
-              text={chatMessageProp.text}
+              chatMessage={chatMessage}
             />
           ))}
         </div>

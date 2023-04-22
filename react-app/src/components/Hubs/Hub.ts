@@ -4,9 +4,9 @@ import config from "../../../config.json"
 class Hub {
     private connection: signalR.HubConnection
 
-    constructor() {
+    constructor(url: string) {
       this.connection = new signalR.HubConnectionBuilder()
-        .withUrl(`${config.httpServerUrl}${config.hubLobbyEndpoint}`, {
+        .withUrl(url, {
           skipNegotiation: true,
           transport: signalR.HttpTransportType.WebSockets,
           withCredentials: false,
@@ -26,14 +26,24 @@ class Hub {
       }
     }
 
-    async invoke(name: string, data: any) {
+    async send(name: string, ...args: any[]) {
       if (this.connection.state === signalR.HubConnectionState.Connected) {
-        return await this.connection.invoke(name, data);
+        return await this.connection.send(name, ...args);
+      }
+    }
+
+    async invoke(name: string, ...args: any[]) {
+      if (this.connection.state === signalR.HubConnectionState.Connected) {
+        return await this.connection.invoke(name, ...args);
       }
     }
 
     on(name: string, callback: (...args: any[]) => any) {
       this.connection.on(name, callback);
+    }
+
+    off(name: string) {
+      this.connection.off(name);
     }
 }
 
