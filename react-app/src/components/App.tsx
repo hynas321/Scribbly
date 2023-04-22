@@ -8,7 +8,7 @@ import PageNotFound from './views/PageNotFound';
 import Logo from './Logo';
 import { Provider } from 'react-redux';
 import { store } from '../redux/store';
-import { LobbyHubContext, lobbyHub } from "./../../Context/LobbyHubContext";
+import { LobbyHubContext, lobbyHub } from "../Context/LobbyHubContext";
 
 function App() {
   const router = createBrowserRouter([

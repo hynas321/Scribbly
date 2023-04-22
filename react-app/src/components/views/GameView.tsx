@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Player } from '../../redux/slices/player-slice';
 import ControlPanel from '../ControlPanel';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import Hub from '../../../Hubs/Hub';
+import { HubType } from '../../enums/HubType';
 
 function GameView() {
   const player: Player = {
@@ -49,6 +49,7 @@ function GameView() {
         </div>
         <div className="col-3">
           <Chat
+            hubType={HubType.GAME}
             placeholderValue="Enter your guess"
             wordLength={wordRiddleLength}
           />

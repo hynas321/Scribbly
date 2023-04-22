@@ -5,7 +5,7 @@ import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { updatedDrawingTimeSeconds, updatedNonAbstractNounsOnly, updatedRoundsCount, updatedWordLanguage } from '../redux/slices/game-settings-slice';
 import { BsGearFill } from 'react-icons/bs';
 import InputSelect from './InputSelect';
-import Hub from '../../Hubs/Hub';
+import Hub from '../Hubs/Hub';
 
 interface GameSettingsBoardProps {
   hub: Hub,

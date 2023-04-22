@@ -3,16 +3,20 @@ import ChatMessage, { ChatMessageProps } from './ChatMessage';
 import InputForm from './InputForm';
 import Button from './Button';
 import { useAppSelector } from '../redux/hooks';
-import { LobbyHubContext } from '../../Context/LobbyHubContext';
+import { LobbyHubContext } from '../Context/LobbyHubContext';
+import { GameHubContext } from '../Context/GameHubContext';
+import { HubType } from '../enums/HubType';
+import * as signalR from '@microsoft/signalr';
 
 interface ChatProps {
+  hubType: HubType
   placeholderValue: string;
   wordLength?: number;
 }
 
-function Chat({placeholderValue, wordLength}: ChatProps) {
-  const hub = useContext(LobbyHubContext);
+function Chat({hubType, placeholderValue, wordLength}: ChatProps) {
   const username = useAppSelector((state) => state.player.username);
+  const hub = useContext(hubType === HubType.LOBBY ?LobbyHubContext : GameHubContext);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputFormValue, setInputFormValue] = useState("");
@@ -36,14 +40,10 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
 
     const SendChatMessage = async () => {
       await hub.invoke("SendChatMessage", testLobbyUrl, chatMessage.username, chatMessage.text);
-    }
 
-    if (chatMessage.username == "" || chatMessage.text == "") {
-      return;
-    }
-
-    if (inputFormRef && inputFormRef.current) {
-      inputFormRef.current.value = "";
+      if (inputFormRef && inputFormRef.current) {
+        inputFormRef.current.value = "";
+      }
     }
 
     SendChatMessage();
@@ -60,12 +60,27 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
   }
 
   useEffect(() => {
+
+    if (hub.getState() != signalR.HubConnectionState.Connected) {
+      return;
+    }
+
+    hub.on("ReceiveChatMessages", (chatMessageListSerialized: any) => {
+      const chatMessageList = JSON.parse(chatMessageListSerialized) as ChatMessage[];
+
+      setMessages(chatMessageList);
+    });
+
     const getChatMessages = async () => {
       await hub.invoke("GetChatMessages", testLobbyUrl);
     };
-  
+
     getChatMessages();
-  }, []);
+
+    return () => {
+      hub.off("ReceiveChatMessages");
+    }
+    }, [hub.getState()]);
 
   useEffect(() => {
     if (inputFormValue.length > 0) {
@@ -83,19 +98,7 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
 
     messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
   }, [messages]);
-
-  useEffect(() => {
-    hub.on("ReceiveChatMessages", (chatMessageListSerialized: any) => {
-      const chatMessageList = JSON.parse(chatMessageListSerialized) as ChatMessage[];
-
-      setMessages(chatMessageList);
-    });
-
-    return() => {
-      hub.off("ReceiveChatMessages");
-    }
-  }, [hub]);
-
+  
   return (
     <div>
       <h5>

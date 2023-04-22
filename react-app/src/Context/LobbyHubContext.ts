@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import config from '../config.json'
+import config from '../../config.json'
 import Hub from '../Hubs/Hub';
 
 export const lobbyHub: Hub = new Hub(`${config.httpServerUrl}${config.hubLobbyEndpoint}`);

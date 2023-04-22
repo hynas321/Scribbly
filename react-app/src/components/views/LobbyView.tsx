@@ -11,7 +11,8 @@ import { BsPlayCircle, BsDoorOpen } from 'react-icons/bs';
 import ClipboardBar from '../ClipboardBar';
 import { Player } from '../../redux/slices/player-slice';
 import { useContext } from "react";
-import { LobbyHubContext } from '../../../Context/LobbyHubContext';
+import { LobbyHubContext } from '../../Context/LobbyHubContext';
+import { HubType } from '../../enums/HubType';
 
 function LobbyView() {
   const lobbyHub = useContext(LobbyHubContext);
@@ -115,7 +116,10 @@ function LobbyView() {
         </div>
         <div className="col-1"/>
         <div className="col-3">
-          <Chat placeholderValue={"Enter your message"} />
+          <Chat 
+            hubType={HubType.LOBBY}
+            placeholderValue={"Enter your message"}
+          />
         </div>
         <div>
           <ClipboardBar invitationUrl={invitationUrl} />
