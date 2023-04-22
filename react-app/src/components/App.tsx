@@ -8,53 +8,56 @@ import PageNotFound from './views/PageNotFound';
 import Logo from './Logo';
 import { Provider } from 'react-redux';
 import { store } from '../redux/store';
+import { LobbyHubContext, lobbyHub } from "./../../Context/LobbyHubContext";
 
 function App() {
-    const router = createBrowserRouter([
-      {
-        path: config.mainClientEndpoint,
-        element: <MainView />
-      },
-      {
-        path: config.createGameClientEndpoint,
-        element: <LobbyView />,
-        children: [
-          {
-          path: '',
-          element: <LobbyView />
-          },
-          {
-          path: ':lobbyId',
-          element: <LobbyView />
-          }
-        ]
-      },
-      {
-        path: config.gameClientEndpoint,
-        element: <GameView />,
-        children: [
-          {
-          path: '',
-          element: <GameView />
-          },
-          {
-          path: ':gameId',
-          element: <GameView />
-          }
-        ]
-        
-      },
-      {
-        path: "*",
-        element: <PageNotFound/ >
-      }
-  ]);
+  const router = createBrowserRouter([
+    {
+      path: config.mainClientEndpoint,
+      element: <MainView />
+    },
+    {
+      path: config.createGameClientEndpoint,
+      element: <LobbyView />,
+      children: [
+        {
+        path: '',
+        element: <LobbyView />
+        },
+        {
+        path: ':lobbyId',
+        element: <LobbyView />
+        }
+      ]
+    },
+    {
+      path: config.gameClientEndpoint,
+      element: <GameView />,
+      children: [
+        {
+        path: '',
+        element: <GameView />
+        },
+        {
+        path: ':gameId',
+        element: <GameView />
+        }
+      ]
+      
+    },
+    {
+      path: "*",
+      element: <PageNotFound/ >
+    }
+]);
 
-  return (
-      <Provider store={store}>
-          <Logo />
-          <RouterProvider router={router}/>
-      </Provider>
+return (
+  <LobbyHubContext.Provider value={lobbyHub}>
+    <Provider store={store}>
+      <Logo />
+      <RouterProvider router={router}/>
+    </Provider>
+  </LobbyHubContext.Provider>
   )
 }
 

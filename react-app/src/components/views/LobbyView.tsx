@@ -9,11 +9,12 @@ import PlayerList from '../PlayerList';
 import Chat from '../Chat';
 import { BsPlayCircle, BsDoorOpen } from 'react-icons/bs';
 import ClipboardBar from '../ClipboardBar';
-import Hub from '../Hubs/Hub';
 import { Player } from '../../redux/slices/player-slice';
+import { useContext } from "react";
+import { LobbyHubContext } from '../../../Context/LobbyHubContext';
 
 function LobbyView() {
-  const lobbyHub: Hub = new Hub(`${config.httpServerUrl}${config.hubLobbyEndpoint}`);
+  const lobbyHub = useContext(LobbyHubContext);
   const player = useAppSelector((state) => state.player);
   const navigate = useNavigate();
 
@@ -22,74 +23,49 @@ function LobbyView() {
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertType, setAlertType] = useState("primary");
   const [playerList, setPlayerList] = useState<Player[]>([]);
-  const [messageList, setMessageList] = useState<ChatMessage[]>([]);
 
-  const testLobbyUrl = "TestLobbyUrl";
+  const testLobbyUrl = "TestLobbyUrl"; //temporary
   const invitationUrl: string = "http://www.example.com"; //will be fetched from the server
   const isPlayerHost: boolean = useAppSelector((state) => state.player.host);
 
   const handleStartGameButtonClick = async () => {
-    /*
-    setActiveButton(false);
-    
-    const response = await endpointHandler.createGame(
-      config.createGameServerEndpoint,
-      player.username,
-      gameSettings
-    );
-
-    setActiveButton(true);
-
-    if (response.status != 201)  {
-      setAlertVisible(true);
-      setAlertText("Could not create a new game. Try Again.");
-      setAlertType("danger");
-
-      setTimeout(() => {
-        setAlertVisible(false);
-      }, 4000);
-
-      return;
-    }
-    */
 
     navigate(config.gameClientEndpoint);
   }
 
   useEffect(() => {
-    const setLobbyHub = async () => {
-      lobbyHub.on("PlayerJoinedLobby", (playerListSerialized) => {
-        const playerList = JSON.parse(playerListSerialized) as Player[];
-        console.log(playerList);
-        setPlayerList(playerList);
-      });
 
-      lobbyHub.on("PlayerLeftLobby", (playerListSerialized) => {
+    const setLobbyHub = async () => {
+
+      const getPlayerList = (playerListSerialized: any) => {
         const playerList = JSON.parse(playerListSerialized) as Player[];
-        console.log(playerList);
+
         setPlayerList(playerList);
-      });
+      }
+      
+      lobbyHub.on("PlayerJoinedLobby", getPlayerList);
+      lobbyHub.on("PlayerLeftLobby", getPlayerList);
 
       await lobbyHub.start();
       await lobbyHub.invoke("JoinLobby", testLobbyUrl, player.username);
     }
 
+      const clearBeforeUnload = () => {
+        lobbyHub.off("PlayerJoinedLobby");
+        lobbyHub.off("PlayerLeftLobby");
+        lobbyHub.send("LeaveLobby", testLobbyUrl, player.username);
+        lobbyHub.stop();
+      }
+
     setLobbyHub();
 
-    const cleanBeforeUnload = () => {
-      lobbyHub.off("PlayerJoinedLobby");
-      lobbyHub.off("PlayerLeftLobby");
-      lobbyHub.send("LeaveLobby", testLobbyUrl, player.username);
-      lobbyHub.stop();
-    }
-
-    window.addEventListener("beforeunload", cleanBeforeUnload);
+    window.addEventListener("beforeunload", clearBeforeUnload);
 
     return () => {
-      cleanBeforeUnload();
-      window.removeEventListener("beforeunload", cleanBeforeUnload);
+      clearBeforeUnload();
+      window.removeEventListener("beforeunload", clearBeforeUnload);
     }
-    }, []);
+  }, []);
 
   return (
     <div className="container">
@@ -131,15 +107,15 @@ function LobbyView() {
             />
           </Link>
           <div className="mt-3">
-            <GameSettingsBoard isPlayerHost={isPlayerHost} />
+            <GameSettingsBoard
+              hub={lobbyHub}
+              isPlayerHost={isPlayerHost}
+            />
           </div>
         </div>
         <div className="col-1"/>
         <div className="col-3">
-          <Chat
-            hub={lobbyHub}
-            placeholderValue={"Enter your message"} 
-          />
+          <Chat placeholderValue={"Enter your message"} />
         </div>
         <div>
           <ClipboardBar invitationUrl={invitationUrl} />

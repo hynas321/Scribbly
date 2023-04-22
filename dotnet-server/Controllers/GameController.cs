@@ -30,15 +30,20 @@ public class GameController : ControllerBase
 
             Game game = new Game() 
             {
-                Id = Guid.NewGuid().ToString(),
+                Url = Guid.NewGuid().ToString(),
                 HostUsername = requestBody.HostUsername,
-                NonAbstractNounsOnly = requestBody.NonAbstractNounsOnly,
-                DrawingTimespanSeconds = requestBody.DrawingTimespanSeconds,
-                RoundsCount = requestBody.RoundsCount
+                gameSettings = new GameSettings()
+                {
+                    NonAbstractNounsOnly = requestBody.NonAbstractNounsOnly,
+                    DrawingTimeSeconds = requestBody.DrawingTimeSeconds,
+                    FinishRoundSeconds = requestBody.FinishRoundSeconds,
+                    RoundsCount = requestBody.RoundsCount,
+                    WordLanguage = requestBody.WordLanguage
+                }
             };
 
             Games.Add(game);
-            logger.LogInformation($"Status: 201; Game with the Id {game.Id} and the host username '{game.HostUsername}' has been created.");
+            logger.LogInformation($"Status: 201; Game with the Url {game.Url} and the host username '{game.HostUsername}' has been created.");
             
             return StatusCode(StatusCodes.Status201Created);
         }

@@ -1,19 +1,14 @@
 using System.Text.Json;
+using Dotnet.Server.Managers;
 using Dotnet.Server.Models;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Dotnet.Server.Hubs;
 
-public class LobbyHub : Hub
+public partial class LobbyHub : Hub
 {
-    private readonly LobbyState lobbyState = new LobbyState();
-    private readonly ILogger<LobbyHub> logger;
 
-    public LobbyHub(ILogger<LobbyHub> logger)
-    {
-        this.logger = logger;
-    }
-
+    [HubMethodName("JoinLobby")]
     public async Task JoinLobby(string lobbyUrl, string username)
     {   
         Player player = new Player()
@@ -24,9 +19,9 @@ public class LobbyHub : Hub
             GameUrl = "lobbyUrl"
         };
 
-        lobbyState.AddPlayerToLobby(lobbyUrl, player);
+        lobbyManager.AddPlayerToLobby(lobbyUrl, player);
         
-        List<Player> playerList = lobbyState.GetPlayers(lobbyUrl);
+        List<Player> playerList = lobbyManager.GetPlayers(lobbyUrl);
         JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -38,11 +33,12 @@ public class LobbyHub : Hub
         logger.LogInformation($"Player {username} joined the lobby");
     }
 
+    [HubMethodName("LeaveLobby")]
     public async Task LeaveLobby(string lobbyUrl, string username)
     {
-        lobbyState.RemovePlayerFromLobby(lobbyUrl, username);
+        lobbyManager.RemovePlayerFromLobby(lobbyUrl, username);
 
-        List<Player> playerList = lobbyState.GetPlayers(lobbyUrl);
+        List<Player> playerList = lobbyManager.GetPlayers(lobbyUrl);
         JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -52,26 +48,5 @@ public class LobbyHub : Hub
         await Clients.All.SendAsync("PlayerLeftLobby", playerListSerialized);
 
         logger.LogInformation($"Player {username} joined the lobby");
-    }
-
-    public async Task SendChatMessage(string url, string text)
-    {
-        logger.LogInformation($"New chat message: {null}: {text}");
-
-        await Clients.All.SendAsync("ChatMessageReceived", text);
-    }
-
-    public override async Task OnConnectedAsync()
-    {   
-        logger.LogInformation($"New client connected: {Context.ConnectionId}");
-
-        await base.OnConnectedAsync();
-    }
-
-    public override async Task OnDisconnectedAsync(Exception? exception)
-    {   
-        logger.LogInformation($"Client disconnected: {Context.ConnectionId}");
-
-        await base.OnDisconnectedAsync(exception);
     }
 }

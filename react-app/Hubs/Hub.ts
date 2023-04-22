@@ -1,5 +1,4 @@
 import * as signalR from "@microsoft/signalr";
-import config from "../../../config.json"
 
 class Hub {
     private connection: signalR.HubConnection
@@ -9,7 +8,7 @@ class Hub {
         .withUrl(url, {
           skipNegotiation: true,
           transport: signalR.HttpTransportType.WebSockets,
-          withCredentials: false,
+          withCredentials: false
         })
         .build();
     }
@@ -44,6 +43,10 @@ class Hub {
 
     off(name: string) {
       this.connection.off(name);
+    }
+
+    state() {
+      return this.connection.state;
     }
 }
 

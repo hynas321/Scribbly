@@ -1,7 +1,10 @@
-namespace Dotnet.Server.Models;
+using Dotnet.Server.Models;
 
-class LobbyState
+namespace Dotnet.Server.Managers;
+
+class LobbyManager
 {
+    private int maxChatMessageCount = 30;
     private static Dictionary<string, Lobby> lobbies = new Dictionary<string, Lobby>()
     {
         { "TestLobbyUrl", new Lobby() }
@@ -45,5 +48,23 @@ class LobbyState
     public List<Player> GetPlayers(string lobbyUrl)
     {
         return lobbies[lobbyUrl].players;
+    }
+
+    public void AddChatMessage(string lobbyUrl, ChatMessage message)
+    {
+        List<ChatMessage> messages = lobbies[lobbyUrl].chatMessages;
+
+        if (messages.Count == maxChatMessageCount)
+        {
+            messages.RemoveAt(0);
+        }
+
+        messages.Add(message);
+        
+    }
+
+    public List<ChatMessage> GetMessages(string lobbyUrl)
+    {
+        return lobbies[lobbyUrl].chatMessages;
     }
 }

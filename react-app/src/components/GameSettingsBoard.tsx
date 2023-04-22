@@ -5,18 +5,22 @@ import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { updatedDrawingTimeSeconds, updatedNonAbstractNounsOnly, updatedRoundsCount, updatedWordLanguage } from '../redux/slices/game-settings-slice';
 import { BsGearFill } from 'react-icons/bs';
 import InputSelect from './InputSelect';
+import Hub from '../../Hubs/Hub';
 
 interface GameSettingsBoardProps {
+  hub: Hub,
   isPlayerHost: boolean;
 }
 
-function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
+function GameSettingsBoard({hub, isPlayerHost}: GameSettingsBoardProps) {
   const dispatch = useAppDispatch();
 
   const nonAbstractNounsOnlyText = "Allow only non-abstract nouns";
   const drawingTimeText = "Drawing time";
   const numberOfRoundsText = "Number of rounds";
   const chooseLanguageText = "Language of random words";
+
+  const testLobbyUrl = "TestLobbyUrl"; //temporary
 
   const settings = {
     nonAbstractNounsOnly: useAppSelector((state) => state.gameSettings.nonAbstractNounsOnly),
