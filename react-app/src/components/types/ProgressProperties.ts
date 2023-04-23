@@ -1,5 +1,5 @@
 type ProgressProperties = {
   currentProgress: number,
-	minProgress: number,
+  minProgress: number,
 	maxProgress: number
 }

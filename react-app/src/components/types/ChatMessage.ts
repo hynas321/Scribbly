@@ -1,4 +1,4 @@
 type ChatMessage = {
-    username: string;
-    text: string;
+  username: string;
+  text: string;
 }

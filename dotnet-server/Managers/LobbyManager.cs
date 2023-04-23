@@ -7,17 +7,17 @@ class LobbyManager
     private int maxChatMessageCount = 30;
     private static Dictionary<string, Lobby> lobbies = new Dictionary<string, Lobby>()
     {
-        { "TestLobbyUrl", new Lobby() }
+        { "TestLobbyHash", new Lobby() }
     };
 
-    public void AddLobby(string lobbyUrl, Lobby lobby)
+    public void AddLobby(string lobbyHash, Lobby lobby)
     {
-        lobbies.Add(lobbyUrl, lobby);
+        lobbies.Add(lobbyHash, lobby);
     }
 
-    public void RemoveLobby(string lobbyUrl)
+    public void RemoveLobby(string lobbyHash)
     {
-        lobbies.Remove(lobbyUrl);
+        lobbies.Remove(lobbyHash);
     }
 
     public int GetLobbiesCount()
@@ -25,34 +25,34 @@ class LobbyManager
         return lobbies.Count;
     }
 
-    public Lobby GetLobby(string lobbyUrl)
+    public Lobby GetLobby(string lobbyHash)
     {
-        return lobbies[lobbyUrl];
+        return lobbies[lobbyHash];
     }
 
-    public void AddPlayerToLobby(string lobbyUrl, Player player)
+    public void AddPlayerToLobby(string lobbyHash, Player player)
     {
-        lobbies[lobbyUrl].players.Add(player);
+        lobbies[lobbyHash].Players.Add(player);
     }
 
-    public void RemovePlayerFromLobby(string lobbyUrl, string username)
+    public void RemovePlayerFromLobby(string lobbyHash, string username)
     {
-        lobbies[lobbyUrl].players.RemoveAll(p => p.Username == username);
+        lobbies[lobbyHash].Players.RemoveAll(p => p.Username == username);
     }
 
-    public int GetPlayersCount(string lobbyUrl)
+    public int GetPlayersCount(string lobbyHash)
     {
-        return lobbies[lobbyUrl].players.Count();
+        return lobbies[lobbyHash].Players.Count();
     }
 
-    public List<Player> GetPlayers(string lobbyUrl)
+    public List<Player> GetPlayers(string lobbyHash)
     {
-        return lobbies[lobbyUrl].players;
+        return lobbies[lobbyHash].Players;
     }
 
-    public void AddChatMessage(string lobbyUrl, ChatMessage message)
+    public void AddChatMessage(string lobbyHash, ChatMessage message)
     {
-        List<ChatMessage> messages = lobbies[lobbyUrl].chatMessages;
+        List<ChatMessage> messages = lobbies[lobbyHash].ChatMessages;
 
         if (messages.Count == maxChatMessageCount)
         {
@@ -63,8 +63,18 @@ class LobbyManager
         
     }
 
-    public List<ChatMessage> GetMessages(string lobbyUrl)
+    public List<ChatMessage> GetMessages(string lobbyHash)
     {
-        return lobbies[lobbyUrl].chatMessages;
+        return lobbies[lobbyHash].ChatMessages;
+    }
+
+    public GameSettings GetGameSettings(string lobbyHash)
+    {   
+        return lobbies[lobbyHash].GameSettings;
+    }
+
+    public void ChangeGameSettings(string lobbyHash, GameSettings settings)
+    {
+        lobbies[lobbyHash].GameSettings = settings;
     }
 }

@@ -8,7 +8,7 @@ namespace Dotnet.Server.Hubs;
 public partial class LobbyHub : Hub
 {
     [HubMethodName("SendChatMessage")]
-    public async Task SendChatMessage(string url, string username, string text)
+    public async Task SendChatMessage(string lobbyHash, string username, string text)
     {
         LobbyManager lobbyManager = new LobbyManager();
 
@@ -18,10 +18,10 @@ public partial class LobbyHub : Hub
             Text = text
         };
 
-        lobbyManager.AddChatMessage(url, message);
+        lobbyManager.AddChatMessage(lobbyHash, message);
         logger.LogInformation($"New chat message: {username}: {text}");
 
-        List<ChatMessage> chatMessageList = lobbyManager.GetMessages(url);
+        List<ChatMessage> chatMessageList = lobbyManager.GetMessages(lobbyHash);
         JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -32,9 +32,9 @@ public partial class LobbyHub : Hub
     }
 
     [HubMethodName("GetChatMessages")]
-    public async Task GetChatMessages(string url)
+    public async Task GetChatMessages(string lobbyHash)
     {
-        List<ChatMessage> chatMessageList = lobbyManager.GetMessages(url);
+        List<ChatMessage> chatMessageList = lobbyManager.GetMessages(lobbyHash);
         JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase

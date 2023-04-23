@@ -24,7 +24,7 @@ function Chat({hubType, placeholderValue, wordLength}: ChatProps) {
   const inputFormRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
 
-  const testLobbyUrl = "TestLobbyUrl"; //temporary
+  const testLobbyHash = "TestLobbyHash"; //temporary
   let characters: any[] = [];
 
   if (wordLength) {
@@ -39,7 +39,7 @@ function Chat({hubType, placeholderValue, wordLength}: ChatProps) {
     }
 
     const SendChatMessage = async () => {
-      await hub.invoke("SendChatMessage", testLobbyUrl, chatMessage.username, chatMessage.text);
+      await hub.invoke("SendChatMessage", testLobbyHash, chatMessage.username, chatMessage.text);
 
       if (inputFormRef && inputFormRef.current) {
         inputFormRef.current.value = "";
@@ -72,7 +72,7 @@ function Chat({hubType, placeholderValue, wordLength}: ChatProps) {
     });
 
     const getChatMessages = async () => {
-      await hub.invoke("GetChatMessages", testLobbyUrl);
+      await hub.invoke("GetChatMessages", testLobbyHash);
     };
 
     getChatMessages();

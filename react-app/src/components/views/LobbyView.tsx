@@ -25,7 +25,7 @@ function LobbyView() {
   const [alertType, setAlertType] = useState("primary");
   const [playerList, setPlayerList] = useState<Player[]>([]);
 
-  const testLobbyUrl = "TestLobbyUrl"; //temporary
+  const testLobbyHash = "TestLobbyHash"; //temporary
   const invitationUrl: string = "http://www.example.com"; //will be fetched from the server
   const isPlayerHost: boolean = useAppSelector((state) => state.player.host);
 
@@ -48,13 +48,13 @@ function LobbyView() {
       lobbyHub.on("PlayerLeftLobby", getPlayerList);
 
       await lobbyHub.start();
-      await lobbyHub.invoke("JoinLobby", testLobbyUrl, player.username);
+      await lobbyHub.invoke("JoinLobby", testLobbyHash, player.username);
     }
 
       const clearBeforeUnload = () => {
         lobbyHub.off("PlayerJoinedLobby");
         lobbyHub.off("PlayerLeftLobby");
-        lobbyHub.send("LeaveLobby", testLobbyUrl, player.username);
+        lobbyHub.send("LeaveLobby", testLobbyHash, player.username);
         lobbyHub.stop();
       }
 
@@ -108,10 +108,7 @@ function LobbyView() {
             />
           </Link>
           <div className="mt-3">
-            <GameSettingsBoard
-              hub={lobbyHub}
-              isPlayerHost={isPlayerHost}
-            />
+            <GameSettingsBoard isPlayerHost={isPlayerHost} />
           </div>
         </div>
         <div className="col-1"/>

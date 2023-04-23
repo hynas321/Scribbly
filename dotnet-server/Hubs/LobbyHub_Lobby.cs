@@ -9,19 +9,18 @@ public partial class LobbyHub : Hub
 {
 
     [HubMethodName("JoinLobby")]
-    public async Task JoinLobby(string lobbyUrl, string username)
+    public async Task JoinLobby(string hash, string username)
     {   
         Player player = new Player()
         {
             Username = username,
             Score = 0,
-            Host = false,
-            GameUrl = "lobbyUrl"
+            GameHash = "lobbyUrl"
         };
 
-        lobbyManager.AddPlayerToLobby(lobbyUrl, player);
+        lobbyManager.AddPlayerToLobby(hash, player);
         
-        List<Player> playerList = lobbyManager.GetPlayers(lobbyUrl);
+        List<Player> playerList = lobbyManager.GetPlayers(hash);
         JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -34,11 +33,11 @@ public partial class LobbyHub : Hub
     }
 
     [HubMethodName("LeaveLobby")]
-    public async Task LeaveLobby(string lobbyUrl, string username)
+    public async Task LeaveLobby(string hash, string username)
     {
-        lobbyManager.RemovePlayerFromLobby(lobbyUrl, username);
+        lobbyManager.RemovePlayerFromLobby(hash, username);
 
-        List<Player> playerList = lobbyManager.GetPlayers(lobbyUrl);
+        List<Player> playerList = lobbyManager.GetPlayers(hash);
         JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
