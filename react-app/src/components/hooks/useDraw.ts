@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react"
+import Hub from "../../Hubs/Hub";
 
-export const useDraw = (onDraw: ({
-    canvasContext,
-    currentRelativePoint,
-    previousRelativePoint
-  }: Draw) => void) => {
+export const useDraw = (onDraw: (
+    canvasContext: CanvasRenderingContext2D,
+    line: DrawnLine) => void,
+  hub: Hub,
+  hash: string,
+  color: string) => {
   const [mouseDown, setMouseDown] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previousRelativePoint = useRef<Point | null>(null);
@@ -14,20 +16,51 @@ export const useDraw = (onDraw: ({
   }
 
   const clearCanvas = () => {
-    const canvas = canvasRef.current;
-
-    if (!canvas) {
-      return;
-    }
-
-    const canvasContext = canvas.getContext("2d");
-    
-    if (!canvasContext) {
-      return;
-    }
-
-    canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+    hub.invoke("ClearCanvas", hash);
   }
+
+  useEffect(() => {
+    hub.on("ApplyClearCanvas", () => {
+      const canvas = canvasRef.current;
+
+      if (!canvas) {
+        return;
+      }
+  
+      const canvasContext = canvas.getContext("2d");
+      
+      if (!canvasContext) {
+        return;
+      }
+
+      canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+    });
+
+    hub.on("UpdateCanvas", (drawnLineSerialized: string) => {
+      const drawnLine = JSON.parse(drawnLineSerialized) as DrawnLine;
+      
+      const canvas = canvasRef.current;
+
+      if (!canvas) {
+        return;
+      }
+  
+      const canvasContext = canvas.getContext("2d");
+      
+      if (!canvasContext) {
+        return;
+      }
+
+      onDraw(canvasContext, drawnLine);
+
+      previousRelativePoint.current = drawnLine.currentPoint;
+    });
+
+    return () => {
+      hub.off("ApplyClearCanvas");
+      hub.off("UpdateCanvas")
+    }
+  }, []);
 
   useEffect(() => {
     const handler = (event: MouseEvent) => {
@@ -42,13 +75,16 @@ export const useDraw = (onDraw: ({
         return;
       }
 
-      onDraw({
-        canvasContext,
-        currentRelativePoint,
-        previousRelativePoint: previousRelativePoint.current!
-      });
+      const drawnLine: DrawnLine = {
+        currentPoint: currentRelativePoint,
+        previousPoint: previousRelativePoint.current!,
+        color: color
+      }
 
-      previousRelativePoint.current = currentRelativePoint;
+      //onDraw(canvasContext, drawnLine);
+      //previousRelativePoint.current = drawnLine.currentPoint;
+      
+      hub.invoke("DrawOnCanvas", hash, JSON.stringify(drawnLine));
     };
 
     const determinePointRelativeCoordinates = (event: MouseEvent) => {

@@ -15,8 +15,8 @@ interface ChatProps {
 }
 
 function Chat({hubType, placeholderValue, wordLength}: ChatProps) {
-  const username = useAppSelector((state) => state.player.username);
   const hub = useContext(hubType === HubType.LOBBY ? LobbyHubContext : GameHubContext);
+  const username = useAppSelector((state) => state.player.username);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputFormValue, setInputFormValue] = useState("");
