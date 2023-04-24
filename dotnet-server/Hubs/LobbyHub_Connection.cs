@@ -27,7 +27,10 @@ public partial class LobbyHub : Hub
     {   
         await base.OnDisconnectedAsync(exception);
 
-        hubManager.Connections--;
+        if (hubManager.Connections != 0)
+        {
+            hubManager.Connections--;
+        }
 
         logger.LogInformation($"LobbyHub: Connection {Context.ConnectionId} terminated. Total clients connected: {hubManager.Connections}");
     }
