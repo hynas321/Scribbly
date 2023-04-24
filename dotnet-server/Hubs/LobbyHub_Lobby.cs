@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Dotnet.Server.Managers;
 using Dotnet.Server.Models;
 using Microsoft.AspNetCore.SignalR;
 
@@ -7,45 +6,58 @@ namespace Dotnet.Server.Hubs;
 
 public partial class LobbyHub : Hub
 {
-
     [HubMethodName("JoinLobby")]
-    public async Task JoinLobby(string hash, string username)
-    {   
-        Player player = new Player()
+    public async Task JoinLobby(string lobbyHash, string username)
+    {
+        try
         {
-            Username = username,
-            Score = 0,
-            GameHash = "lobbyUrl"
-        };
+            Player player = new Player()
+            {
+                Username = username,
+                Score = 0,
+                GameHash = lobbyHash
+            };
 
-        lobbyManager.AddPlayerToLobby(hash, player);
-        
-        List<Player> playerList = lobbyManager.GetPlayers(hash);
-        JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
+            lobbiesManager.AddPlayer(lobbyHash, player);
+            
+            List<Player> playerList = lobbiesManager.GetPlayers(lobbyHash);
+            JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+
+            string playerListSerialized = JsonSerializer.Serialize(playerList, jsonSerializerOptions);
+            await Clients.All.SendAsync("PlayerJoinedLobby", playerListSerialized);
+
+            logger.LogInformation($"Lobby #{lobbyHash}: Player {username} joined the lobby.");
+        }
+        catch (Exception ex)
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
-
-        string playerListSerialized = JsonSerializer.Serialize(playerList, jsonSerializerOptions);
-        await Clients.All.SendAsync("PlayerJoinedLobby", playerListSerialized);
-
-        logger.LogInformation($"Player {username} joined the lobby");
+            logger.LogInformation($"Lobby #{lobbyHash}: Player {username} could not join the lobby. {ex}");
+        }
     }
 
     [HubMethodName("LeaveLobby")]
-    public async Task LeaveLobby(string hash, string username)
+    public async Task LeaveLobby(string lobbyHash, string username)
     {
-        lobbyManager.RemovePlayerFromLobby(hash, username);
-
-        List<Player> playerList = lobbyManager.GetPlayers(hash);
-        JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
+        try 
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
+            lobbiesManager.RemovePlayer(lobbyHash, username);
 
-        string playerListSerialized = JsonSerializer.Serialize(playerList, jsonSerializerOptions);
-        await Clients.All.SendAsync("PlayerLeftLobby", playerListSerialized);
+            List<Player> playerList = lobbiesManager.GetPlayers(lobbyHash);
+            JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
 
-        logger.LogInformation($"Player {username} joined the lobby");
+            string playerListSerialized = JsonSerializer.Serialize(playerList, jsonSerializerOptions);
+            await Clients.All.SendAsync("PlayerLeftLobby", playerListSerialized);
+
+            logger.LogInformation($"Lobby {lobbyHash}: Player {username} left the lobby.");
+        }
+        catch (Exception ex)
+        {
+            logger.LogInformation($"Lobby {lobbyHash}: Player {username} could not leave the lobby. {ex}");
+        }
     }
 }

@@ -3,13 +3,13 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Dotnet.Server.Hubs;
 
-public partial class LobbyHub : Hub
+public partial class GameHub : Hub
 {
-    private readonly LobbiesManager lobbiesManager = new LobbiesManager(25);
+    private readonly GamesManager gamesManager = new GamesManager(25);
     private readonly HubConnectionManager hubManager = new HubConnectionManager();
     private readonly ILogger<LobbyHub> logger;
 
-    public LobbyHub(ILogger<LobbyHub> logger)
+    public GameHub(ILogger<LobbyHub> logger)
     {
         this.logger = logger;
     }
@@ -20,7 +20,7 @@ public partial class LobbyHub : Hub
 
         hubManager.Connections++;
         
-        logger.LogInformation($"LobbyHub: New connection {Context.ConnectionId} established. Total connections: {hubManager.Connections}");
+        logger.LogInformation($"GameHub: New connection {Context.ConnectionId} established. Total connections: {hubManager.Connections}");
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
@@ -29,6 +29,6 @@ public partial class LobbyHub : Hub
 
         hubManager.Connections++;
 
-        logger.LogInformation($"LobbyHub: Connection {Context.ConnectionId} terminated. Total clients connected: {hubManager.Connections}");
+        logger.LogInformation($"GameHub: Connection {Context.ConnectionId} terminated. Total clients connected: {hubManager.Connections}");
     }
 }

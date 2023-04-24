@@ -15,6 +15,7 @@ interface GameSettingsBoardProps {
 
 function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
   const hub = useContext(LobbyHubContext);
+  const username = useAppSelector((state) => state.player.username);
   const dispatch = useAppDispatch();
   let gameSettingsLoaded = false;
 
@@ -65,7 +66,7 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
 
     if (!gameSettingsLoaded) {
       const getGameSettings = async() => {
-        await hub.invoke("GetGameSettings", testLobbyHash);
+        await hub.invoke("GetGameSettings", testLobbyHash, username);
         gameSettingsLoaded = true;
       }
 

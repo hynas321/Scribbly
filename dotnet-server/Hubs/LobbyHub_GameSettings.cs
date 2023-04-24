@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Dotnet.Server.Managers;
 using Dotnet.Server.Models;
 using Microsoft.AspNetCore.SignalR;
 
@@ -10,61 +9,100 @@ public partial class LobbyHub : Hub
     [HubMethodName("ChangeAbstractNounsSetting")]
     public async Task ChangeAbstractNounsSettingAsync(string lobbyHash, bool on)
     {
-        GameSettings settings = lobbyManager.GetGameSettings(lobbyHash);
+        try
+        {
+            GameSettings settings = lobbiesManager.GetGameSettings(lobbyHash);
 
-        settings.NonAbstractNounsOnly = on;
-        lobbyManager.ChangeGameSettings(lobbyHash, settings);
+            settings.NonAbstractNounsOnly = on;
+            lobbiesManager.ChangeGameSettings(lobbyHash, settings);
 
-        logger.LogInformation($"Abstract nouns setting set to {Convert.ToString(settings.NonAbstractNounsOnly)}");
-        await Clients.All.SendAsync("ApplyAbstractNounsSetting", on);
+            await Clients.All.SendAsync("ApplyAbstractNounsSetting", on);
+
+            logger.LogInformation($"Lobby #{lobbyHash}: Abstract nouns setting set to {Convert.ToString(settings.NonAbstractNounsOnly)}.");
+        }
+        catch (Exception ex)
+        {
+            logger.LogInformation($"Lobby #{lobbyHash}: Abstract nouns setting could not be set. {ex}");
+        }
     }
 
     [HubMethodName("ChangeDrawingTimeSetting")]
     public async Task ChangeDrawingTimeSetting(string lobbyHash, int time)
     {
-        GameSettings settings = lobbyManager.GetGameSettings(lobbyHash);
+        try
+        {
+            GameSettings settings = lobbiesManager.GetGameSettings(lobbyHash);
 
-        settings.DrawingTimeSeconds = time;
-        lobbyManager.ChangeGameSettings(lobbyHash, settings);
+            settings.DrawingTimeSeconds = time;
+            lobbiesManager.ChangeGameSettings(lobbyHash, settings);
 
-        logger.LogInformation($"Drawing time set to {Convert.ToString(settings.DrawingTimeSeconds)}");
-        await Clients.All.SendAsync("ApplyDrawingTimeSetting", time);
+            await Clients.All.SendAsync("ApplyDrawingTimeSetting", time);
+
+            logger.LogInformation($"Lobby #{lobbyHash}: Drawing time set to {Convert.ToString(settings.DrawingTimeSeconds)}.");
+        }
+        catch (Exception ex)
+        {
+            logger.LogInformation($"Lobby #{lobbyHash}: Drawing time could not be set. {ex}");
+        }
     }
 
     [HubMethodName("ChangeRoundsCountSetting")]
     public async Task ChangeRoundsCountSetting(string lobbyHash, int count)
     {
-        GameSettings settings = lobbyManager.GetGameSettings(lobbyHash);
+        try
+        {
+            GameSettings settings = lobbiesManager.GetGameSettings(lobbyHash);
 
-        settings.RoundsCount = count;
-        lobbyManager.ChangeGameSettings(lobbyHash, settings);
+            settings.RoundsCount = count;
+            lobbiesManager.ChangeGameSettings(lobbyHash, settings);
 
-        logger.LogInformation($"Rounds count set to {Convert.ToString(settings.RoundsCount)}");
-        await Clients.All.SendAsync("ApplyRoundsCountSetting", count);
+            await Clients.All.SendAsync("ApplyRoundsCountSetting", count);
+
+            logger.LogInformation($"Lobby #{lobbyHash}: Rounds count set to {Convert.ToString(settings.RoundsCount)}.");
+        }
+        catch (Exception ex)
+        {
+            logger.LogInformation($"Lobby #{lobbyHash}: Rounds count could not be set. {ex}");
+        }
     }
 
     [HubMethodName("ChangeWordLanguageSetting")]
     public async Task ChangeWordLanguageSetting(string lobbyHash, string language)
     {
-        GameSettings settings = lobbyManager.GetGameSettings(lobbyHash);
+        try
+        {
+            GameSettings settings = lobbiesManager.GetGameSettings(lobbyHash);
 
-        settings.WordLanguage = language;
-        lobbyManager.ChangeGameSettings(lobbyHash, settings);
+            settings.WordLanguage = language;
+            lobbiesManager.ChangeGameSettings(lobbyHash, settings);
 
-        logger.LogInformation($"Word language set to {Convert.ToString(settings.WordLanguage)}");
-        await Clients.All.SendAsync("ApplyWordLanguageSetting", language);
+            await Clients.All.SendAsync("ApplyWordLanguageSetting", language);
+
+            logger.LogInformation($"Lobby #{lobbyHash}: Word language set to {Convert.ToString(settings.WordLanguage)}.");
+        }
+        catch (Exception ex)
+        {
+            logger.LogInformation($"Lobby #{lobbyHash}: Word language could not be set. {ex}");
+        }
     }
 
     [HubMethodName("GetGameSettings")]
-    public async Task GetGameSettings(string lobbyHash)
+    public async Task GetGameSettings(string lobbyHash, string username)
     {
-        GameSettings settings = lobbyManager.GetGameSettings(lobbyHash);
-        JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
+        try
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
+            GameSettings settings = lobbiesManager.GetGameSettings(lobbyHash);
+            JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
 
-        string gameSettingsSerialized = JsonSerializer.Serialize(settings, jsonSerializerOptions);
-        await Clients.All.SendAsync("ApplyGameSettings", gameSettingsSerialized);
+            string gameSettingsSerialized = JsonSerializer.Serialize(settings, jsonSerializerOptions);
+            await Clients.All.SendAsync("ApplyGameSettings", gameSettingsSerialized);
+        }
+        catch (Exception ex)
+        {
+            logger.LogInformation($"Lobby #{lobbyHash}: Player {username} could not load the game settings. {ex}");
+        }
     }
 }

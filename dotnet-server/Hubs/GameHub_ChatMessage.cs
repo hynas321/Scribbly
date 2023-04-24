@@ -4,16 +4,16 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Dotnet.Server.Hubs;
 
-public partial class LobbyHub : Hub
+public partial class GameHub : Hub
 {
     [HubMethodName("SendChatMessage")]
-    public async Task SendChatMessage(string lobbyHash, ChatMessage message)
+    public async Task SendChatMessage(string gameHash, ChatMessage message)
     {
         try
         {
-            lobbiesManager.AddChatMessage(lobbyHash, message);
+            gamesManager.AddChatMessage(gameHash, message);
 
-            List<ChatMessage> chatMessageList = lobbiesManager.GetMessages(lobbyHash);
+            List<ChatMessage> chatMessageList = gamesManager.GetMessages(gameHash);
             JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -22,20 +22,21 @@ public partial class LobbyHub : Hub
             string chatMessageListSerialized = JsonSerializer.Serialize(chatMessageList, jsonSerializerOptions);
             await Clients.All.SendAsync("ReceiveChatMessages", chatMessageListSerialized);
 
-            logger.LogInformation($"Lobby #{lobbyHash}: Player '{message.Username}' posted a new chat message '{message.Text}'.");
+            logger.LogInformation($"Game #{gameHash}: Player '{message.Username}' posted a new chat message '{message.Text}'.");
         }
         catch (Exception ex)
         {
-            logger.LogError($"Lobby #{lobbyHash}: Player '{message.Username}' could not post a new chat message '{message.Text}'. {ex}");
+            logger.LogInformation($"Game #{gameHash}: Player '{message.Username}' could not post a new chat message '{message.Text}'. {ex}");
         }
     }
 
     [HubMethodName("GetChatMessages")]
-    public async Task GetChatMessages(string lobbyHash, string username)
+    public async Task GetChatMessages(string gameHash, string username)
     {
-        try
+        try 
         {
-            List<ChatMessage> chatMessageList = lobbiesManager.GetMessages(lobbyHash);
+            List<ChatMessage> chatMessageList = gamesManager.GetMessages(gameHash);
+
             JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -46,7 +47,7 @@ public partial class LobbyHub : Hub
         }
         catch (Exception ex)
         {
-            logger.LogError($"Lobby #{lobbyHash}: Player '{username}' could not load chat messages. {ex}");
+            logger.LogError($"Game #{gameHash}: Player '{username}' could not load chat messages. {ex}");
         }
     }
 }

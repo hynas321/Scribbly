@@ -16,7 +16,7 @@ interface ChatProps {
 
 function Chat({hubType, placeholderValue, wordLength}: ChatProps) {
   const username = useAppSelector((state) => state.player.username);
-  const hub = useContext(hubType === HubType.LOBBY ?LobbyHubContext : GameHubContext);
+  const hub = useContext(hubType === HubType.LOBBY ? LobbyHubContext : GameHubContext);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputFormValue, setInputFormValue] = useState("");
@@ -24,7 +24,7 @@ function Chat({hubType, placeholderValue, wordLength}: ChatProps) {
   const inputFormRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
 
-  const testLobbyHash = "TestLobbyHash"; //temporary
+  const testHash = (hubType === HubType.LOBBY ? "TestLobbyHash" : "TestGameHash"); //temporary
   let characters: any[] = [];
 
   if (wordLength) {
@@ -39,8 +39,8 @@ function Chat({hubType, placeholderValue, wordLength}: ChatProps) {
     }
 
     const SendChatMessage = async () => {
-      await hub.invoke("SendChatMessage", testLobbyHash, chatMessage.username, chatMessage.text);
-
+      await hub.invoke("SendChatMessage", testHash, chatMessage);
+      
       if (inputFormRef && inputFormRef.current) {
         inputFormRef.current.value = "";
       }
@@ -72,7 +72,7 @@ function Chat({hubType, placeholderValue, wordLength}: ChatProps) {
     });
 
     const getChatMessages = async () => {
-      await hub.invoke("GetChatMessages", testLobbyHash);
+      await hub.invoke("GetChatMessages", testHash, username);
     };
 
     getChatMessages();

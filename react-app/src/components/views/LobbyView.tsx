@@ -27,7 +27,7 @@ function LobbyView() {
 
   const testLobbyHash = "TestLobbyHash"; //temporary
   const invitationUrl: string = "http://www.example.com"; //will be fetched from the server
-  const isPlayerHost: boolean = useAppSelector((state) => state.player.host);
+  const isPlayerHost: boolean  = false; //will be fetched from the server
 
   const handleStartGameButtonClick = async () => {
 

@@ -1,26 +1,56 @@
 import Chat from '../Chat';
 import PlayerList from '../PlayerList';
 import Canvas from '../Canvas';
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Player } from '../../redux/slices/player-slice';
 import ControlPanel from '../ControlPanel';
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { useAppSelector } from '../../redux/hooks';
 import { HubType } from '../../enums/HubType';
+import { GameHubContext } from '../../Context/GameHubContext';
 
 function GameView() {
-  const player: Player = {
-    username: "Player",
-    score: 100,
-    host: false
-  }
-
+  const gameHub = useContext(GameHubContext);
   const gameSettings = useAppSelector((state) => state.gameSettings);
   const gameState = useAppSelector((state) => state.gameState);
-  const dispatch = useAppDispatch();
+  const player = useAppSelector((state) => state.player);
 
-  const [players, setPlayers] =
-    useState<Player[]>([player, player, player, player, player, player, player, player]); // will be fetched from the server
+  const [playerList, setPlayerList] = useState<Player[]>([]);
   const wordRiddleLength = 10; //will be fetched from the server
+  const testGameHash = "TestGameHash"; //temporary
+
+  useEffect(() => {
+
+    const setGameHub = async () => {
+
+      const getPlayerList = (playerListSerialized: any) => {
+        const playerList = JSON.parse(playerListSerialized) as Player[];
+
+        setPlayerList(playerList);
+      }
+      
+      gameHub.on("PlayerJoinedGame", getPlayerList);
+      gameHub.on("PlayerLeftGame", getPlayerList);
+
+      await gameHub.start();
+      await gameHub.invoke("JoinGame", testGameHash, player.username);
+    }
+
+      const clearBeforeUnload = () => {
+        gameHub.off("PlayerJoinedGame");
+        gameHub.off("PlayerLeftGame");
+        gameHub.send("LeaveGame", testGameHash, player.username);
+        gameHub.stop();
+      }
+
+    setGameHub();
+
+    window.addEventListener("beforeunload", clearBeforeUnload);
+
+    return () => {
+      clearBeforeUnload();
+      window.removeEventListener("beforeunload", clearBeforeUnload);
+    }
+  }, []);
 
   return (
     <div className="container text-center">
@@ -28,7 +58,7 @@ function GameView() {
         <div className="col-2">
           <PlayerList
             title={"Players"}
-            players={players}
+            players={playerList}
             displayPoints={true}
             displayIndex={true}
             round={{

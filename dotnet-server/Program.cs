@@ -39,4 +39,5 @@ app.UseAuthorization();
 app.MapControllers();
 app.UseCors("AllowReactApp");
 app.MapHub<LobbyHub>($"/hub/lobby");
+app.MapHub<GameHub>($"/hub/game");
 app.Run(config?.HttpServerUrl);

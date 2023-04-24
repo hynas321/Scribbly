@@ -30,9 +30,9 @@ public class GameController : ControllerBase
 
             Game game = new Game() 
             {
-                Url = Guid.NewGuid().ToString(),
-                HostUsername = requestBody.HostUsername,
-                gameSettings = new GameSettings()
+                Hash = Guid.NewGuid().ToString(),
+                HostToken = requestBody.HostUsername,
+                GameSettings = new GameSettings()
                 {
                     NonAbstractNounsOnly = requestBody.NonAbstractNounsOnly,
                     DrawingTimeSeconds = requestBody.DrawingTimeSeconds,
@@ -43,7 +43,7 @@ public class GameController : ControllerBase
             };
 
             Games.Add(game);
-            logger.LogInformation($"Status: 201; Game with the Url {game.Url} and the host username '{game.HostUsername}' has been created.");
+            logger.LogInformation($"Status: 201; Game with the Url {game.Hash} and the host username '{game.HostToken}' has been created.");
             
             return StatusCode(StatusCodes.Status201Created);
         }
