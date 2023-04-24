@@ -25,6 +25,7 @@
     "socket.io-client": "^4.6.1"
   },
   "devDependencies": {
+    "@types/material-colors": "^1.2.0",
     "@types/react": "^18.0.28",
     "@types/react-color": "^3.0.6",
     "@types/react-copy-to-clipboard": "^5.0.4",
