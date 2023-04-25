@@ -7,12 +7,15 @@ import ControlPanel from '../ControlPanel';
 import { useAppSelector } from '../../redux/hooks';
 import { HubType } from '../../enums/HubType';
 import { GameHubContext } from '../../context/GameHubContext';
+import { useDispatch } from 'react-redux';
+import { updatedCurrentDrawingTimeSeconds } from '../../redux/slices/game-state-slice';
 
 function GameView() {
   const gameHub = useContext(GameHubContext);
   const gameSettings = useAppSelector((state) => state.gameSettings);
   const gameState = useAppSelector((state) => state.gameState);
   const player = useAppSelector((state) => state.player);
+  const dispatch = useDispatch();
 
   const [playerList, setPlayerList] = useState<Player[]>([]);
   const wordRiddleLength = 10; //will be fetched from the server
@@ -30,14 +33,16 @@ function GameView() {
       
       gameHub.on("PlayerJoinedGame", getPlayerList);
       gameHub.on("PlayerLeftGame", getPlayerList);
-
+      //gameHub.on("OnUpdateProgressBarTimer", ...);
       await gameHub.start();
       await gameHub.invoke("JoinGame", testGameHash, player.username);
+      //await gameHub.invoke("StartProgressBarTimer", testGameHash);
     }
 
       const clearBeforeUnload = () => {
         gameHub.off("PlayerJoinedGame");
         gameHub.off("PlayerLeftGame");
+        //gameHub.off("OnUpdateProgressBarTimer");
         gameHub.send("LeaveGame", testGameHash, player.username);
         gameHub.stop();
       }

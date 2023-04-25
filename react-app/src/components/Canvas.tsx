@@ -27,8 +27,6 @@ function Canvas({progressBarProperties}: CanvasProps) {
     const {x: currentRelativeX, y: currentRelativeY} = drawnLine.currentPoint;
     const lineWidth = 5;
 
-    console.log(drawnLine);
-
     let relativeStartPoint = drawnLine.previousPoint ?? drawnLine.currentPoint;
       
     canvasContext.beginPath();

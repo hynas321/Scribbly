@@ -9,7 +9,7 @@ function ProgressBar({progressProperties, text}: ProgressBarProps) {
       <div
         className="progress-bar"
         role="progressbar"
-        style={{ width: `${progressProperties.currentProgress}%`}}
+        style={{ width: `${(progressProperties.currentProgress / progressProperties.maxProgress) * 100}%`}}
         aria-valuenow={progressProperties.currentProgress}
         aria-valuemin={progressProperties.minProgress}
         aria-valuemax={progressProperties.maxProgress}
