@@ -24,7 +24,7 @@ const playerSlice = createSlice({
       state.username = action.payload;
     },
     updatedToken(state, action: PayloadAction<string>) {
-      state.username = action.payload;
+      state.token = action.payload;
     },
     updatedGameHash(state, action: PayloadAction<string>) {
       state.gameHash = action.payload;

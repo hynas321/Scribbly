@@ -5,7 +5,7 @@ import { useAppDispatch } from '../../redux/hooks';
 import config from '../../../config.json';
 import Alert from '../Alert';
 import { useNavigate } from 'react-router-dom';
-import { Player, updatedGameHash, updatedUsername } from '../../redux/slices/player-slice';
+import { Player, updatedGameHash, updatedToken, updatedUsername } from '../../redux/slices/player-slice';
 import PlayerList from '../PlayerList';
 import Popup from '../Popup';
 
@@ -39,6 +39,7 @@ function MainView() {
 
     dispatch(updatedUsername(username));
     dispatch(updatedGameHash("TestGameHash"));
+    dispatch(updatedToken("HostToken"));
     navigate(config.createGameClientEndpoint);
   }
 
@@ -55,8 +56,10 @@ function MainView() {
   }
 
   const handleOnSubmitPopup = (value: string) => {
-    navigate(config.createGameClientEndpoint);
+    dispatch(updatedUsername(username));
     dispatch(updatedGameHash("TestGameHash"));
+    dispatch(updatedToken("TestToken"));
+    navigate(config.createGameClientEndpoint);
   }
 
   useEffect(() => {

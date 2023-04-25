@@ -26,8 +26,8 @@ function LobbyView() {
   const [playerList, setPlayerList] = useState<Player[]>([]);
 
   const testLobbyHash = "TestLobbyHash"; //temporary
-  const invitationUrl: string = "http://www.example.com"; //will be fetched from the server
-  const isPlayerHost: boolean  = false; //will be fetched from the server
+  const invitationUrl: string = "http://www.example.com"; //temporary, will be fetched from the server
+  const isPlayerHost: boolean  = player.token == "HostToken" ? true : false; //temporary, will be fetched from the server
 
   const handleStartGameButtonClick = async () => {
 
