@@ -19,7 +19,7 @@ function Popup({title, inputFormPlaceholderText, visible, onSubmit, onClose}: Po
       right: 'auto',
       bottom: 'auto',
       transform: 'translate(-50%, -50%)',
-      width: '30%'
+      width: '350px'
     },
   };
   
@@ -44,6 +44,7 @@ function Popup({title, inputFormPlaceholderText, visible, onSubmit, onClose}: Po
     <Modal
       isOpen={visible}
       style={customStyles}
+      ariaHideApp={false}
     >
       <div className="container">
         <h5>{title}</h5>

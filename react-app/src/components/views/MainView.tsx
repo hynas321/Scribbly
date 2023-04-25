@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import Button from '../Button';
 import InputForm from '../InputForm';
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { useAppDispatch } from '../../redux/hooks';
 import config from '../../../config.json';
 import Alert from '../Alert';
 import { useNavigate } from 'react-router-dom';
-import { Player, updatedHost, updatedUsername } from '../../redux/slices/player-slice';
+import { Player, updatedGameHash, updatedToken, updatedUsername } from '../../redux/slices/player-slice';
 import PlayerList from '../PlayerList';
 import Popup from '../Popup';
 
@@ -24,8 +24,9 @@ function MainView() {
 
   const player: Player = {
     username: "Test",
-    score: 100,
-    host: false
+    token: "TestToken",
+    gameHash: "TestGameHash",
+    score: 100
   }
   const handleInputFormChange = (value: string) => {
     setUsername(value.trim());
@@ -37,7 +38,8 @@ function MainView() {
     }
 
     dispatch(updatedUsername(username));
-    dispatch(updatedHost(true));
+    dispatch(updatedGameHash("TestGameHash"));
+    dispatch(updatedToken("HostToken"));
     navigate(config.createGameClientEndpoint);
   }
 
@@ -54,8 +56,10 @@ function MainView() {
   }
 
   const handleOnSubmitPopup = (value: string) => {
+    dispatch(updatedUsername(username));
+    dispatch(updatedGameHash("TestGameHash"));
+    dispatch(updatedToken("TestToken"));
     navigate(config.createGameClientEndpoint);
-    dispatch(updatedHost(false));
   }
 
   useEffect(() => {
@@ -71,7 +75,7 @@ function MainView() {
 
   return (
     <div className="container">
-      <div className="col-lg-4 col-sm-5 col-xs-6 mx-auto text-center">
+      <div className="col-lg-4 col-sm-7 col-xs-6 mx-auto text-center">
         <Popup 
           title={"Join the lobby"}
           inputFormPlaceholderText={"Paste the invitation URL here"}
@@ -101,10 +105,10 @@ function MainView() {
           onClick={handleJoinLobbyButtonClick}
         />
       </div>
-      <div className="col-3 mt-5 text-center mx-auto">
+      <div className="col-lg-3 col-sm-6 col-xs-6 mt-5 text-center mx-auto">
         <PlayerList
-          title="Top 10 players"
-          players={[player, player, player, player, player, player, player, player, player, player]}
+          title="Top 5 players"
+          players={[player, player, player, player, player]}
           displayPoints={true}
           displayIndex={true}
         />

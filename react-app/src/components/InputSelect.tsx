@@ -8,7 +8,6 @@ interface InputSelectProps {
 
 function InputSelect({title, defaultValue, onChange}: InputSelectProps) {
   const [selectedValue, setSelectedValue] = useState(defaultValue);
-  const ref = useRef<HTMLSelectElement>(null);
 
   const handleChange = (event: any) => {
     setSelectedValue(event.target.value);
@@ -21,8 +20,8 @@ function InputSelect({title, defaultValue, onChange}: InputSelectProps) {
   return (
       <>
         <label className="form-label">{title}</label>
-        <select className="form-select" ref={ref} onChange={handleChange}>
-          <option value="en" selected>English</option>
+        <select className="form-select" value={selectedValue} onChange={handleChange}>
+          <option value="en">English</option>
           <option value="pl">Polish</option>
         </select>
       </>

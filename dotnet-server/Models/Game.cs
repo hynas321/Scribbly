@@ -1,10 +1,7 @@
-namespace dotnet_server.Models;
+namespace Dotnet.Server.Models;
 
-public class Game
+class Game : HostedEntity
 {
-    public string? Id { get; set; }
-    public string? HostUsername { get; set; }
-    public bool NonAbstractNounsOnly { get; set; }
-    public int DrawingTimespanSeconds { get; set; }
-    public int RoundsCount { get; set; }
+    public List<DrawnLine> DrawnLines { get; set; } = new List<DrawnLine>();
+    public GameState GameState { get; set; } = new GameState();
 }

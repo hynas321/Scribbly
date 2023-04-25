@@ -25,7 +25,7 @@ function CheckForm({title, radioCount, defaultValue, onChange}: CheckFormProps) 
         className="form-check-input"
         type="radio"
         name="radioOption"
-        value={num}
+        value={num.toString()}
         onChange={handleChange}
         checked={num == checkedValue}
       />

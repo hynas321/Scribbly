@@ -1,4 +1,4 @@
-import {useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from '../Button';
 import GameSettingsBoard from '../GameSettingsBoard';
 import { useAppSelector } from '../../redux/hooks';
@@ -8,50 +8,69 @@ import { Link, useNavigate } from 'react-router-dom';
 import PlayerList from '../PlayerList';
 import Chat from '../Chat';
 import { BsPlayCircle, BsDoorOpen } from 'react-icons/bs';
-import ClipboardBar from '../ClipboardBar';
+import ClipboardBar from '../bars/ClipboardBar';
+import { Player } from '../../redux/slices/player-slice';
+import { useContext } from "react";
+import { LobbyHubContext } from '../../context/LobbyHubContext';
+import { HubType } from '../../enums/HubType';
 
 function LobbyView() {
+  const lobbyHub = useContext(LobbyHubContext);
   const player = useAppSelector((state) => state.player);
   const navigate = useNavigate();
+
   const [activeButton, setActiveButton] = useState(true);
   const [alertText, setAlertText] = useState("");
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertType, setAlertType] = useState("primary");
+  const [playerList, setPlayerList] = useState<Player[]>([]);
 
-  const invitationUrl: string = "http://www.example.com"; //will be fetched from the server
-  const isPlayerHost: boolean = useAppSelector((state) => state.player.host);
+  const testLobbyHash = "TestLobbyHash"; //temporary
+  const invitationUrl: string = "http://www.example.com"; //temporary, will be fetched from the server
+  const isPlayerHost: boolean  = player.token == "HostToken" ? true : false; //temporary, will be fetched from the server
 
   const handleStartGameButtonClick = async () => {
-    /*
-    setActiveButton(false);
-    
-    const response = await endpointHandler.createGame(
-      config.createGameServerEndpoint,
-      player.username,
-      gameSettings
-    );
-
-    setActiveButton(true);
-
-    if (response.status != 201)  {
-      setAlertVisible(true);
-      setAlertText("Could not create a new game. Try Again.");
-      setAlertType("danger");
-
-      setTimeout(() => {
-        setAlertVisible(false);
-      }, 4000);
-
-      return;
-    }
-    */
 
     navigate(config.gameClientEndpoint);
   }
 
+  useEffect(() => {
+
+    const setLobbyHub = async () => {
+
+      const getPlayerList = (playerListSerialized: any) => {
+        const playerList = JSON.parse(playerListSerialized) as Player[];
+
+        setPlayerList(playerList);
+      }
+      
+      lobbyHub.on("PlayerJoinedLobby", getPlayerList);
+      lobbyHub.on("PlayerLeftLobby", getPlayerList);
+
+      await lobbyHub.start();
+      await lobbyHub.invoke("JoinLobby", testLobbyHash, player.username);
+    }
+
+      const clearBeforeUnload = () => {
+        lobbyHub.off("PlayerJoinedLobby");
+        lobbyHub.off("PlayerLeftLobby");
+        lobbyHub.send("LeaveLobby", testLobbyHash, player.username);
+        lobbyHub.stop();
+      }
+
+    setLobbyHub();
+
+    window.addEventListener("beforeunload", clearBeforeUnload);
+
+    return () => {
+      clearBeforeUnload();
+      window.removeEventListener("beforeunload", clearBeforeUnload);
+    }
+  }, []);
+
   return (
-    <div className="container">
-      <div className="row col-6 mx-auto text-center">
+    <div className="container mb-3">
+      <div className="row col-lg-6 col-sm-12 mx-auto text-center">
         <Alert
           visible={alertVisible}
           text={alertText}
@@ -59,16 +78,17 @@ function LobbyView() {
         />
       </div>
       <div className="row">
-        <div className="col-2 mx-auto text-center">
-          <PlayerList
-            title={"Players in the lobby"}
-            players={[player, player, player, player, player, player, player, player]}
-            displayPoints={false}
-            displayIndex={false}
-          />
+        <div className="col-lg-4 col-sm-5 col-12 mx-auto mt-2 text-center order-lg-1 order-2 mb-3">
+          <div className="col-lg-6">
+            <PlayerList
+              title={"Players in the lobby"}
+              players={playerList}
+              displayPoints={false}
+              displayIndex={false}
+            />
+          </div>
         </div>
-        <div className="col-2"/>
-        <div className="col-4 mx-auto text-center">
+        <div className="col-lg-4 col-sm-10 col-12 mx-auto text-center order-lg-2 order-1">
           <h5>Your username: {player.username}</h5>
           { isPlayerHost && 
             <Button
@@ -92,11 +112,15 @@ function LobbyView() {
             <GameSettingsBoard isPlayerHost={isPlayerHost} />
           </div>
         </div>
-        <div className="col-1"/>
-        <div className="col-3">
-          <Chat placeholderValue={"Enter your message"} />
+        <div className="col-lg-4 order-lg-3 col-sm-7 col-12 order-3">
+          <div className="col-lg-9 col-sm-12 col-12 float-end mb-3">
+            <Chat 
+              hubType={HubType.LOBBY}
+              placeholderValue={"Enter your message"}
+            />
+          </div>
         </div>
-        <div>
+        <div className="order-lg-4 order-4">
           <ClipboardBar invitationUrl={invitationUrl} />
         </div>
       </div>

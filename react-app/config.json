@@ -1,5 +1,7 @@
 {
-    "serverUrl": "http://localhost:5159",
+    "httpServerUrl": "http://127.0.0.1:1234",
+    "hubLobbyEndpoint": "/hub/lobby",
+    "hubGameEndpoint": "/hub/game",
     "createGameServerEndpoint": "/api/Game/Create",
     "mainClientEndpoint": "/",
     "createGameClientEndpoint": "/lobby",

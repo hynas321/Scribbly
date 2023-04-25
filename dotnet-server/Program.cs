@@ -1,25 +1,31 @@
+using System.Text.Json;
+using Dotnet.Server.Config;
+using Dotnet.Server.Hubs;
+
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+string json = File.ReadAllText("config.json");
+Config? config = JsonSerializer.Deserialize<Config>(json);
 
 builder.Services.AddControllers()
     .AddJsonOptions(options => 
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = new PascalCaseNamingPolicy();
     });
-    
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+builder.Services.AddSignalR(); 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options => 
 {
     options.AddPolicy("AllowReactApp",
-        builder => builder.WithOrigins("http://localhost:5173")
+        builder => builder.WithOrigins(config?.CorsOrigin!)
             .AllowAnyHeader()
-            .AllowAnyMethod());
+            .AllowAnyMethod()   
+    );
 });
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -32,4 +38,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 app.UseCors("AllowReactApp");
-app.Run();
+app.MapHub<LobbyHub>($"/hub/lobby");
+app.MapHub<GameHub>($"/hub/game");
+app.Run(config?.HttpServerUrl);

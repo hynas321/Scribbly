@@ -1,8 +1,8 @@
-using dotnet_server.Models;
+using Dotnet.Server.Models;
 using Microsoft.AspNetCore.Mvc;
 using HttpRequests;
 
-namespace dotnet_server.Controllers;
+namespace Dotnet.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -22,25 +22,34 @@ public class GameController : ControllerBase
         try 
         {
             if (!ModelState.IsValid)
-            {
+            {   
+                logger.LogError("Status: 400; Invalid received request body.");
+
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
             Game game = new Game() 
             {
-                Id = Guid.NewGuid().ToString(),
-                HostUsername = requestBody.HostUsername,
-                NonAbstractNounsOnly = requestBody.NonAbstractNounsOnly,
-                DrawingTimespanSeconds = requestBody.DrawingTimespanSeconds,
-                RoundsCount = requestBody.RoundsCount
+                Hash = Guid.NewGuid().ToString(),
+                HostToken = requestBody.HostUsername ?? "",
+                GameSettings = new GameSettings()
+                {
+                    NonAbstractNounsOnly = requestBody.NonAbstractNounsOnly,
+                    DrawingTimeSeconds = requestBody.DrawingTimeSeconds,
+                    RoundsCount = requestBody.RoundsCount,
+                    WordLanguage = requestBody.WordLanguage
+                }
             };
 
             Games.Add(game);
-
+            logger.LogInformation($"Status: 201; Game with the Url {game.Hash} and the host username '{game.HostToken}' has been created.");
+            
             return StatusCode(StatusCodes.Status201Created);
         }
         catch
         {   
+            logger.LogError("Status: 500; Internal server error.");
+
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
 

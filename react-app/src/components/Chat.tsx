@@ -1,23 +1,30 @@
-import { useEffect, useRef, useState } from 'react';
-import ChatMessage, { ChatMessageProps } from './ChatMessage';
+import { useContext, useEffect, useRef, useState } from 'react';
+import ChatMessage from './ChatMessage';
 import InputForm from './InputForm';
 import Button from './Button';
 import { useAppSelector } from '../redux/hooks';
-import { BsSend } from 'react-icons/bs';
+import { LobbyHubContext } from '../context/LobbyHubContext';
+import { GameHubContext } from '../context/GameHubContext';
+import { HubType } from '../enums/HubType';
+import * as signalR from '@microsoft/signalr';
 
 interface ChatProps {
+  hubType: HubType
   placeholderValue: string;
   wordLength?: number;
 }
 
-function Chat({placeholderValue, wordLength}: ChatProps) {
+function Chat({hubType, placeholderValue, wordLength}: ChatProps) {
+  const hub = useContext(hubType === HubType.LOBBY ? LobbyHubContext : GameHubContext);
   const username = useAppSelector((state) => state.player.username);
-  const [messages, setMessages] = useState<ChatMessageProps[]>([]);
+
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputFormValue, setInputFormValue] = useState("");
   const [activeButton, setActiveButton] = useState(false);
   const inputFormRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
 
+  const testHash = (hubType === HubType.LOBBY ? "TestLobbyHash" : "TestGameHash"); //temporary
   let characters: any[] = [];
 
   if (wordLength) {
@@ -26,21 +33,20 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
   }
 
   const handleButtonPress = () => {
-    const chatMessageProp: ChatMessageProps = {
+    const chatMessage: ChatMessage = {
       username: username,
       text: inputFormValue
     }
 
-    if (chatMessageProp.username == "" || chatMessageProp.text == "") {
-      return;
+    const SendChatMessage = async () => {
+      await hub.invoke("SendChatMessage", testHash, chatMessage);
+      
+      if (inputFormRef && inputFormRef.current) {
+        inputFormRef.current.value = "";
+      }
     }
 
-    setMessages(messages.concat(chatMessageProp))
-    setInputFormValue("");
-
-    if (inputFormRef && inputFormRef.current) {
-      inputFormRef.current.value = "";
-    }
+    SendChatMessage();
   }
 
   const handleEnterPress = (value: string, key: string) => {
@@ -52,6 +58,29 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
   const handleInputFormChange = (value: string) => {
     setInputFormValue(value);
   }
+
+  useEffect(() => {
+
+    if (hub.getState() != signalR.HubConnectionState.Connected) {
+      return;
+    }
+
+    hub.on("ReceiveChatMessages", (chatMessageListSerialized: any) => {
+      const chatMessageList = JSON.parse(chatMessageListSerialized) as ChatMessage[];
+
+      setMessages(chatMessageList);
+    });
+
+    const getChatMessages = async () => {
+      await hub.invoke("GetChatMessages", testHash, username);
+    };
+
+    getChatMessages();
+
+    return () => {
+      hub.off("ReceiveChatMessages");
+    }
+    }, [hub.getState()]);
 
   useEffect(() => {
     if (inputFormValue.length > 0) {
@@ -69,7 +98,7 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
 
     messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
   }, [messages]);
-
+  
   return (
     <div>
       <h5>
@@ -77,12 +106,11 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
         { wordLength &&`${wordLength}` }
       </h5>
       <div id="messages" className="p-3 bg-light">
-        <div ref={messagesRef} style={{height: "400px", overflowY: "auto"}}>
-          {messages.map((chatMessageProp, index) => (
+        <div ref={messagesRef} style={{height: "450px", overflowY: "auto"}}>
+          {messages.map((chatMessage, index) => (
             <ChatMessage
               key={index}
-              username={chatMessageProp.username}
-              text={chatMessageProp.text}
+              chatMessage={chatMessage}
             />
           ))}
         </div>
