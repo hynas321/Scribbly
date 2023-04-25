@@ -10,7 +10,7 @@ export const useDraw = (onDraw: (
   const [mouseDown, setMouseDown] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previousRelativePoint = useRef<Point | null>(null);
-  
+
   const onMouseDown = () => {
     setMouseDown(true);
   }
@@ -20,47 +20,50 @@ export const useDraw = (onDraw: (
   }
 
   useEffect(() => {
-    hub.on("ApplyClearCanvas", () => {
-      const canvas = canvasRef.current;
+    if (!hub.getState())
+    {
+      return;
+    }
 
+    const getCanvasContext = (): (CanvasRenderingContext2D | null) => {
+      const canvas = canvasRef.current;
+  
       if (!canvas) {
-        return;
+        return null;
       }
   
-      const canvasContext = canvas.getContext("2d");
-      
-      if (!canvasContext) {
-        return;
-      }
+      return canvas.getContext("2d");
+    }
+  
+    const canvasContext = getCanvasContext() as CanvasRenderingContext2D;
 
-      canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+    hub.on("ApplyLoadCanvas", (drawnLinesSerialized) => {
+      const drawnLines = JSON.parse(drawnLinesSerialized) as DrawnLine[];
+
+      for (let i = 0; i < drawnLines.length; i++) {
+        onDraw(canvasContext, drawnLines[i]);
+      }
     });
 
     hub.on("UpdateCanvas", (drawnLineSerialized: string) => {
       const drawnLine = JSON.parse(drawnLineSerialized) as DrawnLine;
-      
-      const canvas = canvasRef.current;
-
-      if (!canvas) {
-        return;
-      }
-  
-      const canvasContext = canvas.getContext("2d");
-      
-      if (!canvasContext) {
-        return;
-      }
 
       onDraw(canvasContext, drawnLine);
-
-      previousRelativePoint.current = drawnLine.currentPoint;
     });
 
+    hub.on("ApplyClearCanvas", () => {
+      const canvas = canvasRef.current!;
+      canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+    });
+
+    hub.invoke("LoadCanvas", hash);
+
     return () => {
+      hub.off("ApplyLoadCanvas");
+      hub.off("UpdateCanvas");
       hub.off("ApplyClearCanvas");
-      hub.off("UpdateCanvas")
     }
-  }, []);
+  }, [hub.getState()]);
 
   useEffect(() => {
     const handler = (event: MouseEvent) => {
@@ -82,7 +85,7 @@ export const useDraw = (onDraw: (
       }
 
       //onDraw(canvasContext, drawnLine);
-      //previousRelativePoint.current = drawnLine.currentPoint;
+      previousRelativePoint.current = drawnLine.currentPoint;
       
       hub.invoke("DrawOnCanvas", hash, JSON.stringify(drawnLine));
     };

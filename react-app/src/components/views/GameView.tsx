@@ -55,7 +55,7 @@ function GameView() {
   return (
     <div className="container text-center">
       <div className="row">
-        <div className="col-2">
+        <div className="col-lg-2 col-md-6 col-12 order-lg-1 order-md-2 order-3 mb-3">
           <PlayerList
             title={"Players"}
             players={playerList}
@@ -68,7 +68,7 @@ function GameView() {
           />
           <ControlPanel />
         </div>
-        <div className="col-7">
+        <div className="col-lg-7 col-md-12 col-12 order-lg-1 order-md-1 order-1 mb-3">
           <Canvas
             progressBarProperties={{
               currentProgress: gameState.currentDrawingTimeSeconds,
@@ -77,7 +77,7 @@ function GameView() {
             }}
           />
         </div>
-        <div className="col-3">
+        <div className="col-lg-3 col-md-6 col-12 order-lg-1 order-md-3 order-2 mb-3">
           <Chat
             hubType={HubType.GAME}
             placeholderValue="Enter your guess"

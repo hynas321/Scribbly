@@ -71,7 +71,7 @@ function MainView() {
 
   return (
     <div className="container">
-      <div className="col-lg-4 col-sm-5 col-xs-6 mx-auto text-center">
+      <div className="col-lg-4 col-sm-7 col-xs-6 mx-auto text-center">
         <Popup 
           title={"Join the lobby"}
           inputFormPlaceholderText={"Paste the invitation URL here"}
@@ -101,10 +101,10 @@ function MainView() {
           onClick={handleJoinLobbyButtonClick}
         />
       </div>
-      <div className="col-3 mt-5 text-center mx-auto">
+      <div className="col-lg-3 col-sm-6 col-xs-6 mt-5 text-center mx-auto">
         <PlayerList
-          title="Top 10 players"
-          players={[player, player, player, player, player, player, player, player, player, player]}
+          title="Top 5 players"
+          players={[player, player, player, player, player]}
           displayPoints={true}
           displayIndex={true}
         />

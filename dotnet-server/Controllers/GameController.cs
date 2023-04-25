@@ -31,7 +31,7 @@ public class GameController : ControllerBase
             Game game = new Game() 
             {
                 Hash = Guid.NewGuid().ToString(),
-                HostToken = requestBody.HostUsername,
+                HostToken = requestBody.HostUsername ?? "",
                 GameSettings = new GameSettings()
                 {
                     NonAbstractNounsOnly = requestBody.NonAbstractNounsOnly,

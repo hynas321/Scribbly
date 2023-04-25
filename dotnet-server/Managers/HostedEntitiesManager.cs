@@ -29,7 +29,7 @@ abstract class HostedEntitiesManager<T> where T : HostedEntity
 
     public T Get(string hash)
     {
-        return entityList.Find(obj => obj.Hash == hash);
+        return entityList.Find(obj => obj.Hash == hash) ?? throw new NullReferenceException();
     }
 
     public void AddPlayer(string hash, Player player)
@@ -73,7 +73,7 @@ abstract class HostedEntitiesManager<T> where T : HostedEntity
 
     public GameSettings GetGameSettings(string hash)
     {      
-        return Get(hash).GameSettings;
+        return Get(hash).GameSettings ?? throw new NullReferenceException();
     }
 
     public void ChangeGameSettings(string hash, GameSettings settings)

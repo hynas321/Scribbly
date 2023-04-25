@@ -1,10 +1,10 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { useDraw } from "./hooks/useDraw";
 import { CirclePicker } from "react-color"
 import Button from "./Button";
 import ProgressBar from "./ProgressBar";
 import { GameHubContext } from "../Context/GameHubContext";
-import * as material from 'material-colors'
+import material from 'material-colors'
 
 interface CanvasProps {
   progressBarProperties: ProgressProperties
@@ -12,6 +12,8 @@ interface CanvasProps {
 function Canvas({progressBarProperties}: CanvasProps) {
   const hub = useContext(GameHubContext);
   const gameHash = "TestGameHash"; //temporary
+  const [color, setColor] = useState("#000000");
+  const { canvasRef, onMouseDown, clearCanvas } = useDraw(draw, hub, gameHash, color);;
 
   const circlePickerColors = [material.black, material.red['500'],
     material.pink['500'], material.purple['500'], material.deepPurple['500'],
@@ -21,12 +23,11 @@ function Canvas({progressBarProperties}: CanvasProps) {
     material.deepOrange['500'], material.brown['500'], material.blueGrey['500']
   ]
 
-  const [color, setColor] = useState("#000000");
-  const { canvasRef, onMouseDown, clearCanvas } = useDraw(draw, hub, gameHash, color);
-
   function draw(canvasContext: CanvasRenderingContext2D, drawnLine: DrawnLine) {
     const {x: currentRelativeX, y: currentRelativeY} = drawnLine.currentPoint;
     const lineWidth = 5;
+
+    console.log(drawnLine);
 
     let relativeStartPoint = drawnLine.previousPoint ?? drawnLine.currentPoint;
       
@@ -52,14 +53,15 @@ function Canvas({progressBarProperties}: CanvasProps) {
           />
         </div>
       </div>
-      <canvas
-        ref={canvasRef}
-        width={700}
-        height={500}
-        className="border border-black rounded-md"
-        onMouseDown={onMouseDown}
-      />
-      <div>
+      <div className="d-flex justify-content-center mb-2">
+        <canvas
+          ref={canvasRef}
+          width={700}
+          height={500}
+          className="border border-black rounded-md canvas-scale"
+          onMouseDown={onMouseDown}
+          onTouchStart={onMouseDown}
+        />
       </div>
       <div className="d-flex justify-content-center">
         <CirclePicker
@@ -69,11 +71,13 @@ function Canvas({progressBarProperties}: CanvasProps) {
           colors={circlePickerColors}
         />
       </div>
-      <Button 
-        text={"Clear canvas"}
-        active={true}
-        onClick={clearCanvas}
-      />
+      <div>
+        <Button 
+          text={"Clear canvas"}
+          active={true}
+          onClick={clearCanvas}
+        />
+      </div>
     </>
   )
 }

@@ -6,8 +6,10 @@ export interface Player {
   host: boolean;
 };
 
+const randomNumber = Math.floor(Math.random() * 10000);
+
 const initialState: Player = {
-  username: "Test",
+  username: `Test ${randomNumber}`,
   score: 0,
   host: false
 };
