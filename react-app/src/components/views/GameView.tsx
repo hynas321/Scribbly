@@ -6,7 +6,7 @@ import { Player } from '../../redux/slices/player-slice';
 import ControlPanel from '../ControlPanel';
 import { useAppSelector } from '../../redux/hooks';
 import { HubType } from '../../enums/HubType';
-import { GameHubContext } from '../../Context/GameHubContext';
+import { GameHubContext } from '../../context/GameHubContext';
 
 function GameView() {
   const gameHub = useContext(GameHubContext);
@@ -72,7 +72,7 @@ function GameView() {
           <Canvas
             progressBarProperties={{
               currentProgress: gameState.currentDrawingTimeSeconds,
-              minProgress: gameSettings.finishRoundSeconds,
+              minProgress: 0,
               maxProgress: gameSettings.drawingTimeSeconds
             }}
           />

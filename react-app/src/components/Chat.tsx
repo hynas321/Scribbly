@@ -1,10 +1,10 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import ChatMessage, { ChatMessageProps } from './ChatMessage';
+import ChatMessage from './ChatMessage';
 import InputForm from './InputForm';
 import Button from './Button';
 import { useAppSelector } from '../redux/hooks';
-import { LobbyHubContext } from '../Context/LobbyHubContext';
-import { GameHubContext } from '../Context/GameHubContext';
+import { LobbyHubContext } from '../context/LobbyHubContext';
+import { GameHubContext } from '../context/GameHubContext';
 import { HubType } from '../enums/HubType';
 import * as signalR from '@microsoft/signalr';
 

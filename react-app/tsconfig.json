@@ -16,6 +16,6 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src", "src/Hubs"],
+  "include": ["src", "src/hubs"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import Hub from "../../Hubs/Hub";
+import Hub from "../hubs/Hub";
 
 export const useDraw = (onDraw: (
     canvasContext: CanvasRenderingContext2D,

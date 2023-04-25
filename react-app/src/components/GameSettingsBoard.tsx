@@ -6,7 +6,7 @@ import { GameSettings, updatedDrawingTimeSeconds, updatedNonAbstractNounsOnly, u
 import { BsGearFill } from 'react-icons/bs';
 import InputSelect from './InputSelect';
 import { useContext, useEffect } from "react";
-import { LobbyHubContext } from '../Context/LobbyHubContext';
+import { LobbyHubContext } from '../context/LobbyHubContext';
 import * as signalR from '@microsoft/signalr';
 
 interface GameSettingsBoardProps {

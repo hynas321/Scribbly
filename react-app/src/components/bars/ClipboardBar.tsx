@@ -1,7 +1,7 @@
 import { useState } from "react";
 import CopyToClipboard from "react-copy-to-clipboard";
 import { BsClipboard, BsEmojiSmile, BsPersonAdd } from "react-icons/bs";
-import Button from "./Button";
+import Button from "../Button";
 
 interface ClipboardBarProps {
   invitationUrl: string;

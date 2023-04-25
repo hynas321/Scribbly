@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import Button from '../Button';
 import InputForm from '../InputForm';
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { useAppDispatch } from '../../redux/hooks';
 import config from '../../../config.json';
 import Alert from '../Alert';
 import { useNavigate } from 'react-router-dom';
-import { Player, updatedHost, updatedUsername } from '../../redux/slices/player-slice';
+import { Player, updatedGameHash, updatedUsername } from '../../redux/slices/player-slice';
 import PlayerList from '../PlayerList';
 import Popup from '../Popup';
 
@@ -24,8 +24,9 @@ function MainView() {
 
   const player: Player = {
     username: "Test",
-    score: 100,
-    host: false
+    token: "TestToken",
+    gameHash: "TestGameHash",
+    score: 100
   }
   const handleInputFormChange = (value: string) => {
     setUsername(value.trim());
@@ -37,7 +38,7 @@ function MainView() {
     }
 
     dispatch(updatedUsername(username));
-    dispatch(updatedHost(true));
+    dispatch(updatedGameHash("TestGameHash"));
     navigate(config.createGameClientEndpoint);
   }
 
@@ -55,7 +56,7 @@ function MainView() {
 
   const handleOnSubmitPopup = (value: string) => {
     navigate(config.createGameClientEndpoint);
-    dispatch(updatedHost(false));
+    dispatch(updatedGameHash("TestGameHash"));
   }
 
   useEffect(() => {

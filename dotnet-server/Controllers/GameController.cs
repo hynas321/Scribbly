@@ -36,7 +36,6 @@ public class GameController : ControllerBase
                 {
                     NonAbstractNounsOnly = requestBody.NonAbstractNounsOnly,
                     DrawingTimeSeconds = requestBody.DrawingTimeSeconds,
-                    FinishRoundSeconds = requestBody.FinishRoundSeconds,
                     RoundsCount = requestBody.RoundsCount,
                     WordLanguage = requestBody.WordLanguage
                 }

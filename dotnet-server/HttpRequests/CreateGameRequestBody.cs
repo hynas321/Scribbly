@@ -16,9 +16,6 @@ public class CreateGameRequestBody
     public int DrawingTimeSeconds { get; set; }
 
     [Required]
-    public int FinishRoundSeconds { get; set; }
-
-    [Required]
     [Range(1, 6)]
     public int RoundsCount { get; set; }
 

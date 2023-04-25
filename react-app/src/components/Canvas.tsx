@@ -1,9 +1,9 @@
 import { useContext, useState } from "react";
-import { useDraw } from "./hooks/useDraw";
+import { useDraw } from "../hooks/useDraw";
 import { CirclePicker } from "react-color"
 import Button from "./Button";
-import ProgressBar from "./ProgressBar";
-import { GameHubContext } from "../Context/GameHubContext";
+import ProgressBar from "./bars/ProgressBar";
+import { GameHubContext } from "../context/GameHubContext";
 import material from 'material-colors'
 
 interface CanvasProps {

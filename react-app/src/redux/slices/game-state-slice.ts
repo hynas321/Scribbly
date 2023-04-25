@@ -5,14 +5,14 @@ export interface GameState {
   currentDrawingTimeSeconds: number;
   currentRound: number;
   players: Player[];
-  onlinePlayersUsernames: string[]
+  onlinePlayersTokens: string[]
 };
 
 const initialState: GameState = {
   currentDrawingTimeSeconds: 50,
   currentRound: 1,
   players: [],
-  onlinePlayersUsernames: []
+  onlinePlayersTokens: []
 };
 
 const gameStateSlice = createSlice({
@@ -29,7 +29,7 @@ const gameStateSlice = createSlice({
       state.players = action.payload;
     },
     updatedOnlinePlayersUsernames(state, action: PayloadAction<string[]>) {
-      state.onlinePlayersUsernames = action.payload;
+      state.onlinePlayersTokens = action.payload;
     }
   }
 })

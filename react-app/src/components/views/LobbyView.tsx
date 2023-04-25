@@ -8,10 +8,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import PlayerList from '../PlayerList';
 import Chat from '../Chat';
 import { BsPlayCircle, BsDoorOpen } from 'react-icons/bs';
-import ClipboardBar from '../ClipboardBar';
+import ClipboardBar from '../bars/ClipboardBar';
 import { Player } from '../../redux/slices/player-slice';
 import { useContext } from "react";
-import { LobbyHubContext } from '../../Context/LobbyHubContext';
+import { LobbyHubContext } from '../../context/LobbyHubContext';
 import { HubType } from '../../enums/HubType';
 
 function LobbyView() {

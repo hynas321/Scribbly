@@ -15,7 +15,7 @@ public partial class GameHub : Hub
             {
                 Username = username,
                 Score = 0,
-                GameHash = hash
+                gameHash = hash
             };
 
             gamesManager.AddPlayer(hash, player);

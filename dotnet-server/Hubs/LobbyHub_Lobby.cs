@@ -15,7 +15,7 @@ public partial class LobbyHub : Hub
             {
                 Username = username,
                 Score = 0,
-                GameHash = lobbyHash
+                gameHash = lobbyHash
             };
 
             lobbiesManager.AddPlayer(lobbyHash, player);
