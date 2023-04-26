@@ -6,7 +6,7 @@ namespace Dotnet.Server.Hubs;
 
 public partial class LobbyHub : Hub
 {
-    [HubMethodName("JoinLobby")]
+    [HubMethodName(HubEvents.JoinLobby)]
     public async Task JoinLobby(string lobbyHash, string username)
     {
         try
@@ -27,7 +27,7 @@ public partial class LobbyHub : Hub
             };
 
             string playerListSerialized = JsonSerializer.Serialize(playerList, jsonSerializerOptions);
-            await Clients.All.SendAsync("PlayerJoinedLobby", playerListSerialized);
+            await Clients.All.SendAsync(HubEvents.OnPlayerJoinedLobby, playerListSerialized);
 
             logger.LogInformation($"Lobby #{lobbyHash}: Player {username} joined the lobby.");
         }
@@ -37,7 +37,7 @@ public partial class LobbyHub : Hub
         }
     }
 
-    [HubMethodName("LeaveLobby")]
+    [HubMethodName(HubEvents.LeaveLobby)]
     public async Task LeaveLobby(string lobbyHash, string username)
     {
         try 
@@ -51,13 +51,27 @@ public partial class LobbyHub : Hub
             };
 
             string playerListSerialized = JsonSerializer.Serialize(playerList, jsonSerializerOptions);
-            await Clients.All.SendAsync("PlayerLeftLobby", playerListSerialized);
+            await Clients.All.SendAsync(HubEvents.OnPlayerLeftLobby, playerListSerialized);
 
             logger.LogInformation($"Lobby {lobbyHash}: Player {username} left the lobby.");
         }
         catch (Exception ex)
         {
             logger.LogInformation($"Lobby {lobbyHash}: Player {username} could not leave the lobby. {ex}");
+        }
+    }
+
+    [HubMethodName(HubEvents.StartGame)]
+    public async Task StartGame(string lobbyHash, string username)
+    {
+        try
+        {
+            await Clients.All.SendAsync(HubEvents.OnStartGame);
+            //TODO
+        }
+        catch
+        {
+            //TODO
         }
     }
 }

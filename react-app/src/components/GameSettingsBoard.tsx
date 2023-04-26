@@ -8,6 +8,7 @@ import InputSelect from './InputSelect';
 import { useContext, useEffect } from "react";
 import { LobbyHubContext } from '../context/LobbyHubContext';
 import * as signalR from '@microsoft/signalr';
+import HubEvents from '../hub/HubEvents';
 
 interface GameSettingsBoardProps {
   isPlayerHost: boolean;
@@ -23,7 +24,6 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
   const drawingTimeText = "Drawing time";
   const numberOfRoundsText = "Number of rounds";
   const chooseLanguageText = "Language of random words";
-
   const testLobbyHash = "TestLobbyHash"; //temporary
 
   const settings = {
@@ -33,13 +33,12 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
     wordLanguage: useAppSelector((state) => state.gameSettings.wordLanguage)
   };
 
-
   useEffect(() => {
     if (hub.getState() != signalR.HubConnectionState.Connected) {
       return;
     }
 
-    hub.on("ApplyGameSettings", (gameSettingsSerialized: any) => {
+    hub.on(HubEvents.onLoadGameSettings, (gameSettingsSerialized: any) => {
       const gameSettings = JSON.parse(gameSettingsSerialized) as GameSettings;
       dispatch(updatedNonAbstractNounsOnly(gameSettings.nonAbstractNounsOnly));
       dispatch(updatedDrawingTimeSeconds(gameSettings.drawingTimeSeconds));
@@ -47,55 +46,53 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
       dispatch(updatedWordLanguage(gameSettings.wordLanguage));
     });
 
-    hub.on("ApplyAbstractNounsSetting", (checked: boolean) => {
-      console.log("Test")
+    hub.on(HubEvents.onSetAbstractNouns, (checked: boolean) => {
       dispatch(updatedNonAbstractNounsOnly(checked));
     });
 
-    hub.on("ApplyDrawingTimeSetting", (value: number) => {
+    hub.on(HubEvents.onSetDrawingTimeSeconds, (value: number) => {
       dispatch(updatedDrawingTimeSeconds(value));
     });
 
-    hub.on("ApplyRoundsCountSetting", (value: number) => {
+    hub.on(HubEvents.onSetRoundsCount, (value: number) => {
       dispatch(updatedRoundsCount(value));
     });
 
-    hub.on("ApplyWordLanguageSetting", (value: string) => {
+    hub.on(HubEvents.onSetWordLanguage, (value: string) => {
       dispatch(updatedWordLanguage(value));
     });
 
     if (!gameSettingsLoaded) {
-      const getGameSettings = async() => {
-        await hub.invoke("GetGameSettings", testLobbyHash, username);
+      const loadGameSettings = async() => {
+        await hub.invoke(HubEvents.LoadGameSettings, testLobbyHash, username);
         gameSettingsLoaded = true;
       }
 
-      getGameSettings();
+      loadGameSettings();
     }
-    
     return () => {
-      hub.off("ApplyGameSettings");
-      hub.off("ApplyAbstractNounsSetting");
-      hub.off("ApplyDrawingTimeSetting");
-      hub.off("ApplyRoundsCountSetting");
-      hub.off("ApplyWordLanguageSetting");
+      hub.off(HubEvents.onLoadGameSettings);
+      hub.off(HubEvents.onSetAbstractNouns);
+      hub.off(HubEvents.onSetDrawingTimeSeconds);
+      hub.off(HubEvents.onSetRoundsCount);
+      hub.off(HubEvents.onSetWordLanguage);
     }
   }, [hub.getState()])
 
   const handleCheckBoxChange = async (checked: boolean) => {
-    await hub.invoke("ChangeAbstractNounsSetting", testLobbyHash, checked);
+    await hub.invoke(HubEvents.setAbstractNouns, testLobbyHash, checked);
   }
 
   const handleRangeChange = async (value: number) => {
-    await hub.invoke("ChangeDrawingTimeSetting", testLobbyHash, value);
+    await hub.invoke(HubEvents.setDrawingTimeSeconds, testLobbyHash, value);
   }
 
   const handleCheckFormChange = async (value: number) => {
-    await hub.invoke("ChangeRoundsCountSetting", testLobbyHash, Number(value));
+    await hub.invoke(HubEvents.setRoundsCount, testLobbyHash, Number(value));
   }
 
   const handleInputSelectChange = async (value: string) => {
-    await hub.invoke("ChangeWordLanguageSetting", testLobbyHash, value);
+    await hub.invoke(HubEvents.setWordLanguage, testLobbyHash, value);
   }
 
   return (

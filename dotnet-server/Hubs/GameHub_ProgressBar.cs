@@ -5,8 +5,8 @@ namespace Dotnet.Server.Hubs;
 
 public partial class GameHub : Hub
 {
-    [HubMethodName("StartProgressBarTimer")]
-    public async Task StartProgressBarTimer(string hash)
+    [HubMethodName("StartProgressBar")]
+    public async Task StartProgressBar(string hash)
     {
         try
         {  
@@ -19,7 +19,7 @@ public partial class GameHub : Hub
                 for (int i = 0; i < initialTime; i++)
                 {   
                     logger.LogInformation(Convert.ToString(game.GameState.CurrentDrawingTimeSeconds));
-                    await Clients.Client(Context.ConnectionId).SendAsync("OnUpdateProgressBarTimer", game.GameState.CurrentDrawingTimeSeconds);
+                    await Clients.Client(Context.ConnectionId).SendAsync("OnUpdateProgressBar", game.GameState.CurrentDrawingTimeSeconds);
                     game.GameState.CurrentDrawingTimeSeconds--;
 
                     await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken.Token);
@@ -34,7 +34,7 @@ public partial class GameHub : Hub
         }
         catch(Exception ex)
         {
-            logger.LogInformation($"Game #{hash}: Progress bar timer could not be started. {ex}");
+            logger.LogInformation($"Game #{hash}: Progress bar could not be started. {ex}");
         }
     }
 }

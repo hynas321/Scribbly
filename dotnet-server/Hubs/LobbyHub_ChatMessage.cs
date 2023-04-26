@@ -6,7 +6,7 @@ namespace Dotnet.Server.Hubs;
 
 public partial class LobbyHub : Hub
 {
-    [HubMethodName("SendChatMessage")]
+    [HubMethodName(HubEvents.SendChatMessage)]
     public async Task SendChatMessage(string lobbyHash, ChatMessage message)
     {
         try
@@ -20,7 +20,7 @@ public partial class LobbyHub : Hub
             };
 
             string chatMessageListSerialized = JsonSerializer.Serialize(chatMessageList, jsonSerializerOptions);
-            await Clients.All.SendAsync("ReceiveChatMessages", chatMessageListSerialized);
+            await Clients.All.SendAsync(HubEvents.OnLoadChatMessages, chatMessageListSerialized);
 
             logger.LogInformation($"Lobby #{lobbyHash}: Player '{message.Username}' posted a new chat message '{message.Text}'.");
         }
@@ -30,8 +30,8 @@ public partial class LobbyHub : Hub
         }
     }
 
-    [HubMethodName("GetChatMessages")]
-    public async Task GetChatMessages(string lobbyHash, string username)
+    [HubMethodName(HubEvents.LoadChatMessages)]
+    public async Task LoadChatMessages(string lobbyHash, string username)
     {
         try
         {
@@ -42,7 +42,7 @@ public partial class LobbyHub : Hub
             };
 
             string chatMessageListSerialized = JsonSerializer.Serialize(chatMessageList, jsonSerializerOptions);
-            await Clients.All.SendAsync("ReceiveChatMessages", chatMessageListSerialized);
+            await Clients.All.SendAsync(HubEvents.OnLoadChatMessages, chatMessageListSerialized);
         }
         catch (Exception ex)
         {

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
-import Hub from "../hubs/Hub";
+import Hub from "../hub/Hub";
+import HubEvents from "../hub/HubEvents";
 
 export const useDraw = (onDraw: (
     canvasContext: CanvasRenderingContext2D,
@@ -16,7 +17,7 @@ export const useDraw = (onDraw: (
   }
 
   const clearCanvas = () => {
-    hub.invoke("ClearCanvas", hash);
+    hub.invoke(HubEvents.clearCanvas, hash);
   }
 
   useEffect(() => {
@@ -37,7 +38,7 @@ export const useDraw = (onDraw: (
   
     const canvasContext = getCanvasContext() as CanvasRenderingContext2D;
 
-    hub.on("ApplyLoadCanvas", (drawnLinesSerialized) => {
+    hub.on(HubEvents.onLoadCanvas, (drawnLinesSerialized) => {
       const drawnLines = JSON.parse(drawnLinesSerialized) as DrawnLine[];
 
       for (let i = 0; i < drawnLines.length; i++) {
@@ -45,23 +46,23 @@ export const useDraw = (onDraw: (
       }
     });
 
-    hub.on("UpdateCanvas", (drawnLineSerialized: string) => {
+    hub.on(HubEvents.onDrawOnCanvas, (drawnLineSerialized: string) => {
       const drawnLine = JSON.parse(drawnLineSerialized) as DrawnLine;
 
       onDraw(canvasContext, drawnLine);
     });
 
-    hub.on("ApplyClearCanvas", () => {
+    hub.on(HubEvents.onClearCanvas, () => {
       const canvas = canvasRef.current!;
       canvasContext.clearRect(0, 0, canvas.width, canvas.height);
     });
 
-    hub.invoke("LoadCanvas", hash);
+    hub.invoke(HubEvents.loadCanvas, hash);
 
     return () => {
-      hub.off("ApplyLoadCanvas");
-      hub.off("UpdateCanvas");
-      hub.off("ApplyClearCanvas");
+      hub.off(HubEvents.onLoadCanvas);
+      hub.off(HubEvents.onDrawOnCanvas);
+      hub.off(HubEvents.onClearCanvas);
     }
   }, [hub.getState()]);
 
@@ -87,7 +88,7 @@ export const useDraw = (onDraw: (
       //onDraw(canvasContext, drawnLine);
       previousRelativePoint.current = drawnLine.currentPoint;
       
-      hub.invoke("DrawOnCanvas", hash, JSON.stringify(drawnLine));
+      hub.invoke(HubEvents.drawOnCanvas, hash, JSON.stringify(drawnLine));
     };
 
     const determinePointRelativeCoordinates = (event: MouseEvent) => {

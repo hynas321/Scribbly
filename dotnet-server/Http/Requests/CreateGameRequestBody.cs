@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace HttpRequests;
+namespace Dotnet.Server.Http.Requests;
 
 public class CreateGameRequestBody
 {   

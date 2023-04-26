@@ -6,8 +6,8 @@ namespace Dotnet.Server.Hubs;
 
 public partial class LobbyHub : Hub
 {
-    [HubMethodName("ChangeAbstractNounsSetting")]
-    public async Task ChangeAbstractNounsSettingAsync(string lobbyHash, bool on)
+    [HubMethodName(HubEvents.SetAbstractNouns)]
+    public async Task SetAbstractNouns(string lobbyHash, bool on)
     {
         try
         {
@@ -16,9 +16,7 @@ public partial class LobbyHub : Hub
             settings.NonAbstractNounsOnly = on;
             lobbiesManager.ChangeGameSettings(lobbyHash, settings);
 
-            await Clients.All.SendAsync("ApplyAbstractNounsSetting", on);
-
-            logger.LogInformation($"Lobby #{lobbyHash}: Abstract nouns setting set to {Convert.ToString(settings.NonAbstractNounsOnly)}.");
+            await Clients.All.SendAsync(HubEvents.OnSetAbstractNouns, on);
         }
         catch (Exception ex)
         {
@@ -26,8 +24,8 @@ public partial class LobbyHub : Hub
         }
     }
 
-    [HubMethodName("ChangeDrawingTimeSetting")]
-    public async Task ChangeDrawingTimeSetting(string lobbyHash, int time)
+    [HubMethodName(HubEvents.SetDrawingTimeSeconds)]
+    public async Task SetDrawingTimeSeconds(string lobbyHash, int time)
     {
         try
         {
@@ -36,9 +34,7 @@ public partial class LobbyHub : Hub
             settings.DrawingTimeSeconds = time;
             lobbiesManager.ChangeGameSettings(lobbyHash, settings);
 
-            await Clients.All.SendAsync("ApplyDrawingTimeSetting", time);
-
-            logger.LogInformation($"Lobby #{lobbyHash}: Drawing time set to {Convert.ToString(settings.DrawingTimeSeconds)}.");
+            await Clients.All.SendAsync(HubEvents.OnSetDrawingTimeSeconds, time);
         }
         catch (Exception ex)
         {
@@ -46,8 +42,8 @@ public partial class LobbyHub : Hub
         }
     }
 
-    [HubMethodName("ChangeRoundsCountSetting")]
-    public async Task ChangeRoundsCountSetting(string lobbyHash, int count)
+    [HubMethodName(HubEvents.SetRoundsCount)]
+    public async Task SetRoundsCount(string lobbyHash, int count)
     {
         try
         {
@@ -56,9 +52,7 @@ public partial class LobbyHub : Hub
             settings.RoundsCount = count;
             lobbiesManager.ChangeGameSettings(lobbyHash, settings);
 
-            await Clients.All.SendAsync("ApplyRoundsCountSetting", count);
-
-            logger.LogInformation($"Lobby #{lobbyHash}: Rounds count set to {Convert.ToString(settings.RoundsCount)}.");
+            await Clients.All.SendAsync(HubEvents.OnSetRoundsCount, count);
         }
         catch (Exception ex)
         {
@@ -66,7 +60,7 @@ public partial class LobbyHub : Hub
         }
     }
 
-    [HubMethodName("ChangeWordLanguageSetting")]
+    [HubMethodName(HubEvents.SetWordLanguage)]
     public async Task ChangeWordLanguageSetting(string lobbyHash, string language)
     {
         try
@@ -76,9 +70,7 @@ public partial class LobbyHub : Hub
             settings.WordLanguage = language;
             lobbiesManager.ChangeGameSettings(lobbyHash, settings);
 
-            await Clients.All.SendAsync("ApplyWordLanguageSetting", language);
-
-            logger.LogInformation($"Lobby #{lobbyHash}: Word language set to {Convert.ToString(settings.WordLanguage)}.");
+            await Clients.All.SendAsync(HubEvents.OnSetWordLanguage, language);
         }
         catch (Exception ex)
         {
@@ -86,7 +78,7 @@ public partial class LobbyHub : Hub
         }
     }
 
-    [HubMethodName("GetGameSettings")]
+    [HubMethodName(HubEvents.LoadGameSettings)]
     public async Task GetGameSettings(string lobbyHash, string username)
     {
         try
@@ -98,7 +90,8 @@ public partial class LobbyHub : Hub
             };
 
             string gameSettingsSerialized = JsonSerializer.Serialize(settings, jsonSerializerOptions);
-            await Clients.All.SendAsync("ApplyGameSettings", gameSettingsSerialized);
+
+            await Clients.All.SendAsync(HubEvents.OnLoadGameSettings, gameSettingsSerialized);
         }
         catch (Exception ex)
         {

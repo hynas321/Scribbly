@@ -6,7 +6,7 @@ namespace Dotnet.Server.Hubs;
 
 public partial class GameHub : Hub
 {
-    [HubMethodName("JoinGame")]
+    [HubMethodName(HubEvents.JoinGame)]
     public async Task JoinGame(string hash, string username)
     {
         try
@@ -27,7 +27,7 @@ public partial class GameHub : Hub
             };
 
             string playerListSerialized = JsonSerializer.Serialize(playerList, jsonSerializerOptions);
-            await Clients.All.SendAsync("PlayerJoinedGame", playerListSerialized);
+            await Clients.All.SendAsync(HubEvents.OnPlayerJoinedGame, playerListSerialized);
 
             logger.LogInformation($"Game #{hash}: Player {username} joined the game.");
         }
@@ -37,7 +37,7 @@ public partial class GameHub : Hub
         }
     }
 
-    [HubMethodName("LeaveGame")]
+    [HubMethodName(HubEvents.LeaveGame)]
     public async Task LeaveGame(string hash, string username)
     {
         try
@@ -51,7 +51,7 @@ public partial class GameHub : Hub
             };
 
             string playerListSerialized = JsonSerializer.Serialize(playerList, jsonSerializerOptions);
-            await Clients.All.SendAsync("PlayerLeftGame", playerListSerialized);
+            await Clients.All.SendAsync(HubEvents.OnPlayerLeftGame, playerListSerialized);
 
             logger.LogInformation($"Game #{hash}: Player {username} left the game.");
         }

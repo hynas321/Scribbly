@@ -9,15 +9,18 @@ import PlayerList from '../PlayerList';
 import Chat from '../Chat';
 import { BsPlayCircle, BsDoorOpen } from 'react-icons/bs';
 import ClipboardBar from '../bars/ClipboardBar';
-import { Player } from '../../redux/slices/player-slice';
+import { Player, updatedUsername } from '../../redux/slices/player-slice';
 import { useContext } from "react";
 import { LobbyHubContext } from '../../context/LobbyHubContext';
 import { HubType } from '../../enums/HubType';
+import HubEvents from '../../hub/HubEvents';
+import { useDispatch } from 'react-redux';
 
 function LobbyView() {
   const lobbyHub = useContext(LobbyHubContext);
   const player = useAppSelector((state) => state.player);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [activeButton, setActiveButton] = useState(true);
   const [alertText, setAlertText] = useState("");
@@ -30,12 +33,10 @@ function LobbyView() {
   const isPlayerHost: boolean  = player.token == "HostToken" ? true : false; //temporary, will be fetched from the server
 
   const handleStartGameButtonClick = async () => {
-
-    navigate(config.gameClientEndpoint);
+    await lobbyHub.invoke(HubEvents.startGame, testLobbyHash, player.username);
   }
 
   useEffect(() => {
-
     const setLobbyHub = async () => {
 
       const getPlayerList = (playerListSerialized: any) => {
@@ -44,19 +45,22 @@ function LobbyView() {
         setPlayerList(playerList);
       }
       
-      lobbyHub.on("PlayerJoinedLobby", getPlayerList);
-      lobbyHub.on("PlayerLeftLobby", getPlayerList);
+      lobbyHub.on(HubEvents.onPlayerJoinedLobby, getPlayerList);
+      lobbyHub.on(HubEvents.onPlayerLeftLobby, getPlayerList);
+      lobbyHub.on(HubEvents.onStartGame, () => {
+        navigate(config.gameClientEndpoint);
+      });
 
       await lobbyHub.start();
-      await lobbyHub.invoke("JoinLobby", testLobbyHash, player.username);
+      await lobbyHub.invoke(HubEvents.joinLobby, testLobbyHash, player.username);
     }
 
-      const clearBeforeUnload = () => {
-        lobbyHub.off("PlayerJoinedLobby");
-        lobbyHub.off("PlayerLeftLobby");
-        lobbyHub.send("LeaveLobby", testLobbyHash, player.username);
-        lobbyHub.stop();
-      }
+    const clearBeforeUnload = () => {
+      lobbyHub.off(HubEvents.onPlayerJoinedLobby);
+      lobbyHub.off(HubEvents.onPlayerLeftLobby);
+      lobbyHub.send(HubEvents.leaveLobby, testLobbyHash, player.username);
+      lobbyHub.stop();
+    }
 
     setLobbyHub();
 

@@ -1,6 +1,6 @@
 using Dotnet.Server.Models;
 using Microsoft.AspNetCore.Mvc;
-using HttpRequests;
+using Dotnet.Server.Http.Requests;
 
 namespace Dotnet.Server.Controllers;
 

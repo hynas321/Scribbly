@@ -6,7 +6,7 @@ namespace Dotnet.Server.Hubs;
 
 public partial class GameHub : Hub
 {
-    [HubMethodName("LoadCanvas")]
+    [HubMethodName(HubEvents.LoadCanvas)]
     public async Task LoadCanvas(string gameHash)
     {
         try 
@@ -18,7 +18,7 @@ public partial class GameHub : Hub
             };
 
             string drawnLinesSerialized = System.Text.Json.JsonSerializer.Serialize<List<DrawnLine>>(drawnLines, jsonSerializerOptions);
-            await Clients.All.SendAsync("ApplyLoadCanvas", drawnLinesSerialized);
+            await Clients.All.SendAsync(HubEvents.OnLoadCanvas, drawnLinesSerialized);
         }
         catch (Exception ex)
         {
@@ -26,7 +26,7 @@ public partial class GameHub : Hub
         }
     }
 
-    [HubMethodName("DrawOnCanvas")]
+    [HubMethodName(HubEvents.DrawOnCanvas)]
     public async Task DrawOnCanvas(string gameHash, string drawnLineSerialized)
     {   
         try 
@@ -38,18 +38,18 @@ public partial class GameHub : Hub
             }
 
             gamesManager.AddDrawnLine(gameHash, drawnLineDeserialized);
-            await Clients.All.SendAsync("UpdateCanvas", drawnLineSerialized);
+            await Clients.All.SendAsync(HubEvents.OnDrawOnCanvas, drawnLineSerialized);
         }
         catch { }
     }
 
-    [HubMethodName("ClearCanvas")]
+    [HubMethodName(HubEvents.ClearCanvas)]
     public async Task ClearCanvas(string gameHash)
     {   
         try 
         {
             gamesManager.RemoveAllDrawnLines(gameHash);
-            await Clients.All.SendAsync("ApplyClearCanvas");
+            await Clients.All.SendAsync(HubEvents.OnClearCanvas);
         }
         catch (Exception ex)
         {

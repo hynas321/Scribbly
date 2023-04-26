@@ -7,6 +7,7 @@ import { LobbyHubContext } from '../context/LobbyHubContext';
 import { GameHubContext } from '../context/GameHubContext';
 import { HubType } from '../enums/HubType';
 import * as signalR from '@microsoft/signalr';
+import HubEvents from '../hub/HubEvents';
 
 interface ChatProps {
   hubType: HubType
@@ -39,7 +40,7 @@ function Chat({hubType, placeholderValue, wordLength}: ChatProps) {
     }
 
     const SendChatMessage = async () => {
-      await hub.invoke("SendChatMessage", testHash, chatMessage);
+      await hub.invoke(HubEvents.sendChatMessage, testHash, chatMessage);
       
       if (inputFormRef && inputFormRef.current) {
         inputFormRef.current.value = "";
@@ -65,20 +66,20 @@ function Chat({hubType, placeholderValue, wordLength}: ChatProps) {
       return;
     }
 
-    hub.on("ReceiveChatMessages", (chatMessageListSerialized: any) => {
+    hub.on(HubEvents.onLoadChatMessages, (chatMessageListSerialized: any) => {
       const chatMessageList = JSON.parse(chatMessageListSerialized) as ChatMessage[];
 
       setMessages(chatMessageList);
     });
 
-    const getChatMessages = async () => {
-      await hub.invoke("GetChatMessages", testHash, username);
+    const loadChatMessages = async () => {
+      await hub.invoke(HubEvents.loadChatMessages, testHash, username);
     };
 
-    getChatMessages();
+    loadChatMessages();
 
     return () => {
-      hub.off("ReceiveChatMessages");
+      hub.off(HubEvents.onLoadChatMessages);
     }
     }, [hub.getState()]);
 

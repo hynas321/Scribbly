@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using HttpRequests;
+using Dotnet.Server.Http.Requests;
 using Dotnet.Server.Database;
 using Dotnet.Server.Database.Models;
 using System.Text.Json;

@@ -7,22 +7,19 @@ import ControlPanel from '../ControlPanel';
 import { useAppSelector } from '../../redux/hooks';
 import { HubType } from '../../enums/HubType';
 import { GameHubContext } from '../../context/GameHubContext';
-import { useDispatch } from 'react-redux';
-import { updatedCurrentDrawingTimeSeconds } from '../../redux/slices/game-state-slice';
+import HubEvents from '../../hub/HubEvents';
 
 function GameView() {
   const gameHub = useContext(GameHubContext);
   const gameSettings = useAppSelector((state) => state.gameSettings);
   const gameState = useAppSelector((state) => state.gameState);
   const player = useAppSelector((state) => state.player);
-  const dispatch = useDispatch();
 
   const [playerList, setPlayerList] = useState<Player[]>([]);
   const wordRiddleLength = 10; //will be fetched from the server
   const testGameHash = "TestGameHash"; //temporary
 
   useEffect(() => {
-
     const setGameHub = async () => {
 
       const getPlayerList = (playerListSerialized: any) => {
@@ -31,21 +28,19 @@ function GameView() {
         setPlayerList(playerList);
       }
       
-      gameHub.on("PlayerJoinedGame", getPlayerList);
-      gameHub.on("PlayerLeftGame", getPlayerList);
-      //gameHub.on("OnUpdateProgressBarTimer", ...);
+      gameHub.on(HubEvents.onPlayerJoinedGame, getPlayerList);
+      gameHub.on(HubEvents.onPlayerLeftGame, getPlayerList);
+
       await gameHub.start();
-      await gameHub.invoke("JoinGame", testGameHash, player.username);
-      //await gameHub.invoke("StartProgressBarTimer", testGameHash);
+      await gameHub.invoke(HubEvents.joinGame, testGameHash, player.username);
     }
 
-      const clearBeforeUnload = () => {
-        gameHub.off("PlayerJoinedGame");
-        gameHub.off("PlayerLeftGame");
-        //gameHub.off("OnUpdateProgressBarTimer");
-        gameHub.send("LeaveGame", testGameHash, player.username);
-        gameHub.stop();
-      }
+    const clearBeforeUnload = () => {
+      gameHub.off(HubEvents.onPlayerJoinedGame);
+      gameHub.off(HubEvents.onPlayerLeftGame);
+      gameHub.send(HubEvents.leaveGame, testGameHash, player.username);
+      gameHub.stop();
+    }
 
     setGameHub();
 
