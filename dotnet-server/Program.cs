@@ -1,11 +1,9 @@
-using System.Text.Json;
-using Dotnet.Server.Config;
 using Dotnet.Server.Hubs;
+using Dotnet.Server.JsonConfig;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-
-string json = File.ReadAllText("config.json");
-Config? config = JsonSerializer.Deserialize<Config>(json);
+ConfigHelper configHelper = new ConfigHelper("config.json");
+Config config = configHelper.GetConfig();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options => 

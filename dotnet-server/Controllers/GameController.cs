@@ -23,7 +23,7 @@ public class GameController : ControllerBase
         {
             if (!ModelState.IsValid)
             {   
-                logger.LogError("Status: 400; Invalid received request body.");
+                logger.LogError("Status: 400. Invalid received request body.");
 
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
@@ -42,13 +42,13 @@ public class GameController : ControllerBase
             };
 
             Games.Add(game);
-            logger.LogInformation($"Status: 201; Game with the Url {game.Hash} and the host username '{game.HostToken}' has been created.");
+            logger.LogInformation($"Status: 201. Game with the Url {game.Hash} and the host username '{game.HostToken}' has been created.");
             
             return StatusCode(StatusCodes.Status201Created);
         }
-        catch
+        catch (Exception ex)
         {   
-            logger.LogError("Status: 500; Internal server error.");
+            logger.LogError($"Status: 500. Internal server error. {ex}");
 
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
