@@ -8,12 +8,14 @@ import { useNavigate } from 'react-router-dom';
 import { Player, updatedGameHash, updatedToken, updatedUsername } from '../../redux/slices/player-slice';
 import PlayerList from '../PlayerList';
 import Popup from '../Popup';
+import HttpRequestHandler from '../../utils/HttpRequestHandler';
 
 function MainView() {
+  const httpRequestHandler = new HttpRequestHandler();
   const minUsernameLength: number = 5;
   const dispatch = useAppDispatch();
-
   const navigate = useNavigate();
+
   const [username, setUsername] = useState("");
   const [createLobbyActiveButton, setCreateLobbyActiveButton] = useState(false);
   const [joinLobbyActiveButton, setJoinLobbyActiveButton] = useState(false);
@@ -21,13 +23,8 @@ function MainView() {
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertType, setAlertType] = useState("primary");
   const [popupVisible, setPopupVisible] = useState(false);
+  const [playerList, setPlayerList] = useState<Player[]>([]);
 
-  const player: Player = {
-    username: "Test",
-    token: "TestToken",
-    gameHash: "TestGameHash",
-    score: 100
-  }
   const handleInputFormChange = (value: string) => {
     setUsername(value.trim());
   }
@@ -61,6 +58,15 @@ function MainView() {
     dispatch(updatedToken("TestToken"));
     navigate(config.createGameClientEndpoint);
   }
+
+  useEffect(() => {
+    httpRequestHandler.fetchPlayerScores()
+    .then((data) => {
+      if (Array.isArray(data)) {
+        setPlayerList(data);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     if (username.length >= minUsernameLength) {
@@ -108,7 +114,7 @@ function MainView() {
       <div className="col-lg-3 col-sm-6 col-xs-6 mt-5 text-center mx-auto">
         <PlayerList
           title="Top 5 players"
-          players={[player, player, player, player, player]}
+          players={playerList}
           displayPoints={true}
           displayIndex={true}
         />

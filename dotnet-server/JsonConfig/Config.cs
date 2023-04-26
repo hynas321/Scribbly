@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Dotnet.Server.Config {
+namespace Dotnet.Server.JsonConfig {
     public class Config
     {
         [JsonPropertyName("httpServerUrl")]
@@ -11,5 +11,8 @@ namespace Dotnet.Server.Config {
 
         [JsonPropertyName("corsOrigin")]
         public string? CorsOrigin { get; set; }
+
+        [JsonPropertyName("databaseConnectionString")]
+        public string? DatabaseConnectionString { get; set; }
     }
 }
