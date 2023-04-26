@@ -1,5 +1,6 @@
 using Dapper;
 using Dotnet.Server.Database.Models;
+using Dotnet.Server.JsonConfig;
 using Microsoft.Data.Sqlite;
 
 namespace Dotnet.Server.Database;
@@ -7,10 +8,14 @@ namespace Dotnet.Server.Database;
 public class PlayerScoreRepository
 
 {
-    private readonly string connectionString = "Data Source=Database.db;";
+    private readonly string connectionString;
 
     public PlayerScoreRepository()
     {
+        ConfigHelper configHelper = new ConfigHelper();
+        Config? config = configHelper.GetConfig();
+        connectionString = config.DatabaseConnectionString ?? "null";
+        
         using (SqliteConnection db = new SqliteConnection(connectionString))
         {
             db.Open();

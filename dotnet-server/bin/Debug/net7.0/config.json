@@ -1,5 +1,6 @@
 {
     "httpServerUrl": "http://127.0.0.1:1234",
     "webSocketPort": 5050,
-    "corsOrigin": "*"
+    "corsOrigin": "*",
+    "databaseConnectionString": "Data Source=Database.db;"
 }

@@ -2,7 +2,7 @@ using Dotnet.Server.Hubs;
 using Dotnet.Server.JsonConfig;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-ConfigHelper configHelper = new ConfigHelper("config.json");
+ConfigHelper configHelper = new ConfigHelper();
 Config config = configHelper.GetConfig();
 
 builder.Services.AddControllers()
