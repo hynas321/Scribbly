@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using HttpRequests;
 using Dotnet.Server.Database;
 using Dotnet.Server.Database.Models;
+using System.Text.Json;
 
 namespace Dotnet.Server.Controllers;
 
@@ -55,7 +56,14 @@ public class ScoreboardController : ControllerBase
             PlayerScoreRepository playerScoreRepository = new PlayerScoreRepository();
             IEnumerable<PlayerScore> topPlayerScores = playerScoreRepository.GetTopPlayerScores();
 
-            return StatusCode(StatusCodes.Status200OK, topPlayerScores);
+            JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+
+            string topPlayerScoresSerialized = System.Text.Json.JsonSerializer.Serialize<IEnumerable<PlayerScore>>(topPlayerScores, jsonSerializerOptions);
+            
+            return StatusCode(StatusCodes.Status200OK, topPlayerScoresSerialized);
         }
         catch (Exception ex)
         {   

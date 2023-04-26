@@ -3,6 +3,7 @@
     "hubLobbyEndpoint": "/hub/lobby",
     "hubGameEndpoint": "/hub/game",
     "createGameServerEndpoint": "/api/Game/Create",
+    "fetchPlayerScoresServerEndpoint": "/api/Scoreboard/Get",
     "mainClientEndpoint": "/",
     "createGameClientEndpoint": "/lobby",
     "gameClientEndpoint": "/game"
