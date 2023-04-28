@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Dotnet.Server.Http.Requests;
 using Dotnet.Server.Database;
-using Dotnet.Server.Database.Models;
 using Dotnet.Server.Json;
+using Dotnet.Server.Models;
 
 namespace Dotnet.Server.Controllers;
 
@@ -10,9 +10,9 @@ namespace Dotnet.Server.Controllers;
 [Route("api/[controller]")]
 public class PlayerScoresController : ControllerBase
 {
-    private readonly ILogger<PlayerController> logger;
+    private readonly ILogger<PlayerHubController> logger;
 
-    public PlayerScoresController(ILogger<PlayerController> logger)
+    public PlayerScoresController(ILogger<PlayerHubController> logger)
     {
         this.logger = logger;
     }

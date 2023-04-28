@@ -2,23 +2,29 @@ using Dotnet.Server.Models;
 using Microsoft.AspNetCore.Mvc;
 using Dotnet.Server.Http.Requests;
 using Dotnet.Server.Managers;
+using Microsoft.AspNetCore.SignalR;
+using Dotnet.Server.Hubs;
+using Dotnet.Server.Json;
 
 namespace Dotnet.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class PlayerController : ControllerBase
+public class PlayerHubController : ControllerBase
 {
     private readonly GamesManager gamesManager = new GamesManager(25);
-    private readonly ILogger<PlayerController> logger;
+    private readonly IHubContext<HubConnection> hubContext;
+    private readonly ILogger<PlayerHubController> logger;
 
-    public PlayerController(ILogger<PlayerController> logger)
+    public PlayerHubController(IHubContext<HubConnection> hubContext, ILogger<PlayerHubController> logger)
     {
+        this.hubContext = hubContext;
         this.logger = logger;
     }
 
-    [HttpPost("Add")]
-    public IActionResult AddPlayer([FromBody] AddPlayerBody requestBody)
+    [HttpPost("JoinGame")]
+    [HubMethodName(HubEvents.JoinGame)]
+    public async Task<IActionResult> JoinGame([FromBody] JoinGameBody requestBody)
     {
         try 
         {
@@ -49,13 +55,23 @@ public class PlayerController : ControllerBase
             {
                 Username = requestBody.Username,
                 Token = Guid.NewGuid().ToString().Replace("-", ""),
-                GameHash = requestBody.GameHash,
                 Score = 0
             };
 
             gamesManager.AddPlayer(requestBody.GameHash, player);
 
-            return StatusCode(StatusCodes.Status200OK);
+            List<PlayerScore> playerList = gamesManager.GetPlayersWithoutToken(requestBody.GameHash);
+            string playerListSerialized = JsonHelper.Serialize(playerList);
+            bool gameIsStarted = gamesManager.GetGame(requestBody.GameHash).IsStarted;
+
+            if (HttpContext.WebSockets.IsWebSocketRequest)
+            {
+                await hubContext.Clients
+                    .Group(requestBody.GameHash)
+                    .SendAsync(HubEvents.OnPlayerJoinedGame, playerListSerialized);
+            }
+
+            return StatusCode(StatusCodes.Status200OK, new object[] { player, playerList, gameIsStarted });
         }
         catch (Exception ex)
         {
@@ -65,8 +81,9 @@ public class PlayerController : ControllerBase
         }
     }
 
-    [HttpDelete("Remove")]
-    public IActionResult RemovePlayer([FromBody] RemovePlayerBody requestBody)
+    [HttpDelete("LeaveGame")]
+    [HubMethodName(HubEvents.LeaveGame)]
+    public async Task<IActionResult> LeaveGame([FromBody] LeaveGameBody requestBody)
     {
         try
         {
@@ -88,6 +105,16 @@ public class PlayerController : ControllerBase
             }
 
             gamesManager.RemovePlayer(requestBody.GameHash, requestBody.Token);
+
+            List<PlayerScore> playerList = gamesManager.GetPlayersWithoutToken(requestBody.GameHash);
+            string playerListSerialized = JsonHelper.Serialize(playerList);
+
+            if (HttpContext.WebSockets.IsWebSocketRequest)
+            {
+                await hubContext.Clients
+                    .Group(requestBody.GameHash)
+                    .SendAsync(HubEvents.OnPlayerJoinedGame, playerListSerialized);
+            }
 
             return StatusCode(StatusCodes.Status200OK);
         }

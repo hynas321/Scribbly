@@ -65,6 +65,25 @@ class GamesManager
         return GetGame(gameHash)?.Players.Find(obj => obj.Token == token);
     }
 
+    public List<PlayerScore> GetPlayersWithoutToken(string gameHash)
+    {
+        Game game = GetGame(gameHash);
+        List<PlayerScore> playerObjs = new List<PlayerScore>();
+
+        foreach(Player player in game.Players)
+        {
+            playerObjs.Add(
+                new PlayerScore
+                {
+                    Username = player.Username,
+                    Score = player.Score
+                }
+            );
+        }
+
+        return playerObjs;
+    }
+
     public bool CheckIfPlayerExistsByToken(string gameHash, string token)
     {
         return GetGame(gameHash)?.Players.Find(obj => obj.Token == token) != null;

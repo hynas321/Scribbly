@@ -10,28 +10,30 @@ import ClipboardBar from '../bars/ClipboardBar';
 import { Player } from '../../redux/slices/player-slice';
 import { ConnectionHubContext } from '../../context/ConnectionHubContext';
 import HubEvents from '../../hub/HubEvents';
+import useLocalStorage from 'use-local-storage';
 
 interface LobbyViewProps {
-  players: Player[],
   isPlayerHost: boolean,
   invitationUrl: string
 }
 
-function LobbyView({players, isPlayerHost, invitationUrl}: LobbyViewProps) {
+function LobbyView({isPlayerHost, invitationUrl}: LobbyViewProps) {
   const hub = useContext(ConnectionHubContext);
   const player = useAppSelector((state) => state.player);
+  const playerList = useAppSelector((state) => state.gameState.playerList)
 
+  const [localStorageGameHash, setLocalStorageGameHash] = useLocalStorage("gameHash", "");
   const [activeButton, setActiveButton] = useState(true);
   const [alertText, setAlertText] = useState("");
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertType, setAlertType] = useState("primary");
 
   const handleStartGameButtonClick = async () => {
-    await hub.invoke(HubEvents.startGame, player.gameHash, player.username);
+    await hub.invoke(HubEvents.startGame, localStorageGameHash, player.username);
   }
 
   const handleLeaveGameButtonClick = async () => {
-    await hub.invoke(HubEvents.leaveGame, player.gameHash, player.username);
+    await hub.invoke(HubEvents.leaveGame, { gameHash: localStorageGameHash, token: player.token });
   }
 
   return (
@@ -48,7 +50,7 @@ function LobbyView({players, isPlayerHost, invitationUrl}: LobbyViewProps) {
           <div className="col-lg-6">
             <PlayerList
               title={"Players in the lobby"}
-              players={players}
+              players={playerList}
               displayPoints={false}
               displayIndex={false}
             />

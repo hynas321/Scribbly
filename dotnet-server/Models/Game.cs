@@ -9,4 +9,5 @@ public class Game
     public GameSettings? GameSettings { get; set; } = new GameSettings();
     public List<DrawnLine> DrawnLines { get; set; } = new List<DrawnLine>();
     public GameState GameState { get; set; } = new GameState();
+    public bool IsStarted { get; set; } = false;
 }

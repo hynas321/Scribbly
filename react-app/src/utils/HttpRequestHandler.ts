@@ -1,6 +1,6 @@
 import axios from 'axios';
 import config from '../../config.json';
-import { GameSettings } from '../redux/slices/game-settings-slice';
+import ApiEndpoints from '../hub/ApiEndpoints';
 
 class HttpRequestHandler {
   private httpServerUrl: string = config.httpServerUrl;
@@ -10,9 +10,35 @@ class HttpRequestHandler {
       hostUsername: hostUsername
     };
 
-    return await axios.post(`${this.httpServerUrl}${config.createGameServerEndpoint}`, requestBody)
+    return await axios.post(`${this.httpServerUrl}${ApiEndpoints.gameCreate}`, requestBody)
       .then(response => {
-        return response;
+        switch (response.status) {
+          case 201:
+            return response.data
+          default:
+            throw new Error("Error");
+        }
+      })
+      .catch(error => {
+        return error;
+      });
+  }
+
+  async joinGame(gameHash: string, username: string): Promise<any> {
+    const requestBody: JoinGameRequestBody = {
+      gameHash: gameHash,
+      username: username
+    };
+
+    return await axios.post(`${this.httpServerUrl}${ApiEndpoints.playerJoinGame}`, requestBody)
+      .then(response => {
+        switch (response.status) {
+          case 201:
+            console.log(response.data)
+            return response.data
+          default:
+            throw new Error("Error");
+        }
       })
       .catch(error => {
         return error;
@@ -24,13 +50,13 @@ class HttpRequestHandler {
       gameHash: gameHash as string
     }
 
-    return await axios.post(`${this.httpServerUrl}${config.gameExists}`, requestBody)
+    return await axios.post(`${this.httpServerUrl}${ApiEndpoints.gameExists}`, requestBody)
       .then(response => {
         switch (response.status) {
           case 200:
             return response.data as boolean
-          case 500:
-            throw new Error("Could not check whether the lobby exists");
+          default:
+            throw new Error("Error");
         }
       })
       .catch(error => {
@@ -40,13 +66,13 @@ class HttpRequestHandler {
 
   async fetchPlayerScores()
   {
-    return await axios.get(`${this.httpServerUrl}${config.fetchPlayerScoresServerEndpoint}`)
+    return await axios.get(`${this.httpServerUrl}${ApiEndpoints.playerScoresGet}`)
       .then(response => {
         switch (response.status) {
           case 200:
             return response.data as PlayerScore[];
-          case 500:
-            throw new Error("Could not fetch player scores");
+          default:
+            throw new Error("Error");
         }
       })
       .catch(error => {

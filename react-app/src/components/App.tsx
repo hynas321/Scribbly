@@ -7,7 +7,7 @@ import Logo from './Logo';
 import { Provider } from 'react-redux';
 import { store } from '../redux/store';
 import { ConnectionHubContext, connectionHub } from "../context/ConnectionHubContext";
-import Game from './views/Game';
+import GameView from './views/GameView';
 
 function App() {
   const router = createBrowserRouter([
@@ -17,15 +17,11 @@ function App() {
     },
     {
       path: config.gameClientEndpoint,
-      element: <Game />,
+      element: <GameView />,
       children: [
         {
-        path: '',
-        element: <Game />
-        },
-        {
         path: ':gameId',
-        element: <Game />
+        element: <GameView />
         }
       ]
     },

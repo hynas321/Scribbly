@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Dotnet.Server.Hubs;
 
-public partial class ConnectionHub : Hub
+public partial class HubConnection : Hub
 {
     [HubMethodName("StartProgressBar")]
     public async Task StartProgressBar(string hash)

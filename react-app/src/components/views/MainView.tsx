@@ -5,12 +5,15 @@ import { useAppDispatch } from '../../redux/hooks';
 import config from '../../../config.json';
 import Alert from '../Alert';
 import { useNavigate } from 'react-router-dom';
-import { Player, updatedGameHash, updatedPlayer, updatedUsername } from '../../redux/slices/player-slice';
+import { Player, updatedPlayer, updatedUsername } from '../../redux/slices/player-slice';
 import PlayerList from '../PlayerList';
 import Popup from '../Popup';
 import HttpRequestHandler from '../../utils/HttpRequestHandler';
 import UrlHelper from '../../utils/UrlHelper';
 import { ConnectionHubContext } from '../../context/ConnectionHubContext';
+import useLocalStorage from 'use-local-storage';
+import HubEvents from '../../hub/HubEvents';
+import { updatedPlayerList } from '../../redux/slices/game-state-slice';
 
 function MainView() {
   const hub = useContext(ConnectionHubContext);
@@ -21,6 +24,8 @@ function MainView() {
   const navigate = useNavigate();
 
   const [username, setUsername] = useState("");
+  const [localStorageGameHash, setLocalStorageGameHash] = useLocalStorage("gameHash", "");
+  const [gameHash, setGameHash] = useState("");
   const [createLobbyActiveButton, setCreateLobbyActiveButton] = useState(false);
   const [joinLobbyActiveButton, setJoinLobbyActiveButton] = useState(false);
   const [alertText, setAlertText] = useState("");
@@ -33,29 +38,35 @@ function MainView() {
     setUsername(value.trim());
   }
 
-  const handleCreateLobbyButtonClick = () => {
+  const handleCreateLobbyButtonClick = async () => {
     if (username.length < minUsernameLength) {
       return;
     }
 
     const createGame = async () => {
       await httpRequestHandler.createGame(username)
-        .then((data: CreateLobbyRequestResponse) => {
+        .then((data: CreateGameRequestResponse) => {
           const player: Player = {
             username: username,
             token: data.hostToken,
-            gameHash: data.gameHash,
             score: 0
           }
 
-          console.log(data);
-
-          dispatch(updatedPlayer(player));
-          navigate(`${config.gameClientEndpoint}`);
-        });
+        setLocalStorageGameHash(data.gameHash);
+        dispatch(updatedPlayer(player));
+      });
+    }
+    
+    const joinCreatedGame = async() => {
+      await httpRequestHandler.joinGame(localStorageGameHash, username)
+      .then((data) => {
+        console.log(data);
+        navigate(`${config.gameClientEndpoint}`);
+      });
     }
 
-    createGame();
+    await createGame();
+    await joinCreatedGame();
   }
 
   const handleJoinLobbyButtonClick = () => {
@@ -72,9 +83,8 @@ function MainView() {
 
   const handleOnSubmitPopup = (value: string) => {
     dispatch(updatedUsername(username));
-    dispatch(updatedGameHash(urlHelper.getGameHash(value)));
 
-    navigate(config.gameClientEndpoint);
+    setLocalStorageGameHash(value);
   }
 
   useEffect(() => {
@@ -87,8 +97,28 @@ function MainView() {
       });
     }
 
-    hub.start();
+    const startHubConnection = async () => {
+      hub.on(HubEvents.onPlayerJoinedGame, (playerList: PlayerScore[], gameIsStarted: boolean) => {
+        dispatch(updatedPlayerList(playerList));
+  
+        if (gameIsStarted) {
+          navigate(`${config.gameClientEndpoint}`);
+        }
+        else
+        {
+          navigate(`${config.lobbyClientEndpoint}`);
+        }
+      });
+
+      await hub.start();
+    }
+
+    startHubConnection();
     fetchPlayerScores();
+
+    return () => {
+      hub.off(HubEvents.joinGame);
+    }
   }, []);
 
   useEffect(() => {

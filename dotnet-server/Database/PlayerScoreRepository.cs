@@ -1,6 +1,6 @@
 using Dapper;
-using Dotnet.Server.Database.Models;
 using Dotnet.Server.JsonConfig;
+using Dotnet.Server.Models;
 using Microsoft.Data.Sqlite;
 
 namespace Dotnet.Server.Database;

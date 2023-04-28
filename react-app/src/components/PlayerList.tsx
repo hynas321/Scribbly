@@ -1,8 +1,6 @@
-import { Player } from "../redux/slices/player-slice";
-
 interface PlayerListProps {
   title: string,
-  players: Player[],
+  players: PlayerScore[],
   displayPoints: boolean,
   displayIndex: boolean,
   round?: Round

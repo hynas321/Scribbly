@@ -1,10 +1,15 @@
 interface CreateGameRequestBody {
   hostUsername: string;
 }
-  
-interface CreateLobbyRequestResponse {
+
+interface CreateGameRequestResponse {
+  gameHash: string;
   hostToken: string;
-  gameHash: string
+}
+
+interface JoinGameRequestBody {
+  gameHash: string;
+  username: string;
 }
 
 interface LobbyExistsRequestBody {

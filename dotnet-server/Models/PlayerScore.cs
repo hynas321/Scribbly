@@ -1,4 +1,4 @@
-namespace Dotnet.Server.Database.Models;
+namespace Dotnet.Server.Models;
 
 public class PlayerScore
 {

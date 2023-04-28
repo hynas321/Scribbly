@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Dotnet.Server.Hubs;
 
-public partial class ConnectionHub : Hub
+public partial class HubConnection : Hub
 {
     [HubMethodName(HubEvents.SetAbstractNouns)]
     public async Task SetAbstractNouns(string lobbyHash, bool on)

@@ -4,14 +4,50 @@ import Canvas from '../Canvas';
 import { Player } from '../../redux/slices/player-slice';
 import ControlPanel from '../ControlPanel';
 import { useAppSelector } from '../../redux/hooks';
+import { useContext, useEffect, useState } from 'react';
+import { ConnectionHubContext } from '../../context/ConnectionHubContext';
+import HubEvents from '../../hub/HubEvents';
+import useLocalStorage from 'use-local-storage';
 
-interface GameViewProps {
-  players: Player[]
-}
-
-function GameView({players}: GameViewProps) {
+function GameView() {
+  const gameHub = useContext(ConnectionHubContext);
   const gameSettings = useAppSelector((state) => state.gameSettings);
-  const gameState = useAppSelector((state) => state.gameState);
+  const gameState = useAppSelector((state) => state.gameState);;
+  const player = useAppSelector((state) => state.player);
+  const [localStorageGameHash, setLocalStorageGameHash] = useLocalStorage("gameHash", "")
+  const [playerList, setPlayerList] = useState<Player[]>([]);
+  
+  useEffect(() => {
+      const setConnectionHub = async () => {
+  
+        const getPlayerList = (playerListSerialized: any) => {
+          const playerList = JSON.parse(playerListSerialized) as Player[];
+  
+          setPlayerList(playerList);
+        }
+        
+        gameHub.on(HubEvents.onPlayerJoinedGame, getPlayerList);
+        gameHub.on(HubEvents.onPlayerLeftGame, getPlayerList);
+  
+        await gameHub.start();
+        await gameHub.invoke(HubEvents.joinGame, localStorageGameHash, player.username);
+      }
+  
+      const clearBeforeUnload = () => {
+        gameHub.off(HubEvents.onPlayerJoinedGame);
+        gameHub.off(HubEvents.onPlayerLeftGame);
+        gameHub.send(HubEvents.leaveGame, localStorageGameHash, player.username);
+      }
+  
+      setConnectionHub();
+  
+      window.addEventListener("beforeunload", clearBeforeUnload);
+  
+      return () => {
+        clearBeforeUnload();
+        window.removeEventListener("beforeunload", clearBeforeUnload);
+      }
+    }, []);
 
   return (
     <div className="container text-center">
@@ -19,7 +55,7 @@ function GameView({players}: GameViewProps) {
         <div className="col-lg-2 col-md-6 col-12 order-lg-1 order-md-2 order-3 mb-3">
           <PlayerList
             title={"Players"}
-            players={players}
+            players={playerList}
             displayPoints={true}
             displayIndex={true}
             round={{

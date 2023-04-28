@@ -1,20 +1,17 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Player } from './player-slice';
 
 export interface GameState {
   currentDrawingTimeSeconds: number;
   currentRound: number;
   wordLength: number;
-  players: Player[];
-  onlinePlayersTokens: string[]
+  playerList: PlayerScore[];
 };
 
 const initialState: GameState = {
   currentDrawingTimeSeconds: 50,
   currentRound: 1,
   wordLength: 10,
-  players: [],
-  onlinePlayersTokens: []
+  playerList: []
 };
 
 const gameStateSlice = createSlice({
@@ -30,14 +27,11 @@ const gameStateSlice = createSlice({
     updatedWordLength(state, action: PayloadAction<number>) {
       state.wordLength = action.payload;
     },
-    updatedPlayers(state, action: PayloadAction<Player[]>) {
-      state.players = action.payload;
-    },
-    updatedOnlinePlayersUsernames(state, action: PayloadAction<string[]>) {
-      state.onlinePlayersTokens = action.payload;
+    updatedPlayerList(state, action: PayloadAction<PlayerScore[]>) {
+      state.playerList = action.payload
     }
   }
 })
 
-export const { updatedCurrentDrawingTimeSeconds, updatedCurrentRound, updatedWordLength, updatedPlayers, updatedOnlinePlayersUsernames } = gameStateSlice.actions;
+export const { updatedCurrentDrawingTimeSeconds, updatedCurrentRound, updatedWordLength, updatedPlayerList } = gameStateSlice.actions;
 export default gameStateSlice.reducer;

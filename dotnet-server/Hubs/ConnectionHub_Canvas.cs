@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Dotnet.Server.Hubs;
 
-public partial class ConnectionHub : Hub
+public partial class HubConnection : Hub
 {
     [HubMethodName(HubEvents.LoadCanvas)]
     public async Task LoadCanvas(string gameHash)

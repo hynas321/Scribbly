@@ -1,5 +1,5 @@
-class HubEvents
-{
+class HubEvents {
+
     //GameSettings
     static LoadGameSettings: string = "LoadGameSettings";
     static setAbstractNouns: string = "SetAbstractNouns";

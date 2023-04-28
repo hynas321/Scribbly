@@ -2,6 +2,7 @@ using Dotnet.Server.Models;
 using Microsoft.AspNetCore.Mvc;
 using Dotnet.Server.Http.Requests;
 using Dotnet.Server.Managers;
+using Dotnet.Server.Json;
 
 namespace Dotnet.Server.Controllers;
 
@@ -10,9 +11,9 @@ namespace Dotnet.Server.Controllers;
 public class GameController : ControllerBase
 {
     private readonly GamesManager gamesManager = new GamesManager(25);
-    private readonly ILogger<PlayerController> logger;
+    private readonly ILogger<PlayerHubController> logger;
 
-    public GameController(ILogger<PlayerController> logger)
+    public GameController(ILogger<PlayerHubController> logger)
     {
         this.logger = logger;
     }
@@ -45,7 +46,7 @@ public class GameController : ControllerBase
 
             logger.LogInformation($"Status: 201. Game with the Url {game.GameHash} and the host username '{game.HostToken}' has been created.");
             
-            return StatusCode(StatusCodes.Status201Created, response);
+            return StatusCode(StatusCodes.Status201Created, JsonHelper.Serialize(response));
         }
         catch (Exception ex)
         {   

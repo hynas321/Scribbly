@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Dotnet.Server.Hubs;
 
-public partial class ConnectionHub : Hub
+public partial class HubConnection : Hub
 {
     [HubMethodName(HubEvents.JoinGame)]
     public async Task JoinGame(string gameHash, string username)
@@ -15,7 +15,6 @@ public partial class ConnectionHub : Hub
             {
                 Username = username,
                 Score = 0,
-                GameHash = gameHash
             };
 
             gamesManager.AddPlayer(gameHash, player);
