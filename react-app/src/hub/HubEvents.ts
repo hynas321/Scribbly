@@ -1,13 +1,5 @@
 class HubEvents
 {
-    //Lobby
-    static joinLobby: string = "JoinLobby";
-    static leaveLobby: string = "LeaveLobby";
-    static startGame: string = "StartGame";
-    static onPlayerJoinedLobby: string = "OnPlayerJoinedLobby";
-    static onPlayerLeftLobby: string = "OnPlayerLeftLobby";
-    static onStartGame: string = "OnStartGame";
-
     //GameSettings
     static LoadGameSettings: string = "LoadGameSettings";
     static setAbstractNouns: string = "SetAbstractNouns";
@@ -26,8 +18,10 @@ class HubEvents
     static onLoadChatMessages: string = "OnLoadChatMessages";
 
     //Game
+    static startGame: string = "StartGame";
     static joinGame: string = "JoinGame";
     static leaveGame: string = "LeaveGame";
+    static onStartGame: string = "OnStartGame";
     static onPlayerJoinedGame: string = "OnPlayerJoinedGame";
     static onPlayerLeftGame: string = "OnPlayerLeftGame";
     

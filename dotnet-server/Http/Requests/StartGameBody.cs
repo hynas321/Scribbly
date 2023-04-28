@@ -1,8 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace Dotnet.Server.Http.Requests;
-
-public class CreateGameRequestBody
+public class StartGameBody
 {   
     [Required]
     [MinLength(5)]

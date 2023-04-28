@@ -6,7 +6,6 @@ using Microsoft.Data.Sqlite;
 namespace Dotnet.Server.Database;
 
 public class PlayerScoreRepository
-
 {
     private readonly string connectionString;
 
@@ -21,8 +20,7 @@ public class PlayerScoreRepository
             db.Open();
             string createTableQuery = $"CREATE TABLE IF NOT EXISTS PlayerScore (Username Text, Score INTEGER)";
             db.Execute(createTableQuery);
-        }
-            
+        } 
     }
 
     public IEnumerable<PlayerScore> GetTopPlayerScores()

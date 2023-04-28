@@ -1,10 +1,11 @@
 using System.Text.Json;
+using Dotnet.Server.Json;
 using Dotnet.Server.Models;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Dotnet.Server.Hubs;
 
-public partial class GameHub : Hub
+public partial class ConnectionHub : Hub
 {
     [HubMethodName(HubEvents.SendChatMessage)]
     public async Task SendChatMessage(string gameHash, ChatMessage message)
@@ -14,12 +15,8 @@ public partial class GameHub : Hub
             gamesManager.AddChatMessage(gameHash, message);
 
             List<ChatMessage> chatMessageList = gamesManager.GetMessages(gameHash);
-            JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            };
+            string chatMessageListSerialized = JsonHelper.Serialize(chatMessageList);
 
-            string chatMessageListSerialized = JsonSerializer.Serialize(chatMessageList, jsonSerializerOptions);
             await Clients.All.SendAsync(HubEvents.OnLoadChatMessages, chatMessageListSerialized);
 
             logger.LogInformation($"Game #{gameHash}: Player '{message.Username}' posted a new chat message '{message.Text}'.");
@@ -36,13 +33,8 @@ public partial class GameHub : Hub
         try 
         {
             List<ChatMessage> chatMessageList = gamesManager.GetMessages(gameHash);
-
-            JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            };
-
-            string chatMessageListSerialized = JsonSerializer.Serialize(chatMessageList, jsonSerializerOptions);
+            string chatMessageListSerialized = JsonHelper.Serialize(chatMessageList);
+            
             await Clients.All.SendAsync(HubEvents.OnLoadChatMessages, chatMessageListSerialized);
         }
         catch (Exception ex)

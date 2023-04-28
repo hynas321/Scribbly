@@ -1,6 +1,6 @@
 namespace Dotnet.Server.Models;
 
-class GameSettings
+public class GameSettings
 {
     public bool NonAbstractNounsOnly { get; set; } = true;
     public int DrawingTimeSeconds { get; set; } = 75;

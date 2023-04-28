@@ -3,14 +3,14 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Dotnet.Server.Hubs;
 
-public partial class GameHub : Hub
+public partial class ConnectionHub : Hub
 {
     [HubMethodName("StartProgressBar")]
     public async Task StartProgressBar(string hash)
     {
         try
         {  
-            Game game = gamesManager.Get(hash);
+            Game game = gamesManager.GetGame(hash);
             int initialTime = game.GameState.CurrentDrawingTimeSeconds;
             CancellationTokenSource cancellationToken = new CancellationTokenSource();
 

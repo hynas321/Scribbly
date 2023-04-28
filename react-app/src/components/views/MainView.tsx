@@ -1,17 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Button from '../Button';
 import InputForm from '../InputForm';
 import { useAppDispatch } from '../../redux/hooks';
 import config from '../../../config.json';
 import Alert from '../Alert';
 import { useNavigate } from 'react-router-dom';
-import { Player, updatedGameHash, updatedToken, updatedUsername } from '../../redux/slices/player-slice';
+import { Player, updatedGameHash, updatedPlayer, updatedUsername } from '../../redux/slices/player-slice';
 import PlayerList from '../PlayerList';
 import Popup from '../Popup';
 import HttpRequestHandler from '../../utils/HttpRequestHandler';
+import UrlHelper from '../../utils/UrlHelper';
+import { ConnectionHubContext } from '../../context/ConnectionHubContext';
 
 function MainView() {
+  const hub = useContext(ConnectionHubContext);
   const httpRequestHandler = new HttpRequestHandler();
+  const urlHelper = new UrlHelper();
   const minUsernameLength: number = 5;
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -34,10 +38,24 @@ function MainView() {
       return;
     }
 
-    dispatch(updatedUsername(username));
-    dispatch(updatedGameHash("TestGameHash"));
-    dispatch(updatedToken("HostToken"));
-    navigate(config.createGameClientEndpoint);
+    const createGame = async () => {
+      await httpRequestHandler.createGame(username)
+        .then((data: CreateLobbyRequestResponse) => {
+          const player: Player = {
+            username: username,
+            token: data.hostToken,
+            gameHash: data.gameHash,
+            score: 0
+          }
+
+          console.log(data);
+
+          dispatch(updatedPlayer(player));
+          navigate(`${config.gameClientEndpoint}`);
+        });
+    }
+
+    createGame();
   }
 
   const handleJoinLobbyButtonClick = () => {
@@ -54,18 +72,23 @@ function MainView() {
 
   const handleOnSubmitPopup = (value: string) => {
     dispatch(updatedUsername(username));
-    dispatch(updatedGameHash("TestGameHash"));
-    dispatch(updatedToken("TestToken"));
-    navigate(config.createGameClientEndpoint);
+    dispatch(updatedGameHash(urlHelper.getGameHash(value)));
+
+    navigate(config.gameClientEndpoint);
   }
 
   useEffect(() => {
-    httpRequestHandler.fetchPlayerScores()
-    .then((data) => {
-      if (Array.isArray(data)) {
-        setPlayerList(data);
-      }
-    });
+    const fetchPlayerScores = async () => {
+      await httpRequestHandler.fetchPlayerScores()
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setPlayerList(data);
+        }
+      });
+    }
+
+    hub.start();
+    fetchPlayerScores();
   }, []);
 
   useEffect(() => {

@@ -1,9 +1,9 @@
 namespace Dotnet.Server.Models;
 
-class Player
+public class Player
 {
-    public string? Username { get; set; }
-    public string? Token { get; set; }
-    public string? gameHash { get; set; }
-    public int Score { get; set; }
+    public string Username { get; set; } = string.Empty;
+    public string Token { get; set; } = string.Empty;
+    public string GameHash { get; set; } = string.Empty;
+    public int Score { get; set; } = 0;
 }

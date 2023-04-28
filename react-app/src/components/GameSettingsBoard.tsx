@@ -6,7 +6,7 @@ import { GameSettings, updatedDrawingTimeSeconds, updatedNonAbstractNounsOnly, u
 import { BsGearFill } from 'react-icons/bs';
 import InputSelect from './InputSelect';
 import { useContext, useEffect } from "react";
-import { LobbyHubContext } from '../context/LobbyHubContext';
+import { ConnectionHubContext, connectionHub } from '../context/ConnectionHubContext';
 import * as signalR from '@microsoft/signalr';
 import HubEvents from '../hub/HubEvents';
 
@@ -15,7 +15,7 @@ interface GameSettingsBoardProps {
 }
 
 function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
-  const hub = useContext(LobbyHubContext);
+  const hub = useContext(ConnectionHubContext);
   const username = useAppSelector((state) => state.player.username);
   const dispatch = useAppDispatch();
   let gameSettingsLoaded = false;

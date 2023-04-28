@@ -1,12 +1,6 @@
 public class DrawnLine
 {
-    public Point? CurrentPoint { get; set; }
-    public Point? PreviousPoint { get; set; }
-    public string? Color { get; set; }
-}
-
-public class Point
-{
-    public double X { get; set; }
-    public double Y { get; set; }
+    public Point? CurrentPoint { get; set; } = new Point();
+    public Point? PreviousPoint { get; set; } = new Point();
+    public string Color { get; set; } = string.Empty;
 }

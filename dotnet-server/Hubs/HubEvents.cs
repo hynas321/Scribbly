@@ -2,13 +2,6 @@ namespace Dotnet.Server.Hubs;
 
 public static class HubEvents
 {
-    //Lobby
-    public const string JoinLobby = "JoinLobby";
-    public const string LeaveLobby = "LeaveLobby";
-    public const string StartGame = "StartGame";
-    public const string OnPlayerJoinedLobby = "OnPlayerJoinedLobby";
-    public const string OnPlayerLeftLobby = "OnPlayerLeftLobby";
-    public const string OnStartGame = "OnStartGame";
     
     //GameSettings
     public const string LoadGameSettings = "LoadGameSettings";
@@ -28,10 +21,12 @@ public static class HubEvents
     public const string OnLoadChatMessages = "OnLoadChatMessages";
 
     //Game
+    public const string StartGame = "StartGame";
     public const string JoinGame = "JoinGame";
     public const string LeaveGame = "LeaveGame";
     public const string OnPlayerJoinedGame = "OnPlayerJoinedGame";
     public const string OnPlayerLeftGame = "OnPlayerLeftGame";
+    public const string OnStartGame = "OnStartGame";
 
     // Canvas
     public const string LoadCanvas = "LoadCanvas";

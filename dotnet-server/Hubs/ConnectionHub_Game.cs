@@ -1,13 +1,13 @@
-using System.Text.Json;
+using Dotnet.Server.Json;
 using Dotnet.Server.Models;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Dotnet.Server.Hubs;
 
-public partial class GameHub : Hub
+public partial class ConnectionHub : Hub
 {
     [HubMethodName(HubEvents.JoinGame)]
-    public async Task JoinGame(string hash, string username)
+    public async Task JoinGame(string gameHash, string username)
     {
         try
         {
@@ -15,25 +15,21 @@ public partial class GameHub : Hub
             {
                 Username = username,
                 Score = 0,
-                gameHash = hash
+                GameHash = gameHash
             };
 
-            gamesManager.AddPlayer(hash, player);
+            gamesManager.AddPlayer(gameHash, player);
             
-            List<Player> playerList = gamesManager.GetPlayers(hash);
-            JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            };
+            List<Player> playerList = gamesManager.GetPlayers(gameHash);
+            string playerListSerialized = JsonHelper.Serialize(playerList);
 
-            string playerListSerialized = JsonSerializer.Serialize(playerList, jsonSerializerOptions);
             await Clients.All.SendAsync(HubEvents.OnPlayerJoinedGame, playerListSerialized);
 
-            logger.LogInformation($"Game #{hash}: Player {username} joined the game.");
+            logger.LogInformation($"Game #{gameHash}: Player {username} joined the game.");
         }
         catch (Exception ex)
         {
-            logger.LogError($"Game #{hash}: Player {username} could not join the game. {ex}");
+            logger.LogError($"Game #{gameHash}: Player {username} could not join the game. {ex}");
         }
     }
 
@@ -45,12 +41,8 @@ public partial class GameHub : Hub
             gamesManager.RemovePlayer(hash, username);
 
             List<Player> playerList = gamesManager.GetPlayers(hash);
-            JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            };
+            string playerListSerialized = JsonHelper.Serialize(playerList);
 
-            string playerListSerialized = JsonSerializer.Serialize(playerList, jsonSerializerOptions);
             await Clients.All.SendAsync(HubEvents.OnPlayerLeftGame, playerListSerialized);
 
             logger.LogInformation($"Game #{hash}: Player {username} left the game.");

@@ -1,76 +1,38 @@
-import { useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import Button from '../Button';
 import GameSettingsBoard from '../GameSettingsBoard';
 import { useAppSelector } from '../../redux/hooks';
-import config from '../../../config.json';
 import Alert from '../Alert';
-import { Link, useNavigate } from 'react-router-dom';
 import PlayerList from '../PlayerList';
 import Chat from '../Chat';
 import { BsPlayCircle, BsDoorOpen } from 'react-icons/bs';
 import ClipboardBar from '../bars/ClipboardBar';
-import { Player, updatedUsername } from '../../redux/slices/player-slice';
-import { useContext } from "react";
-import { LobbyHubContext } from '../../context/LobbyHubContext';
-import { HubType } from '../../enums/HubType';
+import { Player } from '../../redux/slices/player-slice';
+import { ConnectionHubContext } from '../../context/ConnectionHubContext';
 import HubEvents from '../../hub/HubEvents';
-import { useDispatch } from 'react-redux';
 
-function LobbyView() {
-  const lobbyHub = useContext(LobbyHubContext);
+interface LobbyViewProps {
+  players: Player[],
+  isPlayerHost: boolean,
+  invitationUrl: string
+}
+
+function LobbyView({players, isPlayerHost, invitationUrl}: LobbyViewProps) {
+  const hub = useContext(ConnectionHubContext);
   const player = useAppSelector((state) => state.player);
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const [activeButton, setActiveButton] = useState(true);
   const [alertText, setAlertText] = useState("");
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertType, setAlertType] = useState("primary");
-  const [playerList, setPlayerList] = useState<Player[]>([]);
-
-  const testLobbyHash = "TestLobbyHash"; //temporary
-  const invitationUrl: string = "http://www.example.com"; //temporary, will be fetched from the server
-  const isPlayerHost: boolean  = player.token == "HostToken" ? true : false; //temporary, will be fetched from the server
 
   const handleStartGameButtonClick = async () => {
-    await lobbyHub.invoke(HubEvents.startGame, testLobbyHash, player.username);
+    await hub.invoke(HubEvents.startGame, player.gameHash, player.username);
   }
 
-  useEffect(() => {
-    const setLobbyHub = async () => {
-
-      const getPlayerList = (playerListSerialized: any) => {
-        const playerList = JSON.parse(playerListSerialized) as Player[];
-
-        setPlayerList(playerList);
-      }
-      
-      lobbyHub.on(HubEvents.onPlayerJoinedLobby, getPlayerList);
-      lobbyHub.on(HubEvents.onPlayerLeftLobby, getPlayerList);
-      lobbyHub.on(HubEvents.onStartGame, () => {
-        navigate(config.gameClientEndpoint);
-      });
-
-      await lobbyHub.start();
-      await lobbyHub.invoke(HubEvents.joinLobby, testLobbyHash, player.username);
-    }
-
-    const clearBeforeUnload = () => {
-      lobbyHub.off(HubEvents.onPlayerJoinedLobby);
-      lobbyHub.off(HubEvents.onPlayerLeftLobby);
-      lobbyHub.send(HubEvents.leaveLobby, testLobbyHash, player.username);
-      lobbyHub.stop();
-    }
-
-    setLobbyHub();
-
-    window.addEventListener("beforeunload", clearBeforeUnload);
-
-    return () => {
-      clearBeforeUnload();
-      window.removeEventListener("beforeunload", clearBeforeUnload);
-    }
-  }, []);
+  const handleLeaveGameButtonClick = async () => {
+    await hub.invoke(HubEvents.leaveGame, player.gameHash, player.username);
+  }
 
   return (
     <div className="container mb-3">
@@ -86,7 +48,7 @@ function LobbyView() {
           <div className="col-lg-6">
             <PlayerList
               title={"Players in the lobby"}
-              players={playerList}
+              players={players}
               displayPoints={false}
               displayIndex={false}
             />
@@ -104,24 +66,20 @@ function LobbyView() {
             />
           }
           { !isPlayerHost && <h4 className="mt-3">Waiting for the host to start the game</h4> }
-          <Link to={config.mainClientEndpoint}>
             <Button
               text="Leave the lobby"
               active={true}
               icon={<BsDoorOpen/>}
               type={"danger"}
+              onClick={handleLeaveGameButtonClick}
             />
-          </Link>
           <div className="mt-3">
             <GameSettingsBoard isPlayerHost={isPlayerHost} />
           </div>
         </div>
         <div className="col-lg-4 order-lg-3 col-sm-7 col-12 order-3">
           <div className="col-lg-9 col-sm-12 col-12 float-end mb-3">
-            <Chat 
-              hubType={HubType.LOBBY}
-              placeholderValue={"Enter your message"}
-            />
+            <Chat placeholderValue={"Enter your message"}/>
           </div>
         </div>
         <div className="order-lg-4 order-4">

@@ -4,6 +4,7 @@ import { Player } from './player-slice';
 export interface GameState {
   currentDrawingTimeSeconds: number;
   currentRound: number;
+  wordLength: number;
   players: Player[];
   onlinePlayersTokens: string[]
 };
@@ -11,6 +12,7 @@ export interface GameState {
 const initialState: GameState = {
   currentDrawingTimeSeconds: 50,
   currentRound: 1,
+  wordLength: 10,
   players: [],
   onlinePlayersTokens: []
 };
@@ -25,6 +27,9 @@ const gameStateSlice = createSlice({
     updatedCurrentRound(state, action: PayloadAction<number>) {
       state.currentRound = action.payload;
     },
+    updatedWordLength(state, action: PayloadAction<number>) {
+      state.wordLength = action.payload;
+    },
     updatedPlayers(state, action: PayloadAction<Player[]>) {
       state.players = action.payload;
     },
@@ -34,5 +39,5 @@ const gameStateSlice = createSlice({
   }
 })
 
-export const { updatedCurrentDrawingTimeSeconds, updatedCurrentRound, updatedPlayers, updatedOnlinePlayersUsernames } = gameStateSlice.actions;
+export const { updatedCurrentDrawingTimeSeconds, updatedCurrentRound, updatedWordLength, updatedPlayers, updatedOnlinePlayersUsernames } = gameStateSlice.actions;
 export default gameStateSlice.reducer;

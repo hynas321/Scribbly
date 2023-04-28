@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Dotnet.Server.Http.Requests;
 
-public class AddPlayerScoreRequestBody
+public class AddPlayerScoreBody
 {   
     [Required]
     [MinLength(5)]

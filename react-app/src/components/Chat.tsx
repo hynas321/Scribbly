@@ -3,20 +3,17 @@ import ChatMessage from './ChatMessage';
 import InputForm from './InputForm';
 import Button from './Button';
 import { useAppSelector } from '../redux/hooks';
-import { LobbyHubContext } from '../context/LobbyHubContext';
-import { GameHubContext } from '../context/GameHubContext';
-import { HubType } from '../enums/HubType';
+import { ConnectionHubContext } from '../context/ConnectionHubContext';
 import * as signalR from '@microsoft/signalr';
 import HubEvents from '../hub/HubEvents';
 
 interface ChatProps {
-  hubType: HubType
   placeholderValue: string;
   wordLength?: number;
 }
 
-function Chat({hubType, placeholderValue, wordLength}: ChatProps) {
-  const hub = useContext(hubType === HubType.LOBBY ? LobbyHubContext : GameHubContext);
+function Chat({placeholderValue, wordLength}: ChatProps) {
+  const hub = useContext(ConnectionHubContext);
   const username = useAppSelector((state) => state.player.username);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -25,7 +22,7 @@ function Chat({hubType, placeholderValue, wordLength}: ChatProps) {
   const inputFormRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
 
-  const testHash = (hubType === HubType.LOBBY ? "TestLobbyHash" : "TestGameHash"); //temporary
+  const testHash = "TestGameHash"; //temporary
   let characters: any[] = [];
 
   if (wordLength) {
@@ -61,7 +58,6 @@ function Chat({hubType, placeholderValue, wordLength}: ChatProps) {
   }
 
   useEffect(() => {
-
     if (hub.getState() != signalR.HubConnectionState.Connected) {
       return;
     }

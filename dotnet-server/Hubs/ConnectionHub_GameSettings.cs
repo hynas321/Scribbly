@@ -1,20 +1,21 @@
 using System.Text.Json;
+using Dotnet.Server.Json;
 using Dotnet.Server.Models;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Dotnet.Server.Hubs;
 
-public partial class LobbyHub : Hub
+public partial class ConnectionHub : Hub
 {
     [HubMethodName(HubEvents.SetAbstractNouns)]
     public async Task SetAbstractNouns(string lobbyHash, bool on)
     {
         try
         {
-            GameSettings settings = lobbiesManager.GetGameSettings(lobbyHash);
+            GameSettings settings = gamesManager.GetGameSettings(lobbyHash);
 
             settings.NonAbstractNounsOnly = on;
-            lobbiesManager.ChangeGameSettings(lobbyHash, settings);
+            gamesManager.ChangeGameSettings(lobbyHash, settings);
 
             await Clients.All.SendAsync(HubEvents.OnSetAbstractNouns, on);
         }
@@ -29,10 +30,10 @@ public partial class LobbyHub : Hub
     {
         try
         {
-            GameSettings settings = lobbiesManager.GetGameSettings(lobbyHash);
+            GameSettings settings = gamesManager.GetGameSettings(lobbyHash);
 
             settings.DrawingTimeSeconds = time;
-            lobbiesManager.ChangeGameSettings(lobbyHash, settings);
+            gamesManager.ChangeGameSettings(lobbyHash, settings);
 
             await Clients.All.SendAsync(HubEvents.OnSetDrawingTimeSeconds, time);
         }
@@ -47,10 +48,10 @@ public partial class LobbyHub : Hub
     {
         try
         {
-            GameSettings settings = lobbiesManager.GetGameSettings(lobbyHash);
+            GameSettings settings = gamesManager.GetGameSettings(lobbyHash);
 
             settings.RoundsCount = count;
-            lobbiesManager.ChangeGameSettings(lobbyHash, settings);
+            gamesManager.ChangeGameSettings(lobbyHash, settings);
 
             await Clients.All.SendAsync(HubEvents.OnSetRoundsCount, count);
         }
@@ -65,10 +66,10 @@ public partial class LobbyHub : Hub
     {
         try
         {
-            GameSettings settings = lobbiesManager.GetGameSettings(lobbyHash);
+            GameSettings settings = gamesManager.GetGameSettings(lobbyHash);
 
             settings.WordLanguage = language;
-            lobbiesManager.ChangeGameSettings(lobbyHash, settings);
+            gamesManager.ChangeGameSettings(lobbyHash, settings);
 
             await Clients.All.SendAsync(HubEvents.OnSetWordLanguage, language);
         }
@@ -83,13 +84,8 @@ public partial class LobbyHub : Hub
     {
         try
         {
-            GameSettings settings = lobbiesManager.GetGameSettings(lobbyHash);
-            JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            };
-
-            string gameSettingsSerialized = JsonSerializer.Serialize(settings, jsonSerializerOptions);
+            GameSettings settings = gamesManager.GetGameSettings(lobbyHash);
+            string gameSettingsSerialized = JsonHelper.Serialize(settings);
 
             await Clients.All.SendAsync(HubEvents.OnLoadGameSettings, gameSettingsSerialized);
         }

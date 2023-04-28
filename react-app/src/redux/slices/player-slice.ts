@@ -31,9 +31,15 @@ const playerSlice = createSlice({
     },
     updatedScore(state, action: PayloadAction<number>) {
       state.score += action.payload;
+    },
+    updatedPlayer(state, action: PayloadAction<Player>) {
+      state.username = action.payload.username;
+      state.token = action.payload.token;
+      state.gameHash = action.payload.gameHash;
+      state.score = action.payload.score;
     }
   }
 })
 
-export const { updatedUsername, updatedToken, updatedGameHash, updatedScore } = playerSlice.actions;
+export const { updatedUsername, updatedToken, updatedGameHash, updatedScore, updatedPlayer } = playerSlice.actions;
 export default playerSlice.reducer;

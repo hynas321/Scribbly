@@ -2,23 +2,23 @@ using Microsoft.AspNetCore.Mvc;
 using Dotnet.Server.Http.Requests;
 using Dotnet.Server.Database;
 using Dotnet.Server.Database.Models;
-using System.Text.Json;
+using Dotnet.Server.Json;
 
 namespace Dotnet.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ScoreboardController : ControllerBase
+public class PlayerScoresController : ControllerBase
 {
-    private readonly ILogger<GameController> logger;
+    private readonly ILogger<PlayerController> logger;
 
-    public ScoreboardController(ILogger<GameController> logger)
+    public PlayerScoresController(ILogger<PlayerController> logger)
     {
         this.logger = logger;
     }
 
     [HttpPost("Add")]
-    public IActionResult AddPlayerScore([FromBody] AddPlayerScoreRequestBody requestBody)
+    public IActionResult AddPlayerScore([FromBody] AddPlayerScoreBody requestBody)
     {
         try 
         {
@@ -55,13 +55,7 @@ public class ScoreboardController : ControllerBase
         {
             PlayerScoreRepository playerScoreRepository = new PlayerScoreRepository();
             IEnumerable<PlayerScore> topPlayerScores = playerScoreRepository.GetTopPlayerScores();
-
-            JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            };
-
-            string topPlayerScoresSerialized = System.Text.Json.JsonSerializer.Serialize<IEnumerable<PlayerScore>>(topPlayerScores, jsonSerializerOptions);
+            string topPlayerScoresSerialized = JsonHelper.Serialize(topPlayerScores);
             
             return StatusCode(StatusCodes.Status200OK, topPlayerScoresSerialized);
         }

@@ -3,14 +3,14 @@ import { useDraw } from "../hooks/useDraw";
 import { CirclePicker } from "react-color"
 import Button from "./Button";
 import ProgressBar from "./bars/ProgressBar";
-import { GameHubContext } from "../context/GameHubContext";
+import { ConnectionHubContext } from "../context/ConnectionHubContext";
 import material from 'material-colors'
 
 interface CanvasProps {
   progressBarProperties: ProgressProperties
 }
 function Canvas({progressBarProperties}: CanvasProps) {
-  const hub = useContext(GameHubContext);
+  const hub = useContext(ConnectionHubContext);
   const gameHash = "TestGameHash"; //temporary
   const [color, setColor] = useState("#000000");
   const { canvasRef, onMouseDown, clearCanvas } = useDraw(draw, hub, gameHash, color);;
