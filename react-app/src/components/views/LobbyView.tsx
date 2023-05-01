@@ -1,40 +1,95 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Button from '../Button';
 import GameSettingsBoard from '../GameSettingsBoard';
 import { useAppSelector } from '../../redux/hooks';
 import Alert from '../Alert';
 import PlayerList from '../PlayerList';
 import Chat from '../Chat';
+import config from '../../../config.json';
 import { BsPlayCircle, BsDoorOpen } from 'react-icons/bs';
 import ClipboardBar from '../bars/ClipboardBar';
-import { Player } from '../../redux/slices/player-slice';
 import { ConnectionHubContext } from '../../context/ConnectionHubContext';
 import HubEvents from '../../hub/HubEvents';
-import useLocalStorage from 'use-local-storage';
+import { updatedPlayerList } from '../../redux/slices/game-state-slice';
+import { useDispatch } from 'react-redux';
+import HttpRequestHandler from '../../utils/HttpRequestHandler';
+import { HubConnectionState } from '@microsoft/signalr';
+import { useNavigate } from 'react-router-dom';
 
-interface LobbyViewProps {
-  isPlayerHost: boolean,
-  invitationUrl: string
-}
-
-function LobbyView({isPlayerHost, invitationUrl}: LobbyViewProps) {
+function LobbyView() {
   const hub = useContext(ConnectionHubContext);
+  const httpRequestHandler = new HttpRequestHandler();
   const player = useAppSelector((state) => state.player);
-  const playerList = useAppSelector((state) => state.gameState.playerList)
+  const playerList = useAppSelector((state) => state.gameState.playerList);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const [localStorageGameHash, setLocalStorageGameHash] = useLocalStorage("gameHash", "");
+  let isPlayerHost: boolean = false;
+
+  const [invitationUrl, setInvitationUrl] = useState(player.gameHash);
   const [activeButton, setActiveButton] = useState(true);
   const [alertText, setAlertText] = useState("");
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertType, setAlertType] = useState("primary");
 
   const handleStartGameButtonClick = async () => {
-    await hub.invoke(HubEvents.startGame, localStorageGameHash, player.username);
+    await hub.invoke(HubEvents.startGame, player.gameHash, player.username);
   }
 
   const handleLeaveGameButtonClick = async () => {
-    await hub.invoke(HubEvents.leaveGame, { gameHash: localStorageGameHash, token: player.token });
+    const leaveGameBody = {
+      gameHash: player.gameHash,
+      token: player.token
+    };
+
+    await hub.invoke(HubEvents.leaveGame, leaveGameBody);
+    navigate(config.mainClientEndpoint);
   }
+
+  useEffect(() => {
+    if (hub.getState() !== HubConnectionState.Connected) {
+      return;
+    }
+
+    const checkIfPlayerIsHost = async () => {
+      isPlayerHost = await httpRequestHandler.fetchPlayerIsHost(player.token, player.gameHash);
+    }
+
+    const setConnectionHub = async () => {
+
+      await httpRequestHandler.fetchGameHash(player.token)
+        .then((data) => {
+          invitationUrl == `${config.gameClientEndpoint}/${data}` 
+        });
+
+      const getPlayerList = (playerListSerialized: string) => {
+        const deserializedPlayerList = JSON.parse(playerListSerialized) as PlayerScore[];
+
+        dispatch(updatedPlayerList(deserializedPlayerList));
+      }
+      
+      hub.on(HubEvents.onPlayerJoinedGame, getPlayerList);
+      hub.on(HubEvents.onPlayerLeftGame, getPlayerList);
+
+      await hub.start();
+    }
+
+    const clearBeforeUnload = () => {
+      hub.off(HubEvents.onPlayerJoinedGame);
+      hub.off(HubEvents.onPlayerLeftGame);
+      hub.send(HubEvents.leaveGame, player.gameHash, player.username);
+    }
+
+    checkIfPlayerIsHost();
+    setConnectionHub();
+
+    window.addEventListener("beforeunload", clearBeforeUnload);
+
+    return () => {
+      clearBeforeUnload();
+      window.removeEventListener("beforeunload", clearBeforeUnload);
+    }
+  }, [hub.getState()]);
 
   return (
     <div className="container mb-3">
@@ -93,3 +148,7 @@ function LobbyView({isPlayerHost, invitationUrl}: LobbyViewProps) {
 }
 
 export default LobbyView;
+
+function dispatch() {
+  throw new Error('Function not implemented.');
+}

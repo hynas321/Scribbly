@@ -5,7 +5,7 @@ namespace Dotnet.Server.JsonConfig;
 class ConfigHelper
 {   
     private readonly string configFilePath = "./config.json";
-    private readonly Config? config;
+    private readonly Config config;
 
     public ConfigHelper()
     {

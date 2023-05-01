@@ -22,7 +22,7 @@ function ClipboardBar({invitationUrl}: ClipboardBarProps) {
     <>
       <div className="d-flex align-items-center">
         <h3><BsPersonAdd/></h3>
-        <span className="mx-2"><b>{"Invitation link - share it to invite your friends!"}</b></span>
+        <span className="mx-2"><b>{"Invitation hash - share it to invite your friends!"}</b></span>
       </div>
       <CopyToClipboard 
         text={invitationUrl}

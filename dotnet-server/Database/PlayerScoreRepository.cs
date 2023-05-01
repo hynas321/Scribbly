@@ -12,7 +12,7 @@ public class PlayerScoreRepository
     public PlayerScoreRepository()
     {
         ConfigHelper configHelper = new ConfigHelper();
-        Config? config = configHelper.GetConfig();
+        Config config = configHelper.GetConfig();
         connectionString = config.DatabaseConnectionString ?? "null";
         
         using (SqliteConnection db = new SqliteConnection(connectionString))

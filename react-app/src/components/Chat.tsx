@@ -14,7 +14,7 @@ interface ChatProps {
 
 function Chat({placeholderValue, wordLength}: ChatProps) {
   const hub = useContext(ConnectionHubContext);
-  const username = useAppSelector((state) => state.player.username);
+  const player = useAppSelector((state) => state.player);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputFormValue, setInputFormValue] = useState("");
@@ -22,7 +22,6 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
   const inputFormRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
 
-  const testHash = "TestGameHash"; //temporary
   let characters: any[] = [];
 
   if (wordLength) {
@@ -31,13 +30,15 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
   }
 
   const handleButtonPress = () => {
-    const chatMessage: ChatMessage = {
-      username: username,
-      text: inputFormValue
-    }
 
     const SendChatMessage = async () => {
-      await hub.invoke(HubEvents.sendChatMessage, testHash, chatMessage);
+      const sendChatMessageBody: SendChatMessageInvocation = {
+        gameHash: player.gameHash,
+        token: player.token,
+        text: inputFormValue
+      }
+
+      await hub.invoke(HubEvents.sendChatMessage, sendChatMessageBody);
       
       if (inputFormRef && inputFormRef.current) {
         inputFormRef.current.value = "";
@@ -69,7 +70,12 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
     });
 
     const loadChatMessages = async () => {
-      await hub.invoke(HubEvents.loadChatMessages, testHash, username);
+      const loadChatMessagesBody = {
+        gameHash: player.gameHash,
+        token: player.token
+      };
+
+      await hub.invoke(HubEvents.loadChatMessages, loadChatMessagesBody);
     };
 
     loadChatMessages();

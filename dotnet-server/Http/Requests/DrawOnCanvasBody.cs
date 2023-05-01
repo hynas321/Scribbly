@@ -2,9 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Dotnet.Server.Http.Requests;
 
-public class CreateGameBody
+public class DrawOnCanvasBody
 {   
     [Required]
-    [MinLength(5)]
-    public string HostUsername { get; set; }
+    public string DrawnLineSerialized { get; set; }
 }

@@ -10,7 +10,7 @@ public partial class HubConnection : Hub
     {
         try
         {  
-            Game game = gamesManager.GetGame(hash);
+            Game game = gamesManager.GetGameByHash(hash);
             int initialTime = game.GameState.CurrentDrawingTimeSeconds;
             CancellationTokenSource cancellationToken = new CancellationTokenSource();
 

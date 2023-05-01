@@ -23,7 +23,7 @@
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.10.0",
     "socket.io-client": "^4.6.1",
-    "use-local-storage": "^3.0.0"
+    "use-local-storage-state": "^18.3.2"
   },
   "devDependencies": {
     "@types/material-colors": "^1.2.0",

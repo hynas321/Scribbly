@@ -1,17 +1,30 @@
-interface CreateGameRequestBody {
+import { Player } from "../redux/slices/player-slice";
+
+export interface CreateGameRequestBody {
   hostUsername: string;
 }
 
-interface CreateGameRequestResponse {
+export interface CreateGameRequestResponse {
   gameHash: string;
   hostToken: string;
 }
 
-interface JoinGameRequestBody {
+export interface GameExistsBody {
+  gameHash: string;
+} 
+
+export interface JoinGameRequestBody {
   gameHash: string;
   username: string;
 }
 
-interface LobbyExistsRequestBody {
-  
+export interface JoinGameRequestResponse {
+  player: Player;
+  playerList: PlayerScore[];
+  gameIsStarted: boolean;
+}
+
+export interface PlayerIsHostBody {
+  gameHash: string
+  token: string,
 }

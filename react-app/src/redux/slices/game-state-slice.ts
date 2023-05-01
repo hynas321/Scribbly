@@ -28,8 +28,8 @@ const gameStateSlice = createSlice({
       state.wordLength = action.payload;
     },
     updatedPlayerList(state, action: PayloadAction<PlayerScore[]>) {
-      state.playerList = action.payload
-    }
+      state.playerList = action.payload;
+    },
   }
 })
 

@@ -18,6 +18,7 @@ public static class HubEvents
     //Chat
     public const string SendChatMessage = "SendChatMessage";
     public const string LoadChatMessages = "LoadChatMessages";
+    public const string OnSendChatMessage = "OnSendChatMessage";
     public const string OnLoadChatMessages = "OnLoadChatMessages";
 
     //Game

@@ -10,19 +10,19 @@ namespace Dotnet.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class PlayerHubController : ControllerBase
+public class PlayerController : ControllerBase
 {
     private readonly GamesManager gamesManager = new GamesManager(25);
     private readonly IHubContext<HubConnection> hubContext;
-    private readonly ILogger<PlayerHubController> logger;
+    private readonly ILogger<PlayerController> logger;
 
-    public PlayerHubController(IHubContext<HubConnection> hubContext, ILogger<PlayerHubController> logger)
+    public PlayerController(IHubContext<HubConnection> hubContext, ILogger<PlayerController> logger)
     {
         this.hubContext = hubContext;
         this.logger = logger;
     }
 
-    [HttpPost("JoinGame")]
+    [HttpPost(HubEvents.JoinGame)]
     [HubMethodName(HubEvents.JoinGame)]
     public async Task<IActionResult> JoinGame([FromBody] JoinGameBody requestBody)
     {
@@ -35,7 +35,7 @@ public class PlayerHubController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            bool gameExists = gamesManager.GameExists(requestBody.GameHash);
+            bool gameExists = gamesManager.CheckIfGameExistsByHash(requestBody.GameHash);
 
             if (!gameExists)
             {
@@ -54,24 +54,27 @@ public class PlayerHubController : ControllerBase
             Player player = new Player()
             {
                 Username = requestBody.Username,
+                Score = 0,
                 Token = Guid.NewGuid().ToString().Replace("-", ""),
-                Score = 0
+                GameHash = requestBody.GameHash
             };
 
             gamesManager.AddPlayer(requestBody.GameHash, player);
 
             List<PlayerScore> playerList = gamesManager.GetPlayersWithoutToken(requestBody.GameHash);
-            string playerListSerialized = JsonHelper.Serialize(playerList);
-            bool gameIsStarted = gamesManager.GetGame(requestBody.GameHash).IsStarted;
+            bool gameIsStarted = gamesManager.GetGameByHash(requestBody.GameHash).IsStarted;
 
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
+                string connectionId = HttpContext.Request.Query["connectionId"];
+
+                await hubContext.Groups.AddToGroupAsync(connectionId, requestBody.GameHash);
                 await hubContext.Clients
                     .Group(requestBody.GameHash)
-                    .SendAsync(HubEvents.OnPlayerJoinedGame, playerListSerialized);
+                    .SendAsync(HubEvents.OnPlayerJoinedGame, JsonHelper.Serialize(playerList));
             }
 
-            return StatusCode(StatusCodes.Status200OK, new object[] { player, playerList, gameIsStarted });
+            return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(new { player, playerList, gameIsStarted }));
         }
         catch (Exception ex)
         {
@@ -81,7 +84,7 @@ public class PlayerHubController : ControllerBase
         }
     }
 
-    [HttpDelete("LeaveGame")]
+    [HttpDelete(HubEvents.LeaveGame)]
     [HubMethodName(HubEvents.LeaveGame)]
     public async Task<IActionResult> LeaveGame([FromBody] LeaveGameBody requestBody)
     {
@@ -94,7 +97,7 @@ public class PlayerHubController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            bool gameExists = gamesManager.GameExists(requestBody.GameHash);
+            bool gameExists = gamesManager.CheckIfGameExistsByHash(requestBody.GameHash);
             bool playerExists = gamesManager.CheckIfPlayerExistsByToken(requestBody.GameHash, requestBody.Token);
             
             if (!gameExists || !playerExists)
@@ -111,9 +114,13 @@ public class PlayerHubController : ControllerBase
 
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
+                string connectionId = HttpContext.Request.Query["connectionId"];
+
+                await hubContext.Groups.RemoveFromGroupAsync(connectionId, requestBody.GameHash);
+
                 await hubContext.Clients
                     .Group(requestBody.GameHash)
-                    .SendAsync(HubEvents.OnPlayerJoinedGame, playerListSerialized);
+                    .SendAsync(HubEvents.OnPlayerLeftGame, playerListSerialized);
             }
 
             return StatusCode(StatusCodes.Status200OK);
@@ -138,7 +145,7 @@ public class PlayerHubController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            bool gameExists = gamesManager.GameExists(requestBody.GameHash);
+            bool gameExists = gamesManager.CheckIfGameExistsByHash(requestBody.GameHash);
             bool playerExists = gamesManager.CheckIfPlayerExistsByToken(requestBody.GameHash, requestBody.Token);
 
             if (!gameExists)
@@ -149,6 +156,40 @@ public class PlayerHubController : ControllerBase
             }
 
             return StatusCode(StatusCodes.Status200OK, playerExists);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Status: 500. Internal server error. {ex}");
+
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+    [HttpPost("")]
+    public IActionResult IsHost([FromBody] PlayerIsHostBody requestBody)
+    {
+        try 
+        {
+            if (!ModelState.IsValid)
+            {   
+                logger.LogError("Status: 400. Invalid received request body.");
+
+                return StatusCode(StatusCodes.Status400BadRequest);
+            }
+
+            bool gameExists = gamesManager.CheckIfGameExistsByHash(requestBody.GameHash);
+            bool playerExists = gamesManager.CheckIfPlayerExistsByToken(requestBody.GameHash, requestBody.Token);
+
+            if (!gameExists || !playerExists)
+            {
+                logger.LogError("Status: 404. Not found.");
+
+                return StatusCode(StatusCodes.Status404NotFound);
+            }
+
+            bool playerIsHost = gamesManager.CheckIfPlayerIsHost(requestBody.GameHash, requestBody.Token);
+
+            return StatusCode(StatusCodes.Status200OK, playerIsHost);
         }
         catch (Exception ex)
         {

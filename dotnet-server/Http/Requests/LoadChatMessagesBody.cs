@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Dotnet.Server.Http.Requests;
 
-public class PlayerExistsBody 
+class LoadChatMessagesBody
 {
     [Required]
     public string GameHash { get; set; }

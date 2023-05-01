@@ -39,38 +39,43 @@ class GamesManager
         return gameList;
     }
 
-    public Game GetGame(string gameHash)
+    public Game GetGameByHash(string gameHash)
     {
         return gameList.Find(obj => obj.GameHash == gameHash);
     }
 
-    public bool GameExists(string gameHash)
+    public Game GetGameByPlayerToken(string token)
     {
-        return GetGame(gameHash) != null;
+        return gameList.Find(game => game.GameState.Players.Exists(player => player.Token == token));
+    }
+
+    public bool CheckIfGameExistsByHash(string gameHash)
+    {
+        return GetGameByHash(gameHash) != null;
     }
 
     public void AddPlayer(string gameHash, Player player)
     {   
-        GetGame(gameHash)?.Players?.Add(player);
+        GetGameByHash(gameHash)?.GameState.Players?.Add(player);
     }
 
     public void RemovePlayer(string gameHash, string token)
     {
-       GetGame(gameHash)?.Players?.RemoveAll(obj => obj.Token == token);
+       GetGameByHash(gameHash)?.GameState.Players?.RemoveAll(obj => obj.Token == token);
         
     }
 
     public Player GetPlayerByToken(string gameHash, string token)
     {
-        return GetGame(gameHash)?.Players.Find(obj => obj.Token == token);
+        return GetGameByHash(gameHash)?.GameState.Players.Find(obj => obj.Token == token);
     }
 
     public List<PlayerScore> GetPlayersWithoutToken(string gameHash)
     {
-        Game game = GetGame(gameHash);
+        Game game = GetGameByHash(gameHash);
         List<PlayerScore> playerObjs = new List<PlayerScore>();
 
-        foreach(Player player in game.Players)
+        foreach(Player player in game.GameState.Players)
         {
             playerObjs.Add(
                 new PlayerScore
@@ -86,28 +91,25 @@ class GamesManager
 
     public bool CheckIfPlayerExistsByToken(string gameHash, string token)
     {
-        return GetGame(gameHash)?.Players.Find(obj => obj.Token == token) != null;
+        return GetGameByHash(gameHash)?.GameState.Players.Find(obj => obj.Token == token) != null;
     }
 
     public bool CheckIfPlayerExistsByUsername(string gameHash, string username)
     {
-        return GetGame(gameHash)?.Players.Find(obj => obj.Username == username) != null;
+        return GetGameByHash(gameHash)?.GameState.Players.Find(obj => obj.Username == username) != null;
     }
 
-
-    public int GetPlayersCount(string gameHash)
-    {   
-        return GetGame(gameHash).Players.Count;
-    }
-
-    public List<Player> GetPlayers(string gameHash)
+    public bool CheckIfPlayerIsHost(string gameHash, string token)
     {
-        return GetGame(gameHash).Players;
+        Game game = GetGameByHash(gameHash);
+        Player player = GetPlayerByToken(gameHash, token);
+
+        return game.HostToken == player.Token;
     }
 
     public void AddChatMessage(string gameHash, ChatMessage message)
     {
-        List<ChatMessage> messages = GetGame(gameHash).ChatMessages;
+        List<ChatMessage> messages = GetGameByHash(gameHash).ChatMessages;
 
         if (messages.Count == maxChatMessageCount)
         {
@@ -120,35 +122,40 @@ class GamesManager
 
     public List<ChatMessage> GetMessages(string hash)
     {
-        return GetGame(hash).ChatMessages;
+        return GetGameByHash(hash).ChatMessages;
     }
 
     public GameSettings GetGameSettings(string hash)
     {      
-        return GetGame(hash).GameSettings;
+        return GetGameByHash(hash).GameSettings;
     }
 
     public void ChangeGameSettings(string hash, GameSettings settings)
     {
-        GetGame(hash).GameSettings = settings;
+        GetGameByHash(hash).GameSettings = settings;
     }
     public void AddDrawnLine(string hash, DrawnLine drawnLine)
     {
-        GetGame(hash).DrawnLines.Add(drawnLine);
+        GetGameByHash(hash).DrawnLines.Add(drawnLine);
     }
 
     public int GetDrawnLineCount(string hash)
     {
-        return GetGame(hash).DrawnLines.Count;
+        return GetGameByHash(hash).DrawnLines.Count;
     }
 
     public DrawnLine GetDrawnLine(string hash, int index)
     {
-        return GetGame(hash).DrawnLines[index];
+        return GetGameByHash(hash).DrawnLines[index];
     }
 
     public void RemoveAllDrawnLines(string hash)
     {
-        GetGame(hash).DrawnLines.Clear();
+        GetGameByHash(hash).DrawnLines.Clear();
+    }
+
+    internal bool CheckIfGameExistsByHash(object gameHash)
+    {
+        throw new NotImplementedException();
     }
 }

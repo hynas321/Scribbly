@@ -7,14 +7,15 @@ import { useAppSelector } from '../../redux/hooks';
 import { useContext, useEffect, useState } from 'react';
 import { ConnectionHubContext } from '../../context/ConnectionHubContext';
 import HubEvents from '../../hub/HubEvents';
-import useLocalStorage from 'use-local-storage';
+import useLocalStorageState from 'use-local-storage-state';
+
 
 function GameView() {
   const gameHub = useContext(ConnectionHubContext);
   const gameSettings = useAppSelector((state) => state.gameSettings);
   const gameState = useAppSelector((state) => state.gameState);;
   const player = useAppSelector((state) => state.player);
-  const [localStorageGameHash, setLocalStorageGameHash] = useLocalStorage("gameHash", "")
+  const [localStorageGameHash, setLocalStorageGameHash] = useLocalStorageState("gameHash", { defaultValue: "" });
   const [playerList, setPlayerList] = useState<Player[]>([]);
   
   useEffect(() => {

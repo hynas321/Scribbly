@@ -2,16 +2,18 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface Player {
   username: string;
-  token: string;
   score: number;
+  token: string;
+  gameHash: string;
 };
 
 const randomNumber = Math.floor(Math.random() * 10000);
 
 const initialState: Player = {
-  username: `Test ${randomNumber}`,
-  token: "TestToken",
-  score: 0
+  username: `Player ${randomNumber}`,
+  score: 0,
+  token: localStorage.getItem("token") ?? "",
+  gameHash: localStorage.getItem("gameHash") ?? ""
 };
 
 const playerSlice = createSlice({
@@ -21,19 +23,25 @@ const playerSlice = createSlice({
     updatedUsername(state, action: PayloadAction<string>) {
       state.username = action.payload;
     },
-    updatedToken(state, action: PayloadAction<string>) {
-      state.token = action.payload;
-    },
     updatedScore(state, action: PayloadAction<number>) {
       state.score += action.payload;
     },
+    updatedToken(state, action: PayloadAction<string>) {
+      state.token = action.payload;
+      localStorage.setItem("token", action.payload);
+    },
+    updatedGameHash(state, action: PayloadAction<string>) {
+      state.gameHash = action.payload;
+      localStorage.setItem("gameHash", action.payload);
+    },
     updatedPlayer(state, action: PayloadAction<Player>) {
       state.username = action.payload.username;
-      state.token = action.payload.token;
       state.score = action.payload.score;
+      state.token = action.payload.token;
+      state.gameHash = action.payload.gameHash;
     }
   }
 })
 
-export const { updatedUsername, updatedToken, updatedScore, updatedPlayer } = playerSlice.actions;
+export const { updatedUsername, updatedScore, updatedToken, updatedGameHash, updatedPlayer } = playerSlice.actions;
 export default playerSlice.reducer;

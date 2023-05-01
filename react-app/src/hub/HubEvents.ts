@@ -15,6 +15,7 @@ class HubEvents {
     //Chat
     static sendChatMessage: string = "SendChatMessage";
     static loadChatMessages: string = "LoadChatMessages";
+    static onSendChatMessage: string = "OnSendChatMessage";
     static onLoadChatMessages: string = "OnLoadChatMessages";
 
     //Game

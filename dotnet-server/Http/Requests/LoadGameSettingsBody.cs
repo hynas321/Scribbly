@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Dotnet.Server.Http.Requests;
 
-public class PlayerExistsBody 
+public class LoadGameSettingsBody
 {
     [Required]
     public string GameHash { get; set; }
