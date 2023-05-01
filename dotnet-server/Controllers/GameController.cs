@@ -23,7 +23,9 @@ public class GameController : ControllerBase
     }
 
     [HttpPost("Create")]
-    public IActionResult Create()
+    public IActionResult Create(
+        [FromBody] CreateGameBody body
+    )
     {
         try 
         {
@@ -48,7 +50,7 @@ public class GameController : ControllerBase
                 HostToken = game.HostToken
             };
 
-            logger.LogInformation($"Status: 201. Game with the hash {game.GameHash} and the host username '{game.HostToken}' has been created.");
+            logger.LogInformation($"Status: 201. Game with the hash {game.GameHash} and the host token '{game.HostToken}' has been created.");
             
             return StatusCode(StatusCodes.Status201Created, JsonHelper.Serialize(response));
         }
