@@ -5,6 +5,7 @@ using Dotnet.Server.Managers;
 using Microsoft.AspNetCore.SignalR;
 using Dotnet.Server.Hubs;
 using Dotnet.Server.Json;
+using Dotnet.Server.Http;
 
 namespace Dotnet.Server.Controllers;
 
@@ -24,7 +25,11 @@ public class PlayerController : ControllerBase
 
     [HttpPost(HubEvents.JoinGame)]
     [HubMethodName(HubEvents.JoinGame)]
-    public async Task<IActionResult> JoinGame([FromBody] JoinGameBody requestBody)
+    public async Task<IActionResult> JoinGame(
+        [FromHeader(Name = Headers.GameHash)] string gameHash,
+        [FromBody] JoinGameBody body,
+        [FromHeader(Name = Headers.GameHash)] string token = null
+    )
     {
         try 
         {
@@ -35,42 +40,69 @@ public class PlayerController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            bool gameExists = gamesManager.CheckIfGameExistsByHash(requestBody.GameHash);
+            Game game = gamesManager.GetGameByHash(gameHash);
 
-            if (!gameExists)
+            if (game == null)
             {
                 logger.LogError("Status: 404. Not found.");
 
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
-            if (gamesManager.CheckIfPlayerExistsByUsername(requestBody.GameHash, requestBody.Username))
+            if (gamesManager.CheckIfPlayerExistsByUsername(game, body.Username))
             {
                 logger.LogError("Status: 409. Conflict.");
 
                 return StatusCode(StatusCodes.Status409Conflict);
             }
 
-            Player player = new Player()
+            Player player;
+            PlayerScore playerScore;
+
+            if (token != null &&
+                gamesManager.CheckIfPlayerExistsByToken(game, token) &&
+                token == gamesManager.GetPlayerByToken(game, token).Token
+            )
             {
-                Username = requestBody.Username,
-                Score = 0,
-                Token = Guid.NewGuid().ToString().Replace("-", ""),
-                GameHash = requestBody.GameHash
-            };
+                player = gamesManager.GetPlayerByToken(game, token);
 
-            gamesManager.AddPlayer(requestBody.GameHash, player);
+                playerScore = new PlayerScore()
+                {
+                    Username = player.Username,
+                    Score = player.Score
+                };
+            }
+            else
+            {
+                player = new Player()
+                {
+                    Username = body.Username,
+                    Score = 0,
+                    Token = Guid.NewGuid().ToString().Replace("-", ""),
+                    GameHash = gameHash
+                };
 
-            List<PlayerScore> playerList = gamesManager.GetPlayersWithoutToken(requestBody.GameHash);
-            bool gameIsStarted = gamesManager.GetGameByHash(requestBody.GameHash).IsStarted;
+                playerScore = new PlayerScore()
+                {
+                    Username = player.Username,
+                    Score = player.Score
+                };
+
+                gamesManager.AddPlayer(game, player);
+            }
+
+            gamesManager.AddPlayerScore(game, playerScore);
+        
+            List<PlayerScore> playerList = gamesManager.GetPlayersWithoutToken(gameHash);
+            bool gameIsStarted = game.GameState.IsStarted;
 
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
                 string connectionId = HttpContext.Request.Query["connectionId"];
 
-                await hubContext.Groups.AddToGroupAsync(connectionId, requestBody.GameHash);
+                await hubContext.Groups.AddToGroupAsync(connectionId, gameHash);
                 await hubContext.Clients
-                    .Group(requestBody.GameHash)
+                    .Group(gameHash)
                     .SendAsync(HubEvents.OnPlayerJoinedGame, JsonHelper.Serialize(playerList));
             }
 
@@ -86,7 +118,10 @@ public class PlayerController : ControllerBase
 
     [HttpDelete(HubEvents.LeaveGame)]
     [HubMethodName(HubEvents.LeaveGame)]
-    public async Task<IActionResult> LeaveGame([FromBody] LeaveGameBody requestBody)
+    public async Task<IActionResult> LeaveGame(
+        [FromHeader(Name = Headers.GameHash)] string gameHash,
+        [FromHeader(Name = Headers.GameHash)] string token
+    )
     {
         try
         {
@@ -97,30 +132,46 @@ public class PlayerController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            bool gameExists = gamesManager.CheckIfGameExistsByHash(requestBody.GameHash);
-            bool playerExists = gamesManager.CheckIfPlayerExistsByToken(requestBody.GameHash, requestBody.Token);
-            
-            if (!gameExists || !playerExists)
+            Game game = gamesManager.GetGameByHash(gameHash);
+
+            if (game == null)
             {
                 logger.LogError("Status: 404. Not found.");
 
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
-            gamesManager.RemovePlayer(requestBody.GameHash, requestBody.Token);
+            Player player = gamesManager.GetPlayerByToken(game, token);
 
-            List<PlayerScore> playerList = gamesManager.GetPlayersWithoutToken(requestBody.GameHash);
-            string playerListSerialized = JsonHelper.Serialize(playerList);
+            if (player == null)
+            {
+                logger.LogError("Status: 404. Not found.");
+
+                return StatusCode(StatusCodes.Status404NotFound);
+            }
+
+            if (game.GameState.IsStarted)
+            {
+                gamesManager.RemovePlayerScore(game, player.Username);
+            }
+            else
+            {
+                gamesManager.RemovePlayerScore(game, player.Username);
+                gamesManager.RemovePlayer(game, token);
+            }
+
+            List<PlayerScore> playerScores = game.GameState.PlayerScores;
+            string playerListSerialized = JsonHelper.Serialize(playerScores);
 
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
                 string connectionId = HttpContext.Request.Query["connectionId"];
 
-                await hubContext.Groups.RemoveFromGroupAsync(connectionId, requestBody.GameHash);
-
                 await hubContext.Clients
-                    .Group(requestBody.GameHash)
+                    .Group(gameHash)
                     .SendAsync(HubEvents.OnPlayerLeftGame, playerListSerialized);
+
+                await hubContext.Groups.RemoveFromGroupAsync(connectionId, gameHash);
             }
 
             return StatusCode(StatusCodes.Status200OK);
@@ -133,8 +184,11 @@ public class PlayerController : ControllerBase
         }
     }
 
-    [HttpPost("Exists")]
-    public IActionResult Exists([FromBody] PlayerExistsBody requestBody)
+    [HttpGet("Exists")]
+    public IActionResult Exists(
+        [FromHeader(Name = Headers.GameHash)] string gameHash,
+        [FromHeader(Name = Headers.GameHash)] string token
+    )
     {
         try 
         {
@@ -145,15 +199,17 @@ public class PlayerController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            bool gameExists = gamesManager.CheckIfGameExistsByHash(requestBody.GameHash);
-            bool playerExists = gamesManager.CheckIfPlayerExistsByToken(requestBody.GameHash, requestBody.Token);
+            Game game = gamesManager.GetGameByHash(gameHash);
 
-            if (!gameExists)
+            if (game == null)
             {
                 logger.LogError("Status: 404. Not found.");
 
                 return StatusCode(StatusCodes.Status404NotFound);
             }
+
+            Player player = gamesManager.GetPlayerByToken(game, token);
+            bool playerExists = player != null ? true : false;
 
             return StatusCode(StatusCodes.Status200OK, playerExists);
         }
@@ -165,8 +221,11 @@ public class PlayerController : ControllerBase
         }
     }
 
-    [HttpPost("")]
-    public IActionResult IsHost([FromBody] PlayerIsHostBody requestBody)
+    [HttpGet("IsHost")]
+    public IActionResult IsHost(
+        [FromHeader(Name = Headers.GameHash)] string gameHash,
+        [FromHeader(Name = Headers.GameHash)] string token
+    )
     {
         try 
         {
@@ -177,17 +236,25 @@ public class PlayerController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            bool gameExists = gamesManager.CheckIfGameExistsByHash(requestBody.GameHash);
-            bool playerExists = gamesManager.CheckIfPlayerExistsByToken(requestBody.GameHash, requestBody.Token);
+            Game game = gamesManager.GetGameByHash(gameHash);
 
-            if (!gameExists || !playerExists)
+            if (game == null)
             {
                 logger.LogError("Status: 404. Not found.");
 
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
-            bool playerIsHost = gamesManager.CheckIfPlayerIsHost(requestBody.GameHash, requestBody.Token);
+            Player player = gamesManager.GetPlayerByToken(game, token);
+
+            if (player == null)
+            {
+                logger.LogError("Status: 404. Not found.");
+
+                return StatusCode(StatusCodes.Status404NotFound);
+            }
+
+            bool playerIsHost = gamesManager.CheckIfPlayerIsHost(gameHash, token);
 
             return StatusCode(StatusCodes.Status200OK, playerIsHost);
         }

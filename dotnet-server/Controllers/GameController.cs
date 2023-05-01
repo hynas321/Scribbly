@@ -5,6 +5,7 @@ using Dotnet.Server.Managers;
 using Dotnet.Server.Json;
 using Microsoft.AspNetCore.SignalR;
 using Dotnet.Server.Hubs;
+using Dotnet.Server.Http;
 
 namespace Dotnet.Server.Controllers;
 
@@ -22,7 +23,7 @@ public class GameController : ControllerBase
     }
 
     [HttpPost("Create")]
-    public IActionResult Create([FromBody] CreateGameBody requestBody)
+    public IActionResult Create()
     {
         try 
         {
@@ -37,11 +38,6 @@ public class GameController : ControllerBase
             {
                 GameHash = Guid.NewGuid().ToString().Replace("-", ""),
                 HostToken = Guid.NewGuid().ToString().Replace("-", ""),
-                ChatMessages = new List<ChatMessage>(),
-                GameSettings = new GameSettings(),
-                DrawnLines = new List<DrawnLine>(),
-                GameState = new GameState(),
-                IsStarted = false
             };
 
             gamesManager.AddGame(game);
@@ -65,7 +61,10 @@ public class GameController : ControllerBase
     }
 
     [HttpDelete("Remove")]
-    public IActionResult Remove([FromBody] RemoveGameBody requestBody)
+    public IActionResult Remove(
+        [FromHeader(Name = Headers.Token)] string token,
+        [FromHeader(Name = Headers.GameHash)] string gameHash
+    )
     {
         try 
         {
@@ -76,24 +75,23 @@ public class GameController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            bool gameExists = gamesManager.CheckIfGameExistsByHash(requestBody.GameHash);
+            Game game = gamesManager.GetGameByHash(gameHash);
 
-            if (!gameExists)
+            if (game == null)
             {
                 logger.LogError("Status: 404. Not found.");
 
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
-            Game game = gamesManager.GetGameByHash(requestBody.GameHash);
-
-            if (game.HostToken != requestBody.HostToken)
+            if (token != game.HostToken)
             {
-                logger.LogError("Status: 404. Unauthorized.");
+                logger.LogError("Status: 401. Unauthorized.");
                 return StatusCode(StatusCodes.Status401Unauthorized);
             }
 
-            gamesManager.RemoveGame(requestBody.GameHash);
+            gamesManager.RemoveGame(gameHash);
+
             return StatusCode(StatusCodes.Status200OK);
         }
         catch (Exception ex)
@@ -104,54 +102,10 @@ public class GameController : ControllerBase
         }
     }
 
-    [HttpPost(HubEvents.StartGame)]
-    [HubMethodName(HubEvents.StartGame)]
-    public async Task<IActionResult> StartGame([FromBody] SetSettingBody requestBody)
-    {
-        try
-        {
-            if (!ModelState.IsValid || requestBody.Setting is not string)
-            {   
-                logger.LogError("Status: 400. Invalid received request body.");
-
-                return StatusCode(StatusCodes.Status400BadRequest);
-            }
-
-            bool gameExists = gamesManager.CheckIfGameExistsByHash(requestBody.GameHash);
-
-            if (!gameExists)
-            {
-                logger.LogError("Status: 404. Not found.");
-
-                return StatusCode(StatusCodes.Status404NotFound);
-            }
-
-            GameSettings settings = gamesManager.GetGameSettings(requestBody.GameHash);
-
-            settings.WordLanguage = (string)requestBody.Setting;
-            gamesManager.ChangeGameSettings(requestBody.GameHash, settings);
-
-            if (HttpContext.WebSockets.IsWebSocketRequest)
-            {
-                string connectionId = HttpContext.Request.Query["connectionId"];
-
-                await hubContext.Clients
-                    .Group(requestBody.GameHash)
-                    .SendAsync(HubEvents.OnSetRoundsCount, (string)requestBody.Setting);
-            }
-
-            return StatusCode(StatusCodes.Status200OK, (string)requestBody.Setting);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError($"Status: 500. Internal server error. {ex}");
-
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }
-    }
-
-    [HttpPost("Exists")]
-    public IActionResult Exists([FromBody] GameExistsBody requestBody)
+    [HttpGet("Exists")]
+    public IActionResult Exists(
+        [FromHeader(Name = Headers.GameHash)] string gameHash
+    )
     {
         try 
         {
@@ -162,7 +116,7 @@ public class GameController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            bool gameExists = gamesManager.CheckIfGameExistsByHash(requestBody.GameHash);
+            bool gameExists = gamesManager.CheckIfGameExistsByHash(gameHash);
 
             return StatusCode(StatusCodes.Status200OK, gameExists);
         }

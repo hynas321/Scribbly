@@ -22,18 +22,23 @@ public static class HubEvents
     public const string OnLoadChatMessages = "OnLoadChatMessages";
 
     //Game
-    public const string StartGame = "StartGame";
     public const string JoinGame = "JoinGame";
     public const string LeaveGame = "LeaveGame";
     public const string OnPlayerJoinedGame = "OnPlayerJoinedGame";
     public const string OnPlayerLeftGame = "OnPlayerLeftGame";
+
+    //GameState
+    public const string StartGame = "StartGame";
+    public const string StartTimer = "StartTimer";
     public const string OnStartGame = "OnStartGame";
+    public const string OnStartTimer = "OnStartTimer";
+    
 
     // Canvas
     public const string LoadCanvas = "LoadCanvas";
-    public const string OnLoadCanvas = "OnLoadCanvas";
-    public const string DrawOnCanvas = "DrawnOnCanvas";
-    public const string OnDrawOnCanvas = "OnDrawOnCanvas";
+    public const string DrawOnCanvas = "DrawOnCanvas";
     public const string ClearCanvas = "ClearCanvas";
+    public const string OnLoadCanvas = "OnLoadCanvas";
+    public const string OnDrawOnCanvas = "OnDrawOnCanvas";
     public const string OnClearCanvas = "OnClearCanvas";
 }

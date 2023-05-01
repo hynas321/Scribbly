@@ -5,6 +5,7 @@ using Dotnet.Server.Managers;
 using Dotnet.Server.Json;
 using Microsoft.AspNetCore.SignalR;
 using Dotnet.Server.Hubs;
+using Dotnet.Server.Http;
 
 namespace Dotnet.Server.Controllers;
 
@@ -22,43 +23,52 @@ public class GameSettingsController : ControllerBase
         this.hubContext = hubContext;
     }
     
-    [HttpPost(HubEvents.SetAbstractNouns)]
+    [HttpPut(HubEvents.SetAbstractNouns)]
     [HubMethodName(HubEvents.SetAbstractNouns)]
-    public async Task<IActionResult> SetAbstractNouns([FromBody] SetSettingBody requestBody)
+    public async Task<IActionResult> SetAbstractNouns(
+        [FromHeader(Name = Headers.Token)] string token,
+        [FromHeader(Name = Headers.GameHash)] string gameHash,
+        [FromBody] SetSettingBody body)
     {
         try
         {
-            if (!ModelState.IsValid || requestBody.Setting is not bool)
+            if (!ModelState.IsValid || body.Setting is not bool)
             {   
                 logger.LogError("Status: 400. Invalid received request body.");
 
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            bool gameExists = gamesManager.CheckIfGameExistsByHash(requestBody.GameHash);
+            Game game = gamesManager.GetGameByHash(gameHash);
 
-            if (!gameExists)
+            if (game == null)
             {
                 logger.LogError("Status: 404. Not found.");
 
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
-            GameSettings settings = gamesManager.GetGameSettings(requestBody.GameHash);
+            if (token != game.HostToken)
+            {
+                logger.LogError("Status: 401. Unauthorized.");
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
 
-            settings.NonAbstractNounsOnly = (bool)requestBody.Setting;
-            gamesManager.ChangeGameSettings(requestBody.GameHash, settings);
+            GameSettings settings = game.GameSettings;
+
+            settings.NonAbstractNounsOnly = (bool)body.Setting;
+            game.GameSettings = settings;
 
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
                 string connectionId = HttpContext.Request.Query["connectionId"];
 
                 await hubContext.Clients
-                    .Group(requestBody.GameHash)
-                    .SendAsync(HubEvents.OnSetAbstractNouns, (bool)requestBody.Setting);
+                    .Group(gameHash)
+                    .SendAsync(HubEvents.OnSetAbstractNouns, (bool)body.Setting);
             }
 
-            return StatusCode(StatusCodes.Status200OK, (bool)requestBody.Setting);
+            return StatusCode(StatusCodes.Status200OK, (bool)body.Setting);
         }
         catch (Exception ex)
         {
@@ -68,43 +78,53 @@ public class GameSettingsController : ControllerBase
         }
     }
 
-    [HttpPost(HubEvents.SetDrawingTimeSeconds)]
+    [HttpPut(HubEvents.SetDrawingTimeSeconds)]
     [HubMethodName(HubEvents.SetDrawingTimeSeconds)]
-    public async Task<IActionResult> SetDrawingTimeSeconds([FromBody] SetSettingBody requestBody)
+    public async Task<IActionResult> SetDrawingTimeSeconds(
+        [FromHeader(Name = Headers.Token)] string token,
+        [FromHeader(Name = Headers.GameHash)] string gameHash,
+        [FromBody] SetSettingBody body
+    )
     {
         try
         {
-            if (!ModelState.IsValid || requestBody.Setting is not int)
+            if (!ModelState.IsValid || body.Setting is not int)
             {   
                 logger.LogError("Status: 400. Invalid received request body.");
 
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            bool gameExists = gamesManager.CheckIfGameExistsByHash(requestBody.GameHash);
+            Game game = gamesManager.GetGameByHash(gameHash);
 
-            if (!gameExists)
+            if (game == null)
             {
                 logger.LogError("Status: 404. Not found.");
 
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
-            GameSettings settings = gamesManager.GetGameSettings(requestBody.GameHash);
+            if (token != game.HostToken)
+            {
+                logger.LogError("Status: 401. Unauthorized.");
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
 
-            settings.DrawingTimeSeconds = (int)requestBody.Setting;
-            gamesManager.ChangeGameSettings(requestBody.GameHash, settings);
+            GameSettings settings = game.GameSettings;
+
+            settings.DrawingTimeSeconds = (int)body.Setting;
+            game.GameSettings = settings;
 
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
                 string connectionId = HttpContext.Request.Query["connectionId"];
 
                 await hubContext.Clients
-                    .Group(requestBody.GameHash)
-                    .SendAsync(HubEvents.OnSetDrawingTimeSeconds, (int)requestBody.Setting);
+                    .Group(gameHash)
+                    .SendAsync(HubEvents.OnSetDrawingTimeSeconds, (int)body.Setting);
             }
 
-            return StatusCode(StatusCodes.Status200OK, (int)requestBody.Setting);
+            return StatusCode(StatusCodes.Status200OK, (int)body.Setting);
         }
         catch (Exception ex)
         {
@@ -114,43 +134,53 @@ public class GameSettingsController : ControllerBase
         }
     }
 
-    [HttpPost(HubEvents.SetRoundsCount)]
+    [HttpPut(HubEvents.SetRoundsCount)]
     [HubMethodName(HubEvents.SetRoundsCount)]
-    public async Task<IActionResult> SetRoundsCount([FromBody] SetSettingBody requestBody)
+    public async Task<IActionResult> SetRoundsCount(
+        [FromHeader(Name = Headers.Token)] string token,
+        [FromHeader(Name = Headers.GameHash)] string gameHash,
+        [FromBody] SetSettingBody body
+    )
     {
         try
         {
-            if (!ModelState.IsValid || requestBody.Setting is not int)
+            if (!ModelState.IsValid || body.Setting is not int)
             {   
                 logger.LogError("Status: 400. Invalid received request body.");
 
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            bool gameExists = gamesManager.CheckIfGameExistsByHash(requestBody.GameHash);
+            Game game = gamesManager.GetGameByHash(gameHash);
 
-            if (!gameExists)
+            if (game == null)
             {
                 logger.LogError("Status: 404. Not found.");
 
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
-            GameSettings settings = gamesManager.GetGameSettings(requestBody.GameHash);
+            if (token != game.HostToken)
+            {
+                logger.LogError("Status: 401. Unauthorized.");
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
 
-            settings.RoundsCount = (int)requestBody.Setting;
-            gamesManager.ChangeGameSettings(requestBody.GameHash, settings);
+            GameSettings settings = game.GameSettings;
+
+            settings.RoundsCount = (int)body.Setting;
+            game.GameSettings = settings;
 
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
                 string connectionId = HttpContext.Request.Query["connectionId"];
 
                 await hubContext.Clients
-                    .Group(requestBody.GameHash)
-                    .SendAsync(HubEvents.OnSetRoundsCount, (int)requestBody.Setting);
+                    .Group(gameHash)
+                    .SendAsync(HubEvents.OnSetRoundsCount, (int)body.Setting);
             }
 
-            return StatusCode(StatusCodes.Status200OK, (int)requestBody.Setting);
+            return StatusCode(StatusCodes.Status200OK, (int)body.Setting);
         }
         catch (Exception ex)
         {
@@ -160,43 +190,53 @@ public class GameSettingsController : ControllerBase
         }
     }
 
-    [HttpPost(HubEvents.SetWordLanguage)]
+    [HttpPut(HubEvents.SetWordLanguage)]
     [HubMethodName(HubEvents.SetWordLanguage)]
-    public async Task<IActionResult> ChangeWordLanguageSetting([FromBody] SetSettingBody requestBody)
+    public async Task<IActionResult> ChangeWordLanguageSetting(
+        [FromHeader(Name = Headers.Token)] string token,
+        [FromHeader(Name = Headers.GameHash)] string gameHash,
+        [FromBody] SetSettingBody body
+    )
     {
         try
         {
-            if (!ModelState.IsValid || requestBody.Setting is not string)
+            if (!ModelState.IsValid || body.Setting is not string)
             {   
                 logger.LogError("Status: 400. Invalid received request body.");
 
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            bool gameExists = gamesManager.CheckIfGameExistsByHash(requestBody.GameHash);
+            Game game = gamesManager.GetGameByHash(gameHash);
 
-            if (!gameExists)
+            if (game == null)
             {
                 logger.LogError("Status: 404. Not found.");
 
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
-            GameSettings settings = gamesManager.GetGameSettings(requestBody.GameHash);
+            if (token != game.HostToken)
+            {
+                logger.LogError("Status: 401. Unauthorized.");
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
 
-            settings.WordLanguage = (string)requestBody.Setting;
-            gamesManager.ChangeGameSettings(requestBody.GameHash, settings);
+            GameSettings settings = game.GameSettings;
+
+            settings.DrawingTimeSeconds = (int)body.Setting;
+            game.GameSettings = settings;
 
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
                 string connectionId = HttpContext.Request.Query["connectionId"];
 
                 await hubContext.Clients
-                    .Group(requestBody.GameHash)
-                    .SendAsync(HubEvents.OnSetRoundsCount, (string)requestBody.Setting);
+                    .Group(gameHash)
+                    .SendAsync(HubEvents.OnSetRoundsCount, (string)body.Setting);
             }
 
-            return StatusCode(StatusCodes.Status200OK, (string)requestBody.Setting);
+            return StatusCode(StatusCodes.Status200OK, (string)body.Setting);
         }
         catch (Exception ex)
         {
@@ -206,9 +246,12 @@ public class GameSettingsController : ControllerBase
         }
     }
 
-    [HttpPost(HubEvents.LoadGameSettings)]
+    [HttpGet(HubEvents.LoadGameSettings)]
     [HubMethodName(HubEvents.LoadGameSettings)]
-    public async Task<IActionResult> LoadGameSettings([FromBody] LoadGameSettingsBody requestBody)
+    public async Task<IActionResult> LoadGameSettings(
+        [FromHeader(Name = Headers.Token)] string token,
+        [FromHeader(Name = Headers.GameHash)] string gameHash
+    )
     {
         try
         {
@@ -219,27 +262,27 @@ public class GameSettingsController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            bool gameExists = gamesManager.CheckIfGameExistsByHash(requestBody.GameHash);
+            Game game = gamesManager.GetGameByHash(gameHash);
 
-            if (!gameExists)
+            if (game == null)
             {
                 logger.LogError("Status: 404. Not found.");
 
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
-            GameSettings settings = gamesManager.GetGameSettings(requestBody.GameHash);
+            GameSettings settings = game.GameSettings;
 
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
                 string connectionId = HttpContext.Request.Query["connectionId"];
 
                 await hubContext.Clients
-                    .Group(requestBody.GameHash)
+                    .Client(connectionId)
                     .SendAsync(HubEvents.OnSetRoundsCount, JsonHelper.Serialize(settings));
             }
 
-            return StatusCode(StatusCodes.Status200OK, settings);
+            return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(settings));
         }
         catch (Exception ex)
         {

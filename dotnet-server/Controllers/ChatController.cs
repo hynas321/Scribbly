@@ -5,6 +5,7 @@ using Dotnet.Server.Managers;
 using Microsoft.AspNetCore.SignalR;
 using Dotnet.Server.Hubs;
 using Dotnet.Server.Json;
+using Dotnet.Server.Http;
 
 namespace Dotnet.Server.Controllers;
 
@@ -24,47 +25,64 @@ public class ChatController : ControllerBase
 
     [HttpPost(HubEvents.SendChatMessage)]
     [HubMethodName(HubEvents.SendChatMessage)]
-    public async Task<IActionResult> SendChatMessage([FromBody] SendChatMessageBody requestBody)
+    public async Task<IActionResult> SendChatMessage(
+        [FromHeader(Name = Headers.Token)] string token,
+        [FromHeader(Name = Headers.GameHash)] string gameHash,
+        [FromBody] SendChatMessageBody body
+    )
     {
         try 
         {
             if (!ModelState.IsValid)
             {   
-                logger.LogError("Status: 400. Invalid received request body.");
+                logger.LogError("Status: 400. Invalid request.");
 
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            bool gameExists = gamesManager.CheckIfGameExistsByHash(requestBody.GameHash);
-            bool playerExists = gamesManager.CheckIfPlayerExistsByToken(requestBody.GameHash, requestBody.Token);
+            Game game = gamesManager.GetGameByHash(gameHash);
 
-            if (!gameExists || !playerExists)
+            if (game == null)
             {
                 logger.LogError("Status: 404. Not found.");
 
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
-            Game game = gamesManager.GetGameByHash(requestBody.GameHash);
-            Player player = gamesManager.GetPlayerByToken(requestBody.GameHash, requestBody.Token);
+            Player player = gamesManager.GetPlayerByToken(game, token);
+
+            if (player == null)
+            {
+                logger.LogError("Status: 404. Not found.");
+
+                return StatusCode(StatusCodes.Status404NotFound);
+            }
+
+            if (token != game.GameState.DrawingToken)
+            {
+                logger.LogError("Status: 401. Unauthorized.");
+
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
+
             ChatMessage message = new ChatMessage()
             {
                 Username = player.Username,
-                Text = requestBody.Text
+                Text = body.Text
             };
 
-            gamesManager.AddChatMessage(requestBody.GameHash, message);
+            gamesManager.AddChatMessage(gameHash, message);
 
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
                 string connectionId = HttpContext.Request.Query["connectionId"];
 
                 await hubContext.Clients
-                    .Group(requestBody.GameHash)
+                    .Group(gameHash)
                     .SendAsync(HubEvents.OnSendChatMessage, JsonHelper.Serialize(message));
             }
 
-            return StatusCode(StatusCodes.Status201Created, message);
+            return StatusCode(StatusCodes.Status201Created, JsonHelper.Serialize(message));
         }
         catch (Exception ex)
         {
@@ -74,38 +92,39 @@ public class ChatController : ControllerBase
         }
     }
 
-    [HttpPost(HubEvents.LoadChatMessages)]
+    [HttpGet(HubEvents.LoadChatMessages)]
     [HubMethodName(HubEvents.LoadChatMessages)]
-    public async Task<IActionResult> LoadChatMessages([FromBody] SendChatMessageBody requestBody)
+    public async Task<IActionResult> LoadChatMessages(
+        [FromHeader(Name = Headers.Token)] string token,
+        [FromHeader(Name = Headers.GameHash)] string gameHash
+    )
     {
         try 
         {
             if (!ModelState.IsValid)
             {   
-                logger.LogError("Status: 400. Invalid received request body.");
+                logger.LogError("Status: 400. Bad request.");
 
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            bool gameExists = gamesManager.CheckIfGameExistsByHash(requestBody.GameHash);
-            bool playerExists = gamesManager.CheckIfPlayerExistsByToken(requestBody.GameHash, requestBody.Token);
+            Game game = gamesManager.GetGameByHash(gameHash);
 
-            if (!gameExists || !playerExists)
+            if (game == null)
             {
                 logger.LogError("Status: 404. Not found.");
 
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
-            Game game = gamesManager.GetGameByHash(requestBody.GameHash);
-            Player player = gamesManager.GetPlayerByToken(requestBody.GameHash, requestBody.Token);
-            ChatMessage message = new ChatMessage()
-            {
-                Username = player.Username,
-                Text = requestBody.Text
-            };
+            Player player = gamesManager.GetPlayerByToken(game, token);
 
-            gamesManager.AddChatMessage(requestBody.GameHash, message);
+            if (player == null)
+            {
+                logger.LogError("Status: 404. Not found.");
+
+                return StatusCode(StatusCodes.Status404NotFound);
+            }
 
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
@@ -113,10 +132,10 @@ public class ChatController : ControllerBase
 
                 await hubContext.Clients
                     .Client(connectionId)
-                    .SendAsync(HubEvents.OnLoadChatMessages, JsonHelper.Serialize(message));
+                    .SendAsync(HubEvents.OnLoadChatMessages, JsonHelper.Serialize(game.ChatMessages));
             }
 
-            return StatusCode(StatusCodes.Status201Created, message);
+            return StatusCode(StatusCodes.Status201Created, JsonHelper.Serialize(game.ChatMessages));
         }
         catch (Exception ex)
         {
