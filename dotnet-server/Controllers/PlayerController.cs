@@ -24,8 +24,7 @@ public class PlayerController : ControllerBase
     }
 
     [HttpPost(HubEvents.JoinGame)]
-    [HubMethodName(HubEvents.JoinGame)]
-    public async Task<IActionResult> JoinGame(
+    public IActionResult JoinGame(
         [FromHeader(Name = Headers.GameHash)] string gameHash,
         [FromBody] JoinGameBody body,
         [FromHeader(Name = Headers.Token)] string token = null
@@ -96,16 +95,6 @@ public class PlayerController : ControllerBase
             List<PlayerScore> playerList = gamesManager.GetPlayersWithoutToken(gameHash);
             bool gameIsStarted = game.GameState.IsStarted;
 
-            if (HttpContext.WebSockets.IsWebSocketRequest)
-            {
-                string connectionId = HttpContext.Request.Query["connectionId"];
-
-                await hubContext.Groups.AddToGroupAsync(connectionId, gameHash);
-                await hubContext.Clients
-                    .Group(gameHash)
-                    .SendAsync(HubEvents.OnPlayerJoinedGame, JsonHelper.Serialize(playerList));
-            }
-
             logger.LogInformation("Status: 200. OK.");
 
             return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(new { player, playerList, gameIsStarted }));
@@ -119,8 +108,7 @@ public class PlayerController : ControllerBase
     }
 
     [HttpDelete(HubEvents.LeaveGame)]
-    [HubMethodName(HubEvents.LeaveGame)]
-    public async Task<IActionResult> LeaveGame(
+    public IActionResult LeaveGame(
         [FromHeader(Name = Headers.GameHash)] string gameHash,
         [FromHeader(Name = Headers.Token)] string token
     )
@@ -164,17 +152,6 @@ public class PlayerController : ControllerBase
 
             List<PlayerScore> playerScores = game.GameState.PlayerScores;
             string playerListSerialized = JsonHelper.Serialize(playerScores);
-
-            if (HttpContext.WebSockets.IsWebSocketRequest)
-            {
-                string connectionId = HttpContext.Request.Query["connectionId"];
-
-                await hubContext.Clients
-                    .Group(gameHash)
-                    .SendAsync(HubEvents.OnPlayerLeftGame, playerListSerialized);
-
-                await hubContext.Groups.RemoveFromGroupAsync(connectionId, gameHash);
-            }
 
             logger.LogInformation("Status: 200. OK.");
 

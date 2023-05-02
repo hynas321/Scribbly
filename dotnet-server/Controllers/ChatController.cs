@@ -24,8 +24,7 @@ public class ChatController : ControllerBase
     }
 
     [HttpPost(HubEvents.SendChatMessage)]
-    [HubMethodName(HubEvents.SendChatMessage)]
-    public async Task<IActionResult> SendChatMessage(
+    public IActionResult SendChatMessage(
         [FromHeader(Name = Headers.Token)] string token,
         [FromHeader(Name = Headers.GameHash)] string gameHash,
         [FromBody] SendChatMessageBody body
@@ -73,15 +72,6 @@ public class ChatController : ControllerBase
 
             gamesManager.AddChatMessage(gameHash, message);
 
-            if (HttpContext.WebSockets.IsWebSocketRequest)
-            {
-                string connectionId = HttpContext.Request.Query["connectionId"];
-
-                await hubContext.Clients
-                    .Group(gameHash)
-                    .SendAsync(HubEvents.OnSendChatMessage, JsonHelper.Serialize(message));
-            }
-
             logger.LogInformation("Status: 201. Created.");
 
             return StatusCode(StatusCodes.Status201Created, JsonHelper.Serialize(message));
@@ -95,8 +85,7 @@ public class ChatController : ControllerBase
     }
 
     [HttpGet(HubEvents.LoadChatMessages)]
-    [HubMethodName(HubEvents.LoadChatMessages)]
-    public async Task<IActionResult> LoadChatMessages(
+    public IActionResult LoadChatMessages(
         [FromHeader(Name = Headers.Token)] string token,
         [FromHeader(Name = Headers.GameHash)] string gameHash
     )
@@ -126,15 +115,6 @@ public class ChatController : ControllerBase
                 logger.LogError("Status: 404. Not found.");
 
                 return StatusCode(StatusCodes.Status404NotFound);
-            }
-
-            if (HttpContext.WebSockets.IsWebSocketRequest)
-            {
-                string connectionId = HttpContext.Request.Query["connectionId"];
-
-                await hubContext.Clients
-                    .Client(connectionId)
-                    .SendAsync(HubEvents.OnLoadChatMessages, JsonHelper.Serialize(game.ChatMessages));
             }
 
             logger.LogInformation("Status: 201. Created.");

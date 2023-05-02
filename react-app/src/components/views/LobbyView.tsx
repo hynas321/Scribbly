@@ -15,6 +15,7 @@ import { useDispatch } from 'react-redux';
 import HttpRequestHandler from '../../utils/HttpRequestHandler';
 import { HubConnectionState } from '@microsoft/signalr';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function LobbyView() {
   const hub = useContext(ConnectionHubContext);
@@ -46,21 +47,32 @@ function LobbyView() {
     navigate(config.mainClientEndpoint);
   }
 
+
   useEffect(() => {
-    if (hub.getState() !== HubConnectionState.Connected) {
-      return;
-    }
+
+    const startHubConnection = async () => {
+      if (hub.getState() !== HubConnectionState.Connected) {
+        await hub.start();
+
+        while (hub.getState() !== HubConnectionState.Connected) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      }
+    };
 
     const checkIfPlayerIsHost = async () => {
-      isPlayerHost = await httpRequestHandler.fetchPlayerIsHost(player.token, player.gameHash);
+      //isPlayerHost = await httpRequestHandler.fetchPlayerIsHost(player.token, player.gameHash);
+      //console.log(isPlayerHost)
     }
 
-    const setConnectionHub = async () => {
+    const setLobby = async () => {
 
-      await httpRequestHandler.fetchGameHash(player.token)
-        .then((data) => {
-          invitationUrl == `${config.gameClientEndpoint}/${data}` 
-        });
+      await startHubConnection();
+
+      //await httpRequestHandler.fetchGameHash(player.token)
+        //.then((data) => {
+          //invitationUrl == `${config.gameClientEndpoint}/${data}` 
+        //});
 
       const getPlayerList = (playerListSerialized: string) => {
         const deserializedPlayerList = JSON.parse(playerListSerialized) as PlayerScore[];
@@ -71,7 +83,14 @@ function LobbyView() {
       hub.on(HubEvents.onPlayerJoinedGame, getPlayerList);
       hub.on(HubEvents.onPlayerLeftGame, getPlayerList);
 
-      await hub.start();
+      hub.on("OnGetAll", (data) => {
+        console.log(data)
+      })
+
+      //await axios.get(`${config.httpServerUrl}/api/Game/GetAll`)
+      await hub.getConnection().invoke("GetAll").then((data) => console.log(data));
+      //await hub.invoke("HubGetTest").then((e) => console.log(e)).catch((e) => console.log(e))
+      //await hub.invoke(HubEvents.joinGame);
     }
 
     const clearBeforeUnload = () => {
@@ -80,7 +99,7 @@ function LobbyView() {
       hub.send(HubEvents.leaveGame, player.gameHash, player.username);
     }
 
-    setConnectionHub();
+    setLobby();
     checkIfPlayerIsHost();
 
     window.addEventListener("beforeunload", clearBeforeUnload);
@@ -89,7 +108,7 @@ function LobbyView() {
       clearBeforeUnload();
       window.removeEventListener("beforeunload", clearBeforeUnload);
     }
-  }, [hub.getState()]);
+  }, []);
 
   return (
     <div className="container mb-3">

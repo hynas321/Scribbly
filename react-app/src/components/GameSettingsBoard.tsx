@@ -64,7 +64,7 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
 
     if (!gameSettingsLoaded) {
       const loadGameSettings = async() => {
-        await hub.invoke(HubEvents.LoadGameSettings);
+        //await hub.invoke(HubEvents.LoadGameSettings);
 
         gameSettingsLoaded = true;
       }
@@ -81,19 +81,19 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
   }, [hub.getState()])
 
   const handleCheckBoxChange = async (checked: boolean) => {
-    await hub.invoke(HubEvents.setAbstractNouns, testLobbyHash, checked);
+    //await hub.invoke(HubEvents.setAbstractNouns, testLobbyHash, checked);
   }
 
   const handleRangeChange = async (value: number) => {
-    await hub.invoke(HubEvents.setDrawingTimeSeconds, testLobbyHash, value);
+    //await hub.invoke(HubEvents.setDrawingTimeSeconds, testLobbyHash, value);
   }
 
   const handleCheckFormChange = async (value: number) => {
-    await hub.invoke(HubEvents.setRoundsCount, testLobbyHash, Number(value));
+    //await hub.invoke(HubEvents.setRoundsCount, testLobbyHash, Number(value));
   }
 
   const handleInputSelectChange = async (value: string) => {
-    await hub.invoke(HubEvents.setWordLanguage, testLobbyHash, value);
+    //await hub.invoke(HubEvents.setWordLanguage, testLobbyHash, value);
   }
 
   return (

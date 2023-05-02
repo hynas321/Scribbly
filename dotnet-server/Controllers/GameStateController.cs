@@ -24,8 +24,7 @@ public class GameStateController : ControllerBase
     }
 
     [HttpPut(HubEvents.StartGame)]
-    [HubMethodName(HubEvents.StartGame)]
-    public async Task<IActionResult> StartGame(
+    public IActionResult StartGame(
         [FromHeader(Name = Headers.Token)] string token,
         [FromHeader(Name = Headers.GameHash)] string gameHash
     )
@@ -56,15 +55,6 @@ public class GameStateController : ControllerBase
 
             game.GameState.IsStarted = true;
 
-            if (HttpContext.WebSockets.IsWebSocketRequest)
-            {
-                string connectionId = HttpContext.Request.Query["connectionId"];
-
-                await hubContext.Clients
-                    .Group(gameHash)
-                    .SendAsync(HubEvents.OnStartGame);
-            }
-
             logger.LogInformation("Status: 200. OK.");
 
             return StatusCode(StatusCodes.Status200OK);
@@ -78,7 +68,6 @@ public class GameStateController : ControllerBase
     }
 
     [HttpPut(HubEvents.StartTimer)]
-    [HubMethodName(HubEvents.StartTimer)]
     public async Task<IActionResult> StartTimer(
         [FromHeader(Name = Headers.Token)] string token,
         [FromHeader(Name = Headers.GameHash)] string gameHash

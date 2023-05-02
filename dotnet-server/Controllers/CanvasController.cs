@@ -25,17 +25,16 @@ public class CanvasController : ControllerBase
     }
 
     [HttpPost(HubEvents.DrawOnCanvas)]
-    [HubMethodName(HubEvents.DrawOnCanvas)]
-    public async Task<IActionResult> DrawOnCanvas(
+    public IActionResult DrawOnCanvas(
         [FromHeader(Name = Headers.Token)] string token,
         [FromHeader(Name = Headers.GameHash)] string gameHash,
         [FromBody] DrawOnCanvasBody body
     )
-    {   
-        try 
+    {
+        try
         {
             if (!ModelState.IsValid)
-            {   
+            {
                 logger.LogError("Status: 400. Bad request.");
 
                 return StatusCode(StatusCodes.Status400BadRequest);
@@ -68,15 +67,6 @@ public class CanvasController : ControllerBase
 
             game.DrawnLines.Add(drawnLine);
 
-            if (HttpContext.WebSockets.IsWebSocketRequest)
-            {
-                string connectionId = HttpContext.Request.Query["connectionId"];
-
-                await hubContext.Clients
-                    .Group(gameHash)
-                    .SendAsync(HubEvents.OnDrawOnCanvas, JsonHelper.Serialize(drawnLine));
-            }
-
             logger.LogInformation("Status: 201. Created.");
 
             return StatusCode(StatusCodes.Status201Created, JsonHelper.Serialize(drawnLine));
@@ -90,8 +80,7 @@ public class CanvasController : ControllerBase
     }
 
     [HttpGet(HubEvents.LoadCanvas)]
-    [HubMethodName(HubEvents.LoadCanvas)]
-    public async Task<IActionResult> LoadCanvas(
+    public IActionResult LoadCanvas(
         [FromHeader(Name = Headers.Token)] string token,
         [FromHeader(Name = Headers.GameHash)] string gameHash
     )
@@ -116,15 +105,6 @@ public class CanvasController : ControllerBase
 
             List<DrawnLine> drawnLines = gamesManager.GetGameByHash(gameHash).DrawnLines;
 
-            if (HttpContext.WebSockets.IsWebSocketRequest)
-            {
-                string connectionId = HttpContext.Request.Query["connectionId"];
-
-                await hubContext.Clients
-                    .Client(connectionId)
-                    .SendAsync(HubEvents.OnLoadCanvas, JsonHelper.Serialize(drawnLines));
-            }
-
             logger.LogInformation("Status: 200. OK.");
 
             return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(drawnLines));
@@ -138,8 +118,7 @@ public class CanvasController : ControllerBase
     }
 
     [HttpDelete(HubEvents.ClearCanvas)]
-    [HubMethodName(HubEvents.ClearCanvas)]
-    public async Task<IActionResult> ClearCanvas(
+    public IActionResult ClearCanvas(
         [FromHeader(Name = Headers.Token)] string token,
         [FromHeader(Name = Headers.GameHash)] string gameHash
     )
@@ -167,15 +146,6 @@ public class CanvasController : ControllerBase
                 logger.LogError("Status: 401. Unauthorized.");
 
                 return StatusCode(StatusCodes.Status401Unauthorized);
-            }
-
-            if (HttpContext.WebSockets.IsWebSocketRequest)
-            {
-                string connectionId = HttpContext.Request.Query["connectionId"];
-
-                await hubContext.Clients
-                    .Group(gameHash)
-                    .SendAsync(HubEvents.OnClearCanvas);
             }
 
             logger.LogInformation("Status: 200. OK.");

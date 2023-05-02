@@ -12,6 +12,7 @@ builder.Services.AddControllers()
     });
 
 builder.Services.AddSignalR(); 
+builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options => 

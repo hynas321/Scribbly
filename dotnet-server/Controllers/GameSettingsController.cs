@@ -24,8 +24,7 @@ public class GameSettingsController : ControllerBase
     }
     
     [HttpPut(HubEvents.SetAbstractNouns)]
-    [HubMethodName(HubEvents.SetAbstractNouns)]
-    public async Task<IActionResult> SetAbstractNouns(
+    public IActionResult SetAbstractNouns(
         [FromHeader(Name = Headers.Token)] string token,
         [FromHeader(Name = Headers.GameHash)] string gameHash,
         [FromBody] SetSettingBody body)
@@ -59,15 +58,6 @@ public class GameSettingsController : ControllerBase
             settings.NonAbstractNounsOnly = (bool)body.Setting;
             game.GameSettings = settings;
 
-            if (HttpContext.WebSockets.IsWebSocketRequest)
-            {
-                string connectionId = HttpContext.Request.Query["connectionId"];
-
-                await hubContext.Clients
-                    .Group(gameHash)
-                    .SendAsync(HubEvents.OnSetAbstractNouns, (bool)body.Setting);
-            }
-
             logger.LogInformation("Status: 200. OK.");
 
             return StatusCode(StatusCodes.Status200OK, (bool)body.Setting);
@@ -81,8 +71,7 @@ public class GameSettingsController : ControllerBase
     }
 
     [HttpPut(HubEvents.SetDrawingTimeSeconds)]
-    [HubMethodName(HubEvents.SetDrawingTimeSeconds)]
-    public async Task<IActionResult> SetDrawingTimeSeconds(
+    public IActionResult SetDrawingTimeSeconds(
         [FromHeader(Name = Headers.Token)] string token,
         [FromHeader(Name = Headers.GameHash)] string gameHash,
         [FromBody] SetSettingBody body
@@ -117,15 +106,6 @@ public class GameSettingsController : ControllerBase
             settings.DrawingTimeSeconds = (int)body.Setting;
             game.GameSettings = settings;
 
-            if (HttpContext.WebSockets.IsWebSocketRequest)
-            {
-                string connectionId = HttpContext.Request.Query["connectionId"];
-
-                await hubContext.Clients
-                    .Group(gameHash)
-                    .SendAsync(HubEvents.OnSetDrawingTimeSeconds, (int)body.Setting);
-            }
-
             logger.LogInformation("Status: 200. OK.");
 
             return StatusCode(StatusCodes.Status200OK, (int)body.Setting);
@@ -139,8 +119,7 @@ public class GameSettingsController : ControllerBase
     }
 
     [HttpPut(HubEvents.SetRoundsCount)]
-    [HubMethodName(HubEvents.SetRoundsCount)]
-    public async Task<IActionResult> SetRoundsCount(
+    public IActionResult SetRoundsCount(
         [FromHeader(Name = Headers.Token)] string token,
         [FromHeader(Name = Headers.GameHash)] string gameHash,
         [FromBody] SetSettingBody body
@@ -175,15 +154,6 @@ public class GameSettingsController : ControllerBase
             settings.RoundsCount = (int)body.Setting;
             game.GameSettings = settings;
 
-            if (HttpContext.WebSockets.IsWebSocketRequest)
-            {
-                string connectionId = HttpContext.Request.Query["connectionId"];
-
-                await hubContext.Clients
-                    .Group(gameHash)
-                    .SendAsync(HubEvents.OnSetRoundsCount, (int)body.Setting);
-            }
-
             logger.LogInformation("Status: 200. OK.");
 
             return StatusCode(StatusCodes.Status200OK, (int)body.Setting);
@@ -197,8 +167,7 @@ public class GameSettingsController : ControllerBase
     }
 
     [HttpPut(HubEvents.SetWordLanguage)]
-    [HubMethodName(HubEvents.SetWordLanguage)]
-    public async Task<IActionResult> ChangeWordLanguageSetting(
+    public IActionResult ChangeWordLanguageSetting(
         [FromHeader(Name = Headers.Token)] string token,
         [FromHeader(Name = Headers.GameHash)] string gameHash,
         [FromBody] SetSettingBody body
@@ -233,15 +202,6 @@ public class GameSettingsController : ControllerBase
             settings.DrawingTimeSeconds = (int)body.Setting;
             game.GameSettings = settings;
 
-            if (HttpContext.WebSockets.IsWebSocketRequest)
-            {
-                string connectionId = HttpContext.Request.Query["connectionId"];
-
-                await hubContext.Clients
-                    .Group(gameHash)
-                    .SendAsync(HubEvents.OnSetRoundsCount, (string)body.Setting);
-            }
-
             logger.LogInformation("Status: 200. OK.");
 
             return StatusCode(StatusCodes.Status200OK, (string)body.Setting);
@@ -255,8 +215,7 @@ public class GameSettingsController : ControllerBase
     }
 
     [HttpGet(HubEvents.LoadGameSettings)]
-    [HubMethodName(HubEvents.LoadGameSettings)]
-    public async Task<IActionResult> LoadGameSettings(
+    public IActionResult LoadGameSettings(
         [FromHeader(Name = Headers.Token)] string token,
         [FromHeader(Name = Headers.GameHash)] string gameHash
     )
@@ -280,15 +239,6 @@ public class GameSettingsController : ControllerBase
             }
 
             GameSettings settings = game.GameSettings;
-
-            if (HttpContext.WebSockets.IsWebSocketRequest)
-            {
-                string connectionId = HttpContext.Request.Query["connectionId"];
-
-                await hubContext.Clients
-                    .Client(connectionId)
-                    .SendAsync(HubEvents.OnSetRoundsCount, JsonHelper.Serialize(settings));
-            }
 
             logger.LogInformation("Status: 200. OK.");
 

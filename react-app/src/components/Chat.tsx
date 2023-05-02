@@ -38,11 +38,11 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
         text: inputFormValue
       }
 
-      await hub.invoke(HubEvents.sendChatMessage,
-        player.token,
-        player.gameHash,
-        { text: sendChatMessageBody }
-      );
+      // await hub.invoke(HubEvents.sendChatMessage,
+      //   player.token,
+      //   player.gameHash,
+      //   { text: sendChatMessageBody }
+      // );
       
       if (inputFormRef && inputFormRef.current) {
         inputFormRef.current.value = "";
@@ -79,7 +79,7 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
         token: player.token
       };
 
-      await hub.invoke(HubEvents.loadChatMessages, loadChatMessagesBody);
+      //await hub.invoke(HubEvents.loadChatMessages, loadChatMessagesBody);
     };
 
     loadChatMessages();

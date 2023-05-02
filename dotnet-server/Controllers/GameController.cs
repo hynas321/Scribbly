@@ -19,6 +19,7 @@ public class GameController : ControllerBase
 
     public GameController(ILogger<PlayerController> logger, IHubContext<HubConnection> hubContext)
     {
+        this.hubContext = hubContext;
         this.logger = logger;
     }
 
