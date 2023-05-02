@@ -15,9 +15,9 @@ public class GameController : ControllerBase
 {
     private readonly GamesManager gamesManager = new GamesManager(25);
     private readonly IHubContext<HubConnection> hubContext;
-    private readonly ILogger<PlayerController> logger;
+    private readonly ILogger<GameController> logger;
 
-    public GameController(ILogger<PlayerController> logger, IHubContext<HubConnection> hubContext)
+    public GameController(ILogger<GameController> logger, IHubContext<HubConnection> hubContext)
     {
         this.hubContext = hubContext;
         this.logger = logger;

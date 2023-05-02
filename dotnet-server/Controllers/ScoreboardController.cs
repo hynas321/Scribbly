@@ -10,9 +10,9 @@ namespace Dotnet.Server.Controllers;
 [Route("api/[controller]")]
 public class ScoreboardController : ControllerBase
 {
-    private readonly ILogger<PlayerController> logger;
+    private readonly ILogger<ScoreboardController> logger;
 
-    public ScoreboardController(ILogger<PlayerController> logger)
+    public ScoreboardController(ILogger<ScoreboardController> logger)
     {
         this.logger = logger;
     }
