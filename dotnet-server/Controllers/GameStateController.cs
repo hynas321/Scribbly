@@ -65,6 +65,8 @@ public class GameStateController : ControllerBase
                     .SendAsync(HubEvents.OnStartGame);
             }
 
+            logger.LogInformation("Status: 200. OK.");
+
             return StatusCode(StatusCodes.Status200OK);
         }
         catch (Exception ex)

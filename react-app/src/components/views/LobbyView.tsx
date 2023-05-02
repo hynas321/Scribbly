@@ -80,8 +80,8 @@ function LobbyView() {
       hub.send(HubEvents.leaveGame, player.gameHash, player.username);
     }
 
-    checkIfPlayerIsHost();
     setConnectionHub();
+    checkIfPlayerIsHost();
 
     window.addEventListener("beforeunload", clearBeforeUnload);
 
@@ -148,7 +148,3 @@ function LobbyView() {
 }
 
 export default LobbyView;
-
-function dispatch() {
-  throw new Error('Function not implemented.');
-}

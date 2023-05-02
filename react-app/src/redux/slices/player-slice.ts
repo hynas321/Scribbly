@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, Dispatch, PayloadAction } from '@reduxjs/toolkit';
 
 export interface Player {
   username: string;
@@ -35,6 +35,9 @@ const playerSlice = createSlice({
       localStorage.setItem("gameHash", action.payload);
     },
     updatedPlayer(state, action: PayloadAction<Player>) {
+      localStorage.setItem("token", action.payload.token);
+      localStorage.setItem("gameHash", action.payload.gameHash);
+
       state.username = action.payload.username;
       state.score = action.payload.score;
       state.token = action.payload.token;

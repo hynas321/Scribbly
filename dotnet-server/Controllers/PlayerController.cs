@@ -28,7 +28,7 @@ public class PlayerController : ControllerBase
     public async Task<IActionResult> JoinGame(
         [FromHeader(Name = Headers.GameHash)] string gameHash,
         [FromBody] JoinGameBody body,
-        [FromHeader(Name = Headers.GameHash)] string token = null
+        [FromHeader(Name = Headers.Token)] string token = null
     )
     {
         try 
@@ -106,6 +106,8 @@ public class PlayerController : ControllerBase
                     .SendAsync(HubEvents.OnPlayerJoinedGame, JsonHelper.Serialize(playerList));
             }
 
+            logger.LogInformation("Status: 200. OK.");
+
             return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(new { player, playerList, gameIsStarted }));
         }
         catch (Exception ex)
@@ -120,7 +122,7 @@ public class PlayerController : ControllerBase
     [HubMethodName(HubEvents.LeaveGame)]
     public async Task<IActionResult> LeaveGame(
         [FromHeader(Name = Headers.GameHash)] string gameHash,
-        [FromHeader(Name = Headers.GameHash)] string token
+        [FromHeader(Name = Headers.Token)] string token
     )
     {
         try
@@ -174,6 +176,8 @@ public class PlayerController : ControllerBase
                 await hubContext.Groups.RemoveFromGroupAsync(connectionId, gameHash);
             }
 
+            logger.LogInformation("Status: 200. OK.");
+
             return StatusCode(StatusCodes.Status200OK);
         }
         catch (Exception ex)
@@ -211,6 +215,8 @@ public class PlayerController : ControllerBase
             Player player = gamesManager.GetPlayerByToken(game, token);
             bool playerExists = player != null ? true : false;
 
+            logger.LogInformation("Status: 200. OK.");
+
             return StatusCode(StatusCodes.Status200OK, playerExists);
         }
         catch (Exception ex)
@@ -224,7 +230,7 @@ public class PlayerController : ControllerBase
     [HttpGet("IsHost")]
     public IActionResult IsHost(
         [FromHeader(Name = Headers.GameHash)] string gameHash,
-        [FromHeader(Name = Headers.GameHash)] string token
+        [FromHeader(Name = Headers.Token)] string token
     )
     {
         try 
@@ -255,6 +261,8 @@ public class PlayerController : ControllerBase
             }
 
             bool playerIsHost = gamesManager.CheckIfPlayerIsHost(gameHash, token);
+
+            logger.LogInformation("Status: 200. OK.");
 
             return StatusCode(StatusCodes.Status200OK, playerIsHost);
         }

@@ -50,7 +50,7 @@ public class GameController : ControllerBase
                 HostToken = game.HostToken
             };
 
-            logger.LogInformation($"Status: 201. Game with the hash {game.GameHash} and the host token '{game.HostToken}' has been created.");
+            logger.LogInformation($"Create - Status: 201. Game with the hash {game.GameHash} and the host token '{game.HostToken}' has been created.");
             
             return StatusCode(StatusCodes.Status201Created, JsonHelper.Serialize(response));
         }
@@ -94,6 +94,8 @@ public class GameController : ControllerBase
 
             gamesManager.RemoveGame(gameHash);
 
+            logger.LogInformation("Remove - Status: 200. OK.");
+
             return StatusCode(StatusCodes.Status200OK);
         }
         catch (Exception ex)
@@ -119,6 +121,8 @@ public class GameController : ControllerBase
             }
 
             bool gameExists = gamesManager.CheckIfGameExistsByHash(gameHash);
+
+            logger.LogInformation("Exists - Status: 200. OK.");
 
             return StatusCode(StatusCodes.Status200OK, gameExists);
         }
@@ -151,7 +155,77 @@ public class GameController : ControllerBase
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
+            logger.LogInformation("GetHash - Status: 200. OK.");
+
             return StatusCode(StatusCodes.Status200OK, game.GameHash);
+
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Status: 500. Internal server error. {ex}");
+
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+    [HttpGet("IsStarted")]
+    public IActionResult IsStarted([FromHeader] string gameHash)
+    {
+        try 
+        {
+            if (!ModelState.IsValid)
+            {   
+                logger.LogError("Status: 400. Invalid received request body.");
+
+                return StatusCode(StatusCodes.Status400BadRequest);
+            }
+
+            Game game = gamesManager.GetGameByHash(gameHash);
+
+            if (game == null)
+            {
+                logger.LogError("Status: 404. Not found.");
+
+                return StatusCode(StatusCodes.Status404NotFound);
+            }
+
+            logger.LogInformation("IsStarted - Status: 200. OK.");
+
+            return StatusCode(StatusCodes.Status200OK, game.GameState.IsStarted);
+
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Status: 500. Internal server error. {ex}");
+
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+    [HttpGet("Get")]
+    public IActionResult Get([FromHeader] string gameHash)
+    {
+        try 
+        {
+            if (!ModelState.IsValid)
+            {   
+                logger.LogError("Status: 400. Invalid received request body.");
+
+                return StatusCode(StatusCodes.Status400BadRequest);
+            }
+
+            Game game = gamesManager.GetGameByHash(gameHash);
+
+            if (game == null)
+            {
+                logger.LogError("Status: 404. Not found.");
+
+                return StatusCode(StatusCodes.Status404NotFound);
+            }
+
+            logger.LogInformation("Get - Status: 200. OK.");
+
+            return StatusCode(StatusCodes.Status200OK, game);
 
         }
         catch (Exception ex)

@@ -1,7 +1,12 @@
 import { Player } from "../redux/slices/player-slice";
 
-export interface CreateGameRequestBody {
-  hostUsername: string;
+export interface CreateGameBody {
+  username: string;
+}
+
+export interface CreateGameResponse {
+  gameHash: string;
+  hostToken: string;
 }
 
 export interface CreateGameRequestResponse {

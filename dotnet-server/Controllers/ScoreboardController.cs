@@ -38,6 +38,8 @@ public class ScoreboardController : ControllerBase
 
             playerScoreRepository.AddPlayerScore(playerScore);
 
+            logger.LogInformation("Status: 201. Created.");
+
             return StatusCode(StatusCodes.Status201Created);
         }
         catch (Exception ex)
@@ -57,6 +59,8 @@ public class ScoreboardController : ControllerBase
             IEnumerable<PlayerScore> topPlayerScores = playerScoreRepository.GetTopPlayerScores();
             string topPlayerScoresSerialized = JsonHelper.Serialize(topPlayerScores);
             
+            logger.LogInformation("Status: 200. OK.");
+
             return StatusCode(StatusCodes.Status200OK, topPlayerScoresSerialized);
         }
         catch (Exception ex)

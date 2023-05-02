@@ -82,6 +82,8 @@ public class ChatController : ControllerBase
                     .SendAsync(HubEvents.OnSendChatMessage, JsonHelper.Serialize(message));
             }
 
+            logger.LogInformation("Status: 201. Created.");
+
             return StatusCode(StatusCodes.Status201Created, JsonHelper.Serialize(message));
         }
         catch (Exception ex)
@@ -134,6 +136,8 @@ public class ChatController : ControllerBase
                     .Client(connectionId)
                     .SendAsync(HubEvents.OnLoadChatMessages, JsonHelper.Serialize(game.ChatMessages));
             }
+
+            logger.LogInformation("Status: 201. Created.");
 
             return StatusCode(StatusCodes.Status201Created, JsonHelper.Serialize(game.ChatMessages));
         }

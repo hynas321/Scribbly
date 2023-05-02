@@ -1,7 +1,6 @@
 import * as signalR from "@microsoft/signalr";
 
 class Hub {
-  
   private connection: signalR.HubConnection
 
   constructor(url: string) {
@@ -9,10 +8,16 @@ class Hub {
       .withUrl(url, {
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,
-        withCredentials: false
+        withCredentials: false,
+        headers: {
+          "token": localStorage.getItem("token") as string,
+          "gameHash": localStorage.getItem("gameHash") as string
+        }
       })
       .withAutomaticReconnect()
       .build();
+
+
   }
 
   async start() {
@@ -49,6 +54,10 @@ class Hub {
 
   onreconnected(callback: (...args: any[]) => any) {
     this.connection.onreconnected(callback);
+  }
+
+  getConnection() {
+    return this.connection;
   }
 
   getState() {

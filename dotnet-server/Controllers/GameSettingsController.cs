@@ -68,6 +68,8 @@ public class GameSettingsController : ControllerBase
                     .SendAsync(HubEvents.OnSetAbstractNouns, (bool)body.Setting);
             }
 
+            logger.LogInformation("Status: 200. OK.");
+
             return StatusCode(StatusCodes.Status200OK, (bool)body.Setting);
         }
         catch (Exception ex)
@@ -123,6 +125,8 @@ public class GameSettingsController : ControllerBase
                     .Group(gameHash)
                     .SendAsync(HubEvents.OnSetDrawingTimeSeconds, (int)body.Setting);
             }
+
+            logger.LogInformation("Status: 200. OK.");
 
             return StatusCode(StatusCodes.Status200OK, (int)body.Setting);
         }
@@ -180,6 +184,8 @@ public class GameSettingsController : ControllerBase
                     .SendAsync(HubEvents.OnSetRoundsCount, (int)body.Setting);
             }
 
+            logger.LogInformation("Status: 200. OK.");
+
             return StatusCode(StatusCodes.Status200OK, (int)body.Setting);
         }
         catch (Exception ex)
@@ -236,6 +242,8 @@ public class GameSettingsController : ControllerBase
                     .SendAsync(HubEvents.OnSetRoundsCount, (string)body.Setting);
             }
 
+            logger.LogInformation("Status: 200. OK.");
+
             return StatusCode(StatusCodes.Status200OK, (string)body.Setting);
         }
         catch (Exception ex)
@@ -281,6 +289,8 @@ public class GameSettingsController : ControllerBase
                     .Client(connectionId)
                     .SendAsync(HubEvents.OnSetRoundsCount, JsonHelper.Serialize(settings));
             }
+
+            logger.LogInformation("Status: 200. OK.");
 
             return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(settings));
         }

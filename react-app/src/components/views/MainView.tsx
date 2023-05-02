@@ -10,15 +10,12 @@ import PlayerList from '../PlayerList';
 import Popup from '../Popup';
 import HttpRequestHandler from '../../utils/HttpRequestHandler';
 import UrlHelper from '../../utils/UrlHelper';
-import { CreateGameRequestResponse, JoinGameRequestResponse } from '../../utils/RequestInterfaces';
-import { updatedPlayerList } from '../../redux/slices/game-state-slice';
-import { ConnectionHubContext } from '../../context/ConnectionHubContext';
+import { CreateGameRequestResponse } from '../../utils/RequestInterfaces';
 
 function MainView() {
-  const hub = useContext(ConnectionHubContext);
   const httpRequestHandler = new HttpRequestHandler();
   const urlHelper = new UrlHelper();
-  const minUsernameLength: number = 5;
+  const minUsernameLength: number = 1;
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -33,10 +30,11 @@ function MainView() {
   const [playerListVisible, setPlayerListVisible] = useState(false);
   const [popupVisible, setPopupVisible] = useState(false);
   const [playerList, setPlayerList] = useState<Player[]>([]);
+  const [joiningGame, setJoiningGame] = useState(false);
 
   const createGame = async () => {
     await httpRequestHandler.createGame(username)
-      .then((data: CreateGameRequestResponse) => {
+      .then(async (data: CreateGameRequestResponse) => {
         const player: Player = {
           username: username,
           score: 0,
@@ -45,29 +43,36 @@ function MainView() {
         }
 
         dispatch(updatedPlayer(player));
+        setJoiningGame(true);
       })
       .catch(() => {
+        console.log("S")
         displayAlert("Error", "danger");
       });
   }
 
-  const joinGame = async() => {
-    await httpRequestHandler.joinGame(player.gameHash, username)
-      .then((data: JoinGameRequestResponse) => {
-        dispatch(updatedPlayer(data.player));
-        dispatch(updatedPlayerList(data.playerList));
-        console.log(data)
-        if (data.gameIsStarted) {
-          navigate(`${config.gameClientEndpoint}`);
+  const navigateToProperPage = async () => {
+    await httpRequestHandler.checkIfGameIsStarted(player.gameHash)
+      .then((data: boolean) => {
+
+        if (typeof data != "boolean") {
+          setPopupVisible(false);
+          setJoiningGame(false);
+          displayAlert("Game does not exist", "danger");
+          return;
+        }
+
+        if (data === true) {
+          navigate(config.gameClientEndpoint);
         }
         else {
-          navigate(`${config.lobbyClientEndpoint}`);
+          navigate(config.lobbyClientEndpoint);
         }
-        
       })
       .catch(() => {
-        displayAlert("Error", "danger");
-      })
+        navigate(config.mainClientEndpoint);
+        displayAlert("Something went wrong, try again", "danger");
+      });
   }
 
   const displayAlert = (message: string, type: string) => {
@@ -84,16 +89,15 @@ function MainView() {
     setUsername(value.trim());
   }
 
-  const handleCreateLobbyButtonClick = async () => {
+  const handleCreateGameButtonClick = async () => {
     if (username.length < minUsernameLength) {
       return;
     }
     
     await createGame();
-    await joinGame();
   }
 
-  const handleJoinLobbyButtonClick = async () => {
+  const handleJoinGameButtonClick = async () => {
     if (username.length < minUsernameLength) {
       return;
     }
@@ -107,8 +111,7 @@ function MainView() {
 
   const handleOnSubmitPopup = async (value: string) => {
     dispatch(updatedGameHash(urlHelper.getGameHash(value)));
-
-    await joinGame();
+    setJoiningGame(true);
   }
 
   useEffect(() => {
@@ -126,8 +129,6 @@ function MainView() {
     }
 
     fetchPlayerScores();
-
-    hub.start();
   }, []);
 
   useEffect(() => {
@@ -141,12 +142,18 @@ function MainView() {
     }
   }, [username]);
 
+  useEffect(() => {
+    if (joiningGame === true) {
+      navigateToProperPage();
+    }
+  }, [joiningGame]);
+
   return (
     <div className="container">
       <div className="col-lg-4 col-sm-7 col-xs-6 mx-auto text-center">
         <Popup 
           title={"Join the lobby"}
-          inputFormPlaceholderText={"Paste the invitation URL here"}
+          inputFormPlaceholderText={"Paste the invitation hash here"}
           visible={popupVisible}
           onSubmit={handleOnSubmitPopup}
           onClose={handleClosePopup}
@@ -165,12 +172,12 @@ function MainView() {
           text={"Create the lobby"}
           type="success"
           active={createLobbyActiveButton}
-          onClick={handleCreateLobbyButtonClick}
+          onClick={handleCreateGameButtonClick}
         />
         <Button
           text="Join the lobby"
           active={joinLobbyActiveButton}
-          onClick={handleJoinLobbyButtonClick}
+          onClick={handleJoinGameButtonClick}
         />
       </div>
       <div className="col-lg-3 col-sm-6 col-xs-6 mt-5 text-center mx-auto">

@@ -1,21 +1,40 @@
 import axios from 'axios';
 import config from '../../config.json';
 import ApiEndpoints from '../hub/ApiEndpoints';
-import { CreateGameRequestBody, GameExistsBody, JoinGameRequestBody, JoinGameRequestResponse, PlayerIsHostBody } from './RequestInterfaces';
+import { CreateGameBody, CreateGameResponse, GameExistsBody, JoinGameRequestBody, JoinGameRequestResponse, PlayerIsHostBody } from './RequestInterfaces';
+import ApiHeaders from '../hub/ApiHeaders';
 
 class HttpRequestHandler {
   private httpServerUrl: string = config.httpServerUrl;
 
-  async createGame(hostUsername: string): Promise<any> {
-    const requestBody: CreateGameRequestBody = {
-      hostUsername: hostUsername
+  async createGame(username: string): Promise<any> {
+    const requestBody: CreateGameBody = {
+      username: username
     };
 
-    return await axios.post(`${this.httpServerUrl}${ApiEndpoints.gameCreate}`, requestBody)
+    return await axios.post<CreateGameResponse>(`${this.httpServerUrl}${ApiEndpoints.gameCreate}`, requestBody)
       .then(response => {
         switch (response.status) {
           case 201:
             return response.data
+          default:
+            throw new Error("Error");
+        }
+      })
+      .catch(error => {
+        return error;
+      });
+  }
+
+  async checkIfGameIsStarted(gameHash: string): Promise<any> {
+    return await axios.get<boolean>(`${this.httpServerUrl}${ApiEndpoints.gameIsStarted}`, {
+      headers: {
+        "GameHash": gameHash
+      }})
+      .then(response => {
+        switch (response.status) {
+          case 200:
+            return response.data as boolean
           default:
             throw new Error("Error");
         }
@@ -67,7 +86,7 @@ class HttpRequestHandler {
   async fetchGameHash(token: string): Promise<any> {
     return await axios.get(`${this.httpServerUrl}${ApiEndpoints.gameGetHash}`, {
       headers: {
-        'token': token
+        'Token': token
       }
     })
     .then(response => {
@@ -84,28 +103,28 @@ class HttpRequestHandler {
   }
 
   async fetchPlayerIsHost(token: string, gameHash: string): Promise<any> {
-    const requestBody: PlayerIsHostBody = {
-      gameHash: gameHash,
-      token: token
-    }
-
-    return await axios.post(`${this.httpServerUrl}${ApiEndpoints.gameExists}`, requestBody)
-      .then(response => {
-        switch (response.status) {
-          case 200:
-            return response.data as boolean
-          default:
-            throw new Error("Error");
-        }
-      })
-      .catch(error => {
-        return error;
-      });
+    return await axios.get(`${this.httpServerUrl}${ApiEndpoints.playerIsHost}`, {
+      headers: {
+        "GameHash": gameHash,
+        'Token': token
+      }
+    })
+    .then(response => {
+      switch (response.status) {
+        case 200:
+          return response.data as boolean
+        default:
+          throw new Error("Error");
+      }
+    })
+    .catch(error => {
+      return error;
+    });
   }
 
   async fetchPlayerScores()
   {
-    return await axios.get(`${this.httpServerUrl}${ApiEndpoints.playerScoresGet}`)
+    return await axios.get(`${this.httpServerUrl}${ApiEndpoints.scoreboardGet}`)
       .then(response => {
         switch (response.status) {
           case 200:

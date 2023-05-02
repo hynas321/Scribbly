@@ -38,7 +38,11 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
         text: inputFormValue
       }
 
-      await hub.invoke(HubEvents.sendChatMessage, sendChatMessageBody);
+      await hub.invoke(HubEvents.sendChatMessage,
+        player.token,
+        player.gameHash,
+        { text: sendChatMessageBody }
+      );
       
       if (inputFormRef && inputFormRef.current) {
         inputFormRef.current.value = "";
