@@ -1,22 +1,21 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Button from '../Button';
 import InputForm from '../InputForm';
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { useAppDispatch } from '../../redux/hooks';
 import config from '../../../config.json';
 import Alert from '../Alert';
 import { useNavigate } from 'react-router-dom';
-import { Player, updatedGameHash, updatedPlayer, updatedUsername } from '../../redux/slices/player-slice';
+import { Player, } from '../../redux/slices/player-slice';
 import PlayerList from '../PlayerList';
-import Popup from '../Popup';
-import UrlHelper from '../../utils/UrlHelper';
 import HttpRequestHandler from '../../http/HttpRequestHandler';
 import { CreateGameResponse, JoinGameResponse } from '../../http/HttpInterfaces';
 import { updatedAlert, updatedVisible } from '../../redux/slices/alert-slice';
-import { updatedPlayerList } from '../../redux/slices/game-state-slice';
+import VerificationHelper from '../../utils/VerificationHelper';
+import useLocalStorageState from 'use-local-storage-state';
 
 function MainView() {
   const httpRequestHandler = new HttpRequestHandler();
-  const urlHelper = new UrlHelper();
+  const verificationHelper = new VerificationHelper();
   const minUsernameLength: number = 1;
 
   const isInitialEffectRender = useRef(true);
@@ -24,16 +23,13 @@ function MainView() {
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const player = useAppSelector((state) => state.player);
 
   const [username, setUsername] = useState("");
   const [createLobbyActiveButton, setCreateLobbyActiveButton] = useState(false);
   const [joinLobbyActiveButton, setJoinLobbyActiveButton] = useState(false);
   const [playerListVisible, setPlayerListVisible] = useState(false);
-  const [popupVisible, setPopupVisible] = useState(false);
   const [playerList, setPlayerList] = useState<Player[]>([]);
-  const [joiningGame, setJoiningGame] = useState(false);
-  const [navigatingToProperPage, setNavigatingToProperPage] = useState(false);
+  const [token, setToken] = useLocalStorageState("token");
 
   const handleInputFormChange = (value: string) => {
     setUsername(value.trim());
@@ -47,16 +43,9 @@ function MainView() {
     const createGame = async () => {
       await httpRequestHandler.createGame(username)
         .then(async (data: CreateGameResponse) => {
-          const player: Player = {
-            username: username,
-            score: 0,
-            token: data.hostToken,
-            gameHash: data.gameHash
-          }
           
-          console.log(`Game created, hash: ${data.gameHash}`);
-          dispatch(updatedPlayer(player));
-          setJoiningGame(true);
+          setToken(data.hostToken);
+          navigate(config.gameClientEndpoint);
         })
         .catch(() => {
           displayAlert("Error", "danger");
@@ -71,17 +60,28 @@ function MainView() {
       return;
     }
 
-    setPopupVisible(true);
-  }
+    const checkIfGameExists = async () => {
+      await httpRequestHandler.checkIfGameExists()
+        .then((data: boolean) => {
+  
+          if (typeof data != "boolean") {
+            displayAlert("Unexpected error, try again", "danger");
+            return;
+          }
+  
+          if (data === true) {
+            navigate(config.gameClientEndpoint);
+          }
+          else {
+            displayAlert("Game does not exist", "danger");
+          }
+        })
+        .catch(() => {
+          displayAlert("Unexpected error, try again", "danger");
+        });
+    }
 
-  const handleClosePopup = () => {
-    setPopupVisible(false);
-  }
-
-  const handleOnSubmitPopup = async (value: string) => {
-    dispatch(updatedUsername(username));
-    dispatch(updatedGameHash(urlHelper.getGameHash(value)));
-    setJoiningGame(true);
+    await checkIfGameExists();
   }
 
   useEffect(() => {
@@ -130,62 +130,6 @@ function MainView() {
     isUsernameEffectRendered.current = false;
   }, [username]);
 
-  useEffect(() => {
-    if (!joiningGame) {
-      return;
-    }
-
-    const joinGame = async () => {
-      await httpRequestHandler.joinGame(player.token, player.gameHash, player.username)
-        .then((data: JoinGameResponse) => {
-          dispatch(updatedPlayerList(data.playerScores));
-          dispatch(updatedGameHash(data.gameHash));
-        })
-        .catch(() => {
-          displayAlert("Game does not exist", "danger");
-        });
-    }
-
-    joinGame();
-    console.log("Joining the game...");
-    setNavigatingToProperPage(true);
-  
-  }, [joiningGame]);
-
-  useEffect(() => {
-    if (!navigatingToProperPage) {
-      return;
-    }
-
-    const navigateToProperPage = async () => {
-      await httpRequestHandler.checkIfGameIsStarted(player.gameHash)
-        .then((data: boolean) => {
-  
-          if (typeof data != "boolean") {
-            setPopupVisible(false);
-            setJoiningGame(false);
-            displayAlert("Game does not exist", "danger");
-            return;
-          }
-  
-          if (data === true) {
-            navigate(config.gameClientEndpoint);
-          }
-          else {
-            navigate(config.lobbyClientEndpoint);
-          }
-        })
-        .catch(() => {
-          navigate(config.mainClientEndpoint);
-          displayAlert("Something went wrong, try again", "danger");
-        });
-    }
-
-    navigateToProperPage();
-    console.log("Navigating to the page...");
-
-  }, [navigatingToProperPage]);
-
   const displayAlert = (message: string, type: string) => {
     dispatch(updatedAlert({
       text: message,
@@ -201,13 +145,6 @@ function MainView() {
   return (
     <div className="container">
       <div className="col-lg-4 col-sm-7 col-xs-6 mx-auto text-center">
-        <Popup 
-          title={"Join the lobby"}
-          inputFormPlaceholderText={"Paste the invitation hash here"}
-          visible={popupVisible}
-          onSubmit={handleOnSubmitPopup}
-          onClose={handleClosePopup}
-        />
         <Alert />
         <InputForm
           placeholderValue="Enter username"

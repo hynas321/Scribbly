@@ -8,11 +8,7 @@ class Hub {
       .withUrl(url, {
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,
-        withCredentials: false,
-        headers: {
-          "token": localStorage.getItem("token") as string,
-          "gameHash": localStorage.getItem("gameHash") as string
-        }
+        withCredentials: false
       })
       .withAutomaticReconnect()
       .build();

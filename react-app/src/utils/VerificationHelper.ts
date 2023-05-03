@@ -1,4 +1,4 @@
-class UrlHelper
+class VerificationHelper
 {
     getGameHash(url: string)
     {
@@ -7,4 +7,4 @@ class UrlHelper
     }
 }
 
-export default UrlHelper;
+export default VerificationHelper;

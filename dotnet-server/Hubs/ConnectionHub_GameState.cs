@@ -6,14 +6,11 @@ namespace Dotnet.Server.Hubs;
 public partial class HubConnection : Hub
 {
     [HubMethodName(HubEvents.StartGame)]
-    public async Task StartGame(
-        string token,
-        string gameHash
-    )
+    public async Task StartGame(string token)
     {
         try
         {
-            Game game = gamesManager.GetGameByHash(gameHash);
+            Game game = gameManager.GetGame();
 
             if (game == null)
             {
@@ -27,9 +24,7 @@ public partial class HubConnection : Hub
 
             game.GameState.IsStarted = true;
 
-            await Clients
-                .Group(gameHash)
-                .SendAsync(HubEvents.OnStartGame);
+            await Clients.All.SendAsync(HubEvents.OnStartGame);
 
         }
         catch (Exception ex)
@@ -39,14 +34,16 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.StartTimer)]
-    public async Task StartTimer(
-        string token,
-        string gameHash
-    )
+    public async Task StartTimer(string token)
     {
         try
         {  
-            Game game = gamesManager.GetGameByHash(gameHash);
+            Game game = gameManager.GetGame();
+
+            if (game == null)
+            {
+                return;
+            }
 
             int initialTime = game.GameState.CurrentDrawingTimeSeconds;
             int currentTime = initialTime;
@@ -56,9 +53,7 @@ public partial class HubConnection : Hub
             {
                 for (int i = 0; i < initialTime; i++)
                 {   
-                    await Clients
-                        .Group(gameHash)
-                        .SendAsync(HubEvents.OnStartTimer, currentTime);
+                    await Clients.All.SendAsync(HubEvents.OnStartTimer, currentTime);
 
                     currentTime--;
 

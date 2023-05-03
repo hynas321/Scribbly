@@ -13,7 +13,7 @@ namespace Dotnet.Server.Controllers;
 [Route("api/[controller]")]
 public class GameController : ControllerBase
 {
-    private readonly GamesManager gamesManager = new GamesManager(25);
+    private readonly GameManager gameManager = new GameManager(25);
     private readonly ILogger<GameController> logger;
 
     public GameController(ILogger<GameController> logger)
@@ -22,9 +22,7 @@ public class GameController : ControllerBase
     }
 
     [HttpPost("Create")]
-    public IActionResult Create(
-        [FromBody] CreateGameBody body
-    )
+    public IActionResult Create([FromBody] CreateGameBody body)
     {
         try 
         {
@@ -35,21 +33,26 @@ public class GameController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
+            if (gameManager.GetGame() != null)
+            {
+                logger.LogError("Create Status: 409. Conflict.");
+
+                return StatusCode(StatusCodes.Status409Conflict);
+            }
+            
             Game game = new Game() 
             {
-                GameHash = Guid.NewGuid().ToString().Replace("-", ""),
                 HostToken = Guid.NewGuid().ToString().Replace("-", ""),
             };
 
-            gamesManager.AddGame(game);
+            gameManager.SetGame(game);
 
             CreateGameResponse response = new CreateGameResponse()
             {
-                GameHash = game.GameHash,
                 HostToken = game.HostToken
             };
 
-            logger.LogInformation($"Create Status: 201. Game with the hash {game.GameHash} and the host token '{game.HostToken}' has been created.");
+            logger.LogInformation($"Create Status: 201. Game has been created. Host token: {response.HostToken}");
             
             return StatusCode(StatusCodes.Status201Created, JsonHelper.Serialize(response));
         }
@@ -62,10 +65,7 @@ public class GameController : ControllerBase
     }
 
     [HttpDelete("Remove")]
-    public IActionResult Remove(
-        [FromHeader(Name = Headers.Token)] string token,
-        [FromHeader(Name = Headers.GameHash)] string gameHash
-    )
+    public IActionResult Remove([FromHeader(Name = Headers.Token)] string token)
     {
         try 
         {
@@ -76,7 +76,7 @@ public class GameController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            Game game = gamesManager.GetGameByHash(gameHash);
+            Game game = gameManager.GetGame();
 
             if (game == null)
             {
@@ -91,7 +91,7 @@ public class GameController : ControllerBase
                 return StatusCode(StatusCodes.Status401Unauthorized);
             }
 
-            gamesManager.RemoveGame(gameHash);
+            gameManager.RemoveGame();
 
             logger.LogInformation("Remove Status: 200. OK.");
 
@@ -106,9 +106,7 @@ public class GameController : ControllerBase
     }
 
     [HttpGet("Exists")]
-    public IActionResult Exists(
-        [FromHeader(Name = Headers.GameHash)] string gameHash
-    )
+    public IActionResult Exists()
     {
         try 
         {
@@ -119,7 +117,7 @@ public class GameController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            bool gameExists = gamesManager.CheckIfGameExistsByHash(gameHash);
+            bool gameExists = gameManager.GetGame() != null;
 
             logger.LogInformation("Exists Status: 200. OK.");
 
@@ -133,42 +131,8 @@ public class GameController : ControllerBase
         }
     }
 
-    [HttpGet("GetHash")]
-    public IActionResult GetHash([FromHeader] string token)
-    {
-        try 
-        {
-            if (!ModelState.IsValid)
-            {   
-                logger.LogError("GetHash Status: 400. Invalid received request body.");
-
-                return StatusCode(StatusCodes.Status400BadRequest);
-            }
-
-            Game game = gamesManager.GetGameByPlayerToken(token);
-
-            if (game == null)
-            {
-                logger.LogError("GetHash Status: 404. Not found.");
-
-                return StatusCode(StatusCodes.Status404NotFound);
-            }
-
-            logger.LogInformation("GetHash Status: 200. OK.");
-
-            return StatusCode(StatusCodes.Status200OK, game.GameHash);
-
-        }
-        catch (Exception ex)
-        {
-            logger.LogError($"GetHash Status: 500. Internal server error. {ex}");
-
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }
-    }
-
     [HttpGet("IsStarted")]
-    public IActionResult IsStarted([FromHeader] string gameHash)
+    public IActionResult IsStarted()
     {
         try 
         {
@@ -179,7 +143,7 @@ public class GameController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            Game game = gamesManager.GetGameByHash(gameHash);
+            Game game = gameManager.GetGame();
 
             if (game == null)
             {
@@ -202,7 +166,7 @@ public class GameController : ControllerBase
     }
 
     [HttpGet("Get")]
-    public IActionResult Get([FromHeader] string gameHash)
+    public IActionResult Get()
     {
         try 
         {
@@ -213,7 +177,7 @@ public class GameController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            Game game = gamesManager.GetGameByHash(gameHash);
+            Game game = gameManager.GetGame();
 
             if (game == null)
             {
@@ -235,15 +199,9 @@ public class GameController : ControllerBase
         }
     }
 
-    [HttpGet("GetAll")]
-    public IActionResult GetAll()
-    {
-        return StatusCode(StatusCodes.Status200OK, gamesManager.GetAllGames());
-    }
-
     [HttpGet("GetPlayers")]
-    public IActionResult GetPlayers([FromHeader] string gameHash)
+    public IActionResult GetPlayerScores()
     {
-        return StatusCode(StatusCodes.Status200OK, gamesManager.GetGameByHash(gameHash).GameState.Players);
+        return StatusCode(StatusCodes.Status200OK, gameManager.GetGame().GameState.PlayerScores);
     }
 }

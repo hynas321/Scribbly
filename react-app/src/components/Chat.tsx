@@ -32,7 +32,7 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
   const handleButtonPress = () => {
 
     const SendChatMessage = async () => {
-      await hub.invoke(HubEvents.sendChatMessage, player.token, player.gameHash, inputFormValue);
+      await hub.invoke(HubEvents.sendChatMessage, player.token, inputFormValue);
       
       if (inputFormRef && inputFormRef.current) {
         inputFormRef.current.value = "";
@@ -64,7 +64,7 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
     });
 
     const loadChatMessages = async () => {
-      await hub.invoke(HubEvents.loadChatMessages, player.token, player.gameHash);
+      await hub.invoke(HubEvents.loadChatMessages, player.token);
     };
 
     loadChatMessages();

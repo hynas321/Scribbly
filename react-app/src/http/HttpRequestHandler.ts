@@ -26,16 +26,14 @@ class HttpRequestHandler {
       });
   }
 
-  async joinGame(token: string, gameHash: string, username: string): Promise<any> {
+  async joinGame(token: string, username: string): Promise<any> {
     const requestBody: JoinGameBody = {
       username: username
     };
 
-    console.log(gameHash);
     return await axios.post<JoinGameResponse>(`${this.httpServerUrl}${ApiEndpoints.playerJoinGame}`, requestBody, {
         headers: {
           "Token": token,
-          "GameHash": gameHash
         }
       })
       .then(response => {
@@ -51,11 +49,8 @@ class HttpRequestHandler {
       });
   }
 
-  async checkIfGameIsStarted(gameHash: string): Promise<any> {
-    return await axios.get<boolean>(`${this.httpServerUrl}${ApiEndpoints.gameIsStarted}`, {
-      headers: {
-        "GameHash": gameHash
-      }})
+  async checkIfGameIsStarted(): Promise<any> {
+    return await axios.get<boolean>(`${this.httpServerUrl}${ApiEndpoints.gameIsStarted}`)
       .then(response => {
         switch (response.status) {
           case 200:
@@ -69,9 +64,9 @@ class HttpRequestHandler {
       });
   }
 
-  async gameExists(gameHash: string): Promise<any> {
+  async checkIfGameExists(): Promise<any> {
 
-    return await axios.post(`${this.httpServerUrl}${ApiEndpoints.gameExists}`)
+    return await axios.get<boolean>(`${this.httpServerUrl}${ApiEndpoints.gameExists}`)
       .then(response => {
         switch (response.status) {
           case 200:
@@ -104,10 +99,9 @@ class HttpRequestHandler {
     });
   }
 
-  async fetchPlayerIsHost(token: string, gameHash: string): Promise<any> {
+  async fetchPlayerIsHost(token: string): Promise<any> {
     return await axios.get(`${this.httpServerUrl}${ApiEndpoints.playerIsHost}`, {
       headers: {
-        "GameHash": gameHash,
         'Token': token
       }
     })
@@ -124,8 +118,7 @@ class HttpRequestHandler {
     });
   }
 
-  async fetchPlayerScores()
-  {
+  async fetchPlayerScores() {
     return await axios.get(`${this.httpServerUrl}${ApiEndpoints.scoreboardGet}`)
       .then(response => {
         switch (response.status) {

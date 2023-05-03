@@ -3,7 +3,6 @@ export interface CreateGameBody {
 }
 
 export interface CreateGameResponse {
-  gameHash: string;
   hostToken: string;
 }
 
@@ -12,6 +11,5 @@ export interface JoinGameBody {
 }
 
 export interface JoinGameResponse {
-  gameHash: string;
   playerScores: PlayerScore[];
 }

@@ -64,7 +64,7 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
 
     if (!gameSettingsLoaded) {
       const loadGameSettings = async() => {
-        //await hub.invoke(HubEvents.LoadGameSettings);
+        await hub.invoke(HubEvents.LoadGameSettings, player.token);
 
         gameSettingsLoaded = true;
       }

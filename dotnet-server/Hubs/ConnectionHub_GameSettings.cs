@@ -7,11 +7,7 @@ namespace Dotnet.Server.Hubs;
 public partial class HubConnection : Hub
 {
     [HubMethodName(HubEvents.SetAbstractNouns)]
-    public async Task SetAbstractNouns(
-        string token,
-        string gameHash,
-        object setting
-    )
+    public async Task SetAbstractNouns(string token, object setting)
     {
         try
         {
@@ -20,7 +16,7 @@ public partial class HubConnection : Hub
                 return;
             }
 
-            Game game = gamesManager.GetGameByHash(gameHash);
+            Game game = gameManager.GetGame();
 
             if (game == null)
             {
@@ -37,9 +33,7 @@ public partial class HubConnection : Hub
             settings.NonAbstractNounsOnly = (bool)setting;
             game.GameSettings = settings;
 
-            await Clients
-                .Group(gameHash)
-                .SendAsync(HubEvents.OnSetAbstractNouns, (bool)setting);
+            await Clients.All.SendAsync(HubEvents.OnSetAbstractNouns, (bool)setting);
         }
         catch (Exception ex)
         {
@@ -48,11 +42,7 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.SetDrawingTimeSeconds)]
-    public async Task SetDrawingTimeSeconds(
-        string token,
-        string gameHash,
-        object setting
-    )
+    public async Task SetDrawingTimeSeconds(string token, object setting)
     {
         try
         {
@@ -61,7 +51,7 @@ public partial class HubConnection : Hub
                 return;
             }
 
-            Game game = gamesManager.GetGameByHash(gameHash);
+            Game game = gameManager.GetGame();
 
             if (game == null)
             {
@@ -78,9 +68,7 @@ public partial class HubConnection : Hub
             settings.DrawingTimeSeconds = (int)setting;
             game.GameSettings = settings;
 
-            await Clients
-                .Group(gameHash)
-                .SendAsync(HubEvents.OnSetDrawingTimeSeconds, (int)setting);
+            await Clients.All.SendAsync(HubEvents.OnSetDrawingTimeSeconds, (int)setting);
         }
         catch (Exception ex)
         {
@@ -89,11 +77,7 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.SetRoundsCount)]
-    public async Task SetRoundsCount(
-        string token,
-        string gameHash,
-        object setting
-    )
+    public async Task SetRoundsCount(string token, object setting)
     {
         try
         {
@@ -102,7 +86,7 @@ public partial class HubConnection : Hub
                 return;
             }
 
-            Game game = gamesManager.GetGameByHash(gameHash);
+            Game game = gameManager.GetGame();
 
             if (game == null)
             {
@@ -119,9 +103,7 @@ public partial class HubConnection : Hub
             settings.RoundsCount = (int)setting;
             game.GameSettings = settings;
 
-            await Clients
-                .Group(gameHash)
-                .SendAsync(HubEvents.OnSetRoundsCount, (int)setting);
+            await Clients.All.SendAsync(HubEvents.OnSetRoundsCount, (int)setting);
         }
         catch (Exception ex)
         {
@@ -130,11 +112,7 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.SetWordLanguage)]
-    public async Task ChangeWordLanguageSetting(
-        string token,
-        string gameHash,
-        object setting
-    )
+    public async Task ChangeWordLanguageSetting(string token, object setting)
     {
         try
         {
@@ -143,7 +121,7 @@ public partial class HubConnection : Hub
                 return;
             }
 
-            Game game = gamesManager.GetGameByHash(gameHash);
+            Game game = gameManager.GetGame();
 
             if (game == null)
             {
@@ -160,9 +138,7 @@ public partial class HubConnection : Hub
             settings.WordLanguage = (string)setting;
             game.GameSettings = settings;
 
-            await Clients
-                .Group(gameHash)
-                .SendAsync(HubEvents.OnSetWordLanguage, (string)setting);
+            await Clients.All.SendAsync(HubEvents.OnSetWordLanguage, (string)setting);
         }
         catch (Exception ex)
         {
@@ -171,15 +147,11 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.LoadGameSettings)]
-    public async Task LoadGameSettings(
-        string token,
-        string gameHash
-    )
+    public async Task LoadGameSettings(string token)
     {
         try
         {
-            Game game = gamesManager.GetGameByHash(gameHash);
-
+            Game game = gameManager.GetGame();
             if (game == null)
             {
                 return;

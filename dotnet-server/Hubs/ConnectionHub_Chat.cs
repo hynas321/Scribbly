@@ -7,31 +7,23 @@ namespace Dotnet.Server.Hubs;
 public partial class HubConnection : Hub
 {
     [HubMethodName(HubEvents.SendChatMessage)]
-    public async Task SendChatMessage(
-        string token,
-        string gameHash,
-        string text
-    )
+    public async Task SendChatMessage(string token, string text)
     {
         try 
         {
-            logger.LogInformation(token);
-            logger.LogInformation(gameHash);
-            logger.LogInformation(text);
-
             if (text.Length < 1)
             {
                 logger.LogError($"SendChatMessage: Text is too short {text}");
             }
 
-            Game game = gamesManager.GetGameByHash(gameHash);
+            Game game = gameManager.GetGame();
 
             if (game == null)
             {
-                logger.LogError($"SendChatMessage: Game with the hash {gameHash} does not exist");
+                logger.LogError($"SendChatMessage: Game does not exist");
             }
 
-            Player player = gamesManager.GetPlayerByToken(game, token);
+            Player player = gameManager.GetPlayerByToken(token);
 
             if (player == null)
             {
@@ -49,11 +41,9 @@ public partial class HubConnection : Hub
                 Text = text
             };
 
-            gamesManager.AddChatMessage(gameHash, message);
+            gameManager.AddChatMessage(message);
 
-            await Clients
-                .Group(gameHash)
-                .SendAsync(HubEvents.OnLoadChatMessages, JsonHelper.Serialize(game.ChatMessages));
+            await Clients.All.SendAsync(HubEvents.OnLoadChatMessages, JsonHelper.Serialize(game.ChatMessages));
 
             logger.LogInformation($"SendChatMessage: Message {text} sent by player {player.Username}");
         }
@@ -64,21 +54,18 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.LoadChatMessages)]
-    public async Task LoadChatMessages(
-        string token,
-        string gameHash
-    )
+    public async Task LoadChatMessages(string token)
     {
         try 
         {
-            Game game = gamesManager.GetGameByHash(gameHash);
+            Game game = gameManager.GetGame();
 
             if (game == null)
             {
                 return;
             }
 
-            Player player = gamesManager.GetPlayerByToken(game, token);
+            Player player = gameManager.GetPlayerByToken(token);
 
             if (player == null)
             {

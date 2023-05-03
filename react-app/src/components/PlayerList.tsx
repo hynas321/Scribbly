@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { useAppSelector } from "../redux/hooks";
 
 interface PlayerListProps {
@@ -8,8 +9,21 @@ interface PlayerListProps {
 }
 
 function PlayerList({title, displayPoints, displayIndex, round}: PlayerListProps) {
-  const playerScores = useAppSelector((state) => state.gameState.playerScore);
+  const playerScore = useAppSelector((state) => state.gameState.playerScore);
+  const [playerScores, setPlayerScores] = useState<PlayerScore[]>(playerScore);
+  const isInitialEffectRender = useRef(true);
+  
+  useEffect(() => {
+    if (!isInitialEffectRender.current) {
+      return;
+    }
 
+    if (playerScores.length < 1) {
+      setPlayerScores([]);
+    }
+
+    isInitialEffectRender.current = false;
+  }, []);
   return (
     <>
       { round && <h5>Round {round.currentRound}/{round.roundCount}</h5>}

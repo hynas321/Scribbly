@@ -8,15 +8,11 @@ namespace Dotnet.Server.Hubs;
 public partial class HubConnection : Hub
 {
     [HubMethodName(HubEvents.DrawOnCanvas)]
-    public async Task DrawOnCanvas(
-        string token,
-        string gameHash,
-        string drawnLineSerialized
-    )
+    public async Task DrawOnCanvas(string token, string drawnLineSerialized)
     {   
         try 
         {
-            Game game = gamesManager.GetGameByHash(gameHash);
+            Game game = gameManager.GetGame();
 
             if (game == null)
             {
@@ -37,9 +33,7 @@ public partial class HubConnection : Hub
 
             game.DrawnLines.Add(drawnLine);
 
-            await Clients
-                .Group(gameHash)
-                .SendAsync(HubEvents.OnDrawOnCanvas, JsonHelper.Serialize(drawnLine));
+            await Clients.All.SendAsync(HubEvents.OnDrawOnCanvas, JsonHelper.Serialize(drawnLine));
         }
         catch (Exception ex)
         {
@@ -48,21 +42,18 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.LoadCanvas)]
-    public async Task LoadCanvas(
-        string token,
-        string gameHash
-    )
+    public async Task LoadCanvas(string token)
     {
         try 
         {
-            Game game = gamesManager.GetGameByHash(gameHash);
+            Game game = gameManager.GetGame();
 
             if (game == null)
             {
                 return;
             }
 
-            List<DrawnLine> drawnLines = gamesManager.GetGameByHash(gameHash).DrawnLines;
+            List<DrawnLine> drawnLines = game.DrawnLines;
 
             await Clients
                 .Client(Context.ConnectionId)
@@ -76,14 +67,11 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.ClearCanvas)]
-    public async Task ClearCanvas(
-        string token,
-        string gameHash
-    )
+    public async Task ClearCanvas(string token)
     {   
         try 
         {
-            Game game = gamesManager.GetGameByHash(gameHash);
+            Game game = gameManager.GetGame();
 
             if (game == null)
             {
@@ -95,9 +83,7 @@ public partial class HubConnection : Hub
                 return;
             }
 
-            await Clients
-                .Group(gameHash)
-                .SendAsync(HubEvents.OnClearCanvas);
+            await Clients.All.SendAsync(HubEvents.OnClearCanvas);
         }
         catch (Exception ex)
         {

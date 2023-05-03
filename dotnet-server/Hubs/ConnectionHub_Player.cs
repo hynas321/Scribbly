@@ -8,11 +8,7 @@ public partial class HubConnection : Hub
 {
 
     [HubMethodName(HubEvents.JoinGame)]
-    public async Task JoinGame(
-        string token,
-        string gameHash,
-        string username
-    )
+    public async Task JoinGame(string token, string username)
     {
         try 
         {
@@ -21,11 +17,11 @@ public partial class HubConnection : Hub
                 logger.LogError($"JoinGame: Username is too short {username}");
             }
 
-            Game game = gamesManager.GetGameByHash(gameHash);
+            Game game = gameManager.GetGame();
 
             if (game == null)
             {
-                logger.LogError($"JoinGame: Game with the hash {gameHash} does not exist");
+                logger.LogError($"JoinGame: Game does not exist");
             }
 
             Player player;
@@ -37,7 +33,6 @@ public partial class HubConnection : Hub
                     Username = username,
                     Score = 0,
                     Token = game.HostToken,
-                    GameHash = gameHash
                 };
             }
             else
@@ -47,7 +42,6 @@ public partial class HubConnection : Hub
                     Username = username,
                     Score = 0,
                     Token = Guid.NewGuid().ToString().Replace("-", ""),
-                    GameHash = gameHash
                 };
             }
 
@@ -57,19 +51,15 @@ public partial class HubConnection : Hub
                 Score = player.Score
             };
 
-            gamesManager.AddPlayer(game, player);
-            gamesManager.AddPlayerScore(game, playerScore);
+            gameManager.AddPlayer(player);
+            gameManager.AddPlayerScore(playerScore);
 
-            List<PlayerScore> playerScores = gamesManager.GetPlayersWithoutToken(gameHash);
+            List<PlayerScore> playerScores = gameManager.GetPlayersWithoutToken();
             bool gameIsStarted = game.GameState.IsStarted;
 
-            await Groups.AddToGroupAsync(Context.ConnectionId, gameHash);
+            await Clients.All.SendAsync(HubEvents.OnPlayerJoinedGame, JsonHelper.Serialize(playerScore));
 
-            await Clients
-                .GroupExcept(gameHash, Context.ConnectionId)
-                .SendAsync(HubEvents.OnPlayerJoinedGame, JsonHelper.Serialize(playerScore));
-
-            logger.LogInformation($"JoinGame: Player joined the game with the hash {gameHash}");    
+            logger.LogInformation($"JoinGame: Player joined the game");    
         }
         catch (Exception ex)
         {
@@ -78,21 +68,18 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.LeaveGame)]
-    public async Task LeaveGame(
-        string token,
-        string gameHash
-    )
+    public async Task LeaveGame(string token)
     {
         try
         {
-            Game game = gamesManager.GetGameByHash(gameHash);
+            Game game = gameManager.GetGame();
 
             if (game == null)
             {
                 return;
             }
 
-            Player player = gamesManager.GetPlayerByToken(game, token);
+            Player player = gameManager.GetPlayerByToken(token);
 
             if (player == null)
             {
@@ -101,22 +88,18 @@ public partial class HubConnection : Hub
 
             if (game.GameState.IsStarted)
             {
-                gamesManager.RemovePlayerScore(game, player.Username);
+                gameManager.RemovePlayerScore(player.Username);
             }
             else
             {
-                gamesManager.RemovePlayerScore(game, player.Username);
-                gamesManager.RemovePlayer(game, token);
+                gameManager.RemovePlayerScore(player.Username);
+                gameManager.RemovePlayer(token);
             }
 
             List<PlayerScore> playerScores = game.GameState.PlayerScores;
             string playerListSerialized = JsonHelper.Serialize(playerScores);
 
-            await Clients
-                .GroupExcept(gameHash, Context.ConnectionId)
-                .SendAsync(HubEvents.OnPlayerLeftGame, playerListSerialized);
-
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameHash);
+            await Clients.All.SendAsync(HubEvents.OnPlayerLeftGame, playerListSerialized);
         }
         catch (Exception ex)
         {
