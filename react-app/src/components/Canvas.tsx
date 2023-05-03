@@ -11,9 +11,8 @@ interface CanvasProps {
 }
 function Canvas({progressBarProperties}: CanvasProps) {
   const hub = useContext(ConnectionHubContext);
-  const gameHash = "TestGameHash"; //temporary
   const [color, setColor] = useState("#000000");
-  const { canvasRef, onMouseDown, clearCanvas } = useDraw(draw, hub, gameHash, color);;
+  const { canvasRef, onMouseDown, clearCanvas } = useDraw(draw, hub, color);
 
   const circlePickerColors = [material.black, material.red['500'],
     material.pink['500'], material.purple['500'], material.deepPurple['500'],

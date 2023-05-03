@@ -9,6 +9,7 @@ import { useContext, useEffect } from "react";
 import { ConnectionHubContext, connectionHub } from '../context/ConnectionHubContext';
 import * as signalR from '@microsoft/signalr';
 import HubEvents from '../hub/HubEvents';
+import useLocalStorage from 'use-local-storage';
 
 interface GameSettingsBoardProps {
   isPlayerHost: boolean;
@@ -16,15 +17,15 @@ interface GameSettingsBoardProps {
 
 function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
   const hub = useContext(ConnectionHubContext);
-  const player = useAppSelector((state) => state.player);
   const dispatch = useAppDispatch();
+  const [token, setToken] = useLocalStorage("token", "");
+
   let gameSettingsLoaded = false;
 
   const nonAbstractNounsOnlyText = "Allow only non-abstract nouns";
   const drawingTimeText = "Drawing time";
   const numberOfRoundsText = "Number of rounds";
   const chooseLanguageText = "Language of random words";
-  const testLobbyHash = "TestLobbyHash"; //temporary
 
   const settings = {
     nonAbstractNounsOnly: useAppSelector((state) => state.gameSettings.nonAbstractNounsOnly),
@@ -40,6 +41,7 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
 
     hub.on(HubEvents.onLoadGameSettings, (gameSettingsSerialized: any) => {
       const gameSettings = JSON.parse(gameSettingsSerialized) as GameSettings;
+
       dispatch(updatedNonAbstractNounsOnly(gameSettings.nonAbstractNounsOnly));
       dispatch(updatedDrawingTimeSeconds(gameSettings.drawingTimeSeconds));
       dispatch(updatedRoundsCount(gameSettings.roundsCount));
@@ -64,7 +66,7 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
 
     if (!gameSettingsLoaded) {
       const loadGameSettings = async() => {
-        await hub.invoke(HubEvents.LoadGameSettings, player.token);
+        await hub.invoke(HubEvents.LoadGameSettings, token);
 
         gameSettingsLoaded = true;
       }
@@ -81,19 +83,19 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
   }, [hub.getState()])
 
   const handleCheckBoxChange = async (checked: boolean) => {
-    //await hub.invoke(HubEvents.setAbstractNouns, testLobbyHash, checked);
+    await hub.invoke(HubEvents.setAbstractNouns, token, checked);
   }
 
   const handleRangeChange = async (value: number) => {
-    //await hub.invoke(HubEvents.setDrawingTimeSeconds, testLobbyHash, value);
+    await hub.invoke(HubEvents.setDrawingTimeSeconds, token, value);
   }
 
   const handleCheckFormChange = async (value: number) => {
-    //await hub.invoke(HubEvents.setRoundsCount, testLobbyHash, Number(value));
+    await hub.invoke(HubEvents.setRoundsCount, token, Number(value));
   }
 
   const handleInputSelectChange = async (value: string) => {
-    //await hub.invoke(HubEvents.setWordLanguage, testLobbyHash, value);
+    await hub.invoke(HubEvents.setWordLanguage, token, value);
   }
 
   return (

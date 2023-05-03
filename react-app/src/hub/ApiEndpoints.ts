@@ -6,6 +6,7 @@ class ApiEndpoints {
     static gameGetHash: string = "/api/Game/GetHash";
     static playerJoinGame: string = "/api/Player/JoinGame";
     static playerIsHost: string = "/api/Player/IsHost";
+    static playerExists: string = "/api/Player/Exists";
     static scoreboardGet: string = "/api/Scoreboard/Get";
 }
 

@@ -5,17 +5,15 @@ import { useAppDispatch } from '../../redux/hooks';
 import config from '../../../config.json';
 import Alert from '../Alert';
 import { useNavigate } from 'react-router-dom';
-import { Player, } from '../../redux/slices/player-slice';
+import { PlayerScore, updatedUsername, } from '../../redux/slices/player-score-slice';
 import PlayerList from '../PlayerList';
 import HttpRequestHandler from '../../http/HttpRequestHandler';
-import { CreateGameResponse, JoinGameResponse } from '../../http/HttpInterfaces';
+import { CreateGameResponse } from '../../http/HttpInterfaces';
 import { updatedAlert, updatedVisible } from '../../redux/slices/alert-slice';
-import VerificationHelper from '../../utils/VerificationHelper';
-import useLocalStorageState from 'use-local-storage-state';
+import useLocalStorage from 'use-local-storage';
 
 function MainView() {
   const httpRequestHandler = new HttpRequestHandler();
-  const verificationHelper = new VerificationHelper();
   const minUsernameLength: number = 1;
 
   const isInitialEffectRender = useRef(true);
@@ -25,11 +23,12 @@ function MainView() {
   const navigate = useNavigate();
 
   const [username, setUsername] = useState("");
-  const [createLobbyActiveButton, setCreateLobbyActiveButton] = useState(false);
-  const [joinLobbyActiveButton, setJoinLobbyActiveButton] = useState(false);
+  const [createGameActiveButton, setCreateGameActiveButton] = useState(false);
+  const [joinGameActiveButton, setJoinGameActiveButton] = useState(false);
   const [playerListVisible, setPlayerListVisible] = useState(false);
-  const [playerList, setPlayerList] = useState<Player[]>([]);
-  const [token, setToken] = useLocalStorageState("token");
+  const [playerScores, setPlayerScores] = useState<PlayerScore[]>([]);
+
+  const [token, setToken] = useLocalStorage("token", "");
 
   const handleInputFormChange = (value: string) => {
     setUsername(value.trim());
@@ -44,7 +43,12 @@ function MainView() {
       await httpRequestHandler.createGame(username)
         .then(async (data: CreateGameResponse) => {
           
-          setToken(data.hostToken);
+          if (!("hostToken" in data)) {
+            displayAlert("The game is already created. Join the game.", "primary");
+            return;
+          }
+
+          dispatch(updatedUsername(username));
           navigate(config.gameClientEndpoint);
         })
         .catch(() => {
@@ -70,6 +74,7 @@ function MainView() {
           }
   
           if (data === true) {
+            dispatch(updatedUsername(username));
             navigate(config.gameClientEndpoint);
           }
           else {
@@ -89,6 +94,17 @@ function MainView() {
       return;
     }
 
+    // const checkIfPlayerExists = async () => {
+    //   await httpRequestHandler.checkIfPlayerExists(token)
+    //     .then((data: boolean) => {
+
+    //       if (data === true) {
+    //         console.log(token);
+    //         navigate(config.gameClientEndpoint);
+    //       }
+    //     });
+    // }
+
     const fetchPlayerScores = async () => {
       await httpRequestHandler.fetchPlayerScores()
         .then((data) => {
@@ -97,11 +113,12 @@ function MainView() {
             return;
           }
 
-          setPlayerList(data);
+          setPlayerScores(data);
           setPlayerListVisible(true);
       });
     }
 
+    //checkIfPlayerExists();
     fetchPlayerScores();
     console.log("Player scores fetched");
     isInitialEffectRender.current = false;
@@ -115,14 +132,14 @@ function MainView() {
     }
   
     if (username.length < minUsernameLength) {
-      setCreateLobbyActiveButton(false);
-      setJoinLobbyActiveButton(false);
+      setJoinGameActiveButton(false);
+      setCreateGameActiveButton(false);
 
       console.log("Buttons inactive");
     } 
     else {
-      setCreateLobbyActiveButton(true);
-      setJoinLobbyActiveButton(true);
+      setJoinGameActiveButton(true);
+      setCreateGameActiveButton(true);
 
       console.log("Buttons active");
     }
@@ -152,14 +169,14 @@ function MainView() {
           onChange={handleInputFormChange}
         />
         <Button
-          text={"Create the lobby"}
+          text={"Create the game"}
           type="success"
-          active={createLobbyActiveButton}
+          active={createGameActiveButton}
           onClick={handleCreateGameButtonClick}
         />
         <Button
-          text="Join the lobby"
-          active={joinLobbyActiveButton}
+          text="Join the game"
+          active={joinGameActiveButton}
           onClick={handleJoinGameButtonClick}
         />
       </div>
@@ -167,6 +184,7 @@ function MainView() {
         { playerListVisible &&
           <PlayerList
             title="Top 5 players"
+            playerScores={playerScores}
             displayPoints={true}
             displayIndex={true}
           /> 

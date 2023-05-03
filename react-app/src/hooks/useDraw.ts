@@ -1,23 +1,24 @@
 import { useEffect, useRef, useState } from "react"
 import Hub from "../hub/Hub";
 import HubEvents from "../hub/HubEvents";
+import useLocalStorage from "use-local-storage";
 
 export const useDraw = (onDraw: (
     canvasContext: CanvasRenderingContext2D,
     line: DrawnLine) => void,
   hub: Hub,
-  hash: string,
   color: string) => {
   const [mouseDown, setMouseDown] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previousRelativePoint = useRef<Point | null>(null);
+  const [token, setToken] = useLocalStorage("token", "");
 
   const onMouseDown = () => {
     setMouseDown(true);
   }
 
   const clearCanvas = () => {
-    hub.invoke(HubEvents.clearCanvas, hash);
+    hub.invoke(HubEvents.clearCanvas, token);
   }
 
   useEffect(() => {
@@ -57,7 +58,7 @@ export const useDraw = (onDraw: (
       canvasContext.clearRect(0, 0, canvas.width, canvas.height);
     });
 
-    hub.invoke(HubEvents.loadCanvas, hash);
+    hub.invoke(HubEvents.loadCanvas, token);
 
     return () => {
       hub.off(HubEvents.onLoadCanvas);
@@ -88,7 +89,7 @@ export const useDraw = (onDraw: (
       //onDraw(canvasContext, drawnLine);
       previousRelativePoint.current = drawnLine.currentPoint;
       
-      hub.invoke(HubEvents.drawOnCanvas, hash, JSON.stringify(drawnLine));
+      hub.invoke(HubEvents.drawOnCanvas, token, JSON.stringify(drawnLine));
     };
 
     const determinePointRelativeCoordinates = (event: MouseEvent) => {

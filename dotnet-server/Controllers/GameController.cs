@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Dotnet.Server.Http.Requests;
 using Dotnet.Server.Managers;
 using Dotnet.Server.Json;
-using Microsoft.AspNetCore.SignalR;
-using Dotnet.Server.Hubs;
 using Dotnet.Server.Http;
 
 namespace Dotnet.Server.Controllers;
@@ -40,10 +38,7 @@ public class GameController : ControllerBase
                 return StatusCode(StatusCodes.Status409Conflict);
             }
             
-            Game game = new Game() 
-            {
-                HostToken = Guid.NewGuid().ToString().Replace("-", ""),
-            };
+            Game game = new Game();
 
             gameManager.SetGame(game);
 

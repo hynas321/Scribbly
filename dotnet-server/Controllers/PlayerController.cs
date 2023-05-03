@@ -41,24 +41,55 @@ public class PlayerController : ControllerBase
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
-            Player player = gamesManager.GetPlayerByToken(token);
+            bool isPlayerHost = token == game.HostToken;
 
-            if (player == null)
+            PlayerIsHostResponse response = new PlayerIsHostResponse()
             {
-                logger.LogError("IsHost Status: 404. Player not found.");
-
-                return StatusCode(StatusCodes.Status404NotFound);
-            }
-
-            bool isPlayerHost = player.Token == game.HostToken;
+                isHost = isPlayerHost
+            };
 
             logger.LogInformation("IsHost Status: 200. OK.");
 
-            return StatusCode(StatusCodes.Status200OK, isPlayerHost);
+            return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(response));
         }
         catch (Exception ex)
         {
             logger.LogError($"IsHost Status: 500. Internal server error. {ex}");
+
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+    [HttpGet("Exists")]
+    public IActionResult Exists([FromHeader(Name = Headers.Token)] string token)
+    {
+        try 
+        {
+            if (!ModelState.IsValid)
+            {   
+                logger.LogError("Exists Status: 400. Invalid received request body.");
+
+                return StatusCode(StatusCodes.Status400BadRequest);
+            }
+
+            Game game = gamesManager.GetGame();
+
+            if (game == null)
+            {
+                logger.LogError("Exists Status: 404. Game not found.");
+
+                return StatusCode(StatusCodes.Status404NotFound);
+            }
+
+            bool playerExists = gamesManager.GetPlayerByToken(token) != null;
+
+            logger.LogInformation("Exists Status: 200. OK.");
+
+            return StatusCode(StatusCodes.Status200OK, playerExists);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Exists Status: 500. Internal server error. {ex}");
 
             return StatusCode(StatusCodes.Status500InternalServerError);
         }

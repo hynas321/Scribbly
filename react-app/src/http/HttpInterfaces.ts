@@ -13,3 +13,7 @@ export interface JoinGameBody {
 export interface JoinGameResponse {
   playerScores: PlayerScore[];
 }
+
+export interface PlayerIsHostResponse {
+  isHost: boolean;
+}

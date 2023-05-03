@@ -7,33 +7,30 @@ namespace Dotnet.Server.Hubs;
 public partial class HubConnection : Hub
 {
     [HubMethodName(HubEvents.SetAbstractNouns)]
-    public async Task SetAbstractNouns(string token, object setting)
+    public async Task SetAbstractNouns(string token, bool setting)
     {
         try
         {
-            if (setting is not bool)
-            {
-                return;
-            }
-
             Game game = gameManager.GetGame();
 
             if (game == null)
             {
-                return;
+                logger.LogError($"SetAbstractNouns: Game does not exist");
             }
 
             if (token != game.HostToken)
             {
-                return;
+                logger.LogError($"SetAbstractNouns: Player is not a host");
             }
 
             GameSettings settings = game.GameSettings;
 
-            settings.NonAbstractNounsOnly = (bool)setting;
+            settings.NonAbstractNounsOnly = setting;
             game.GameSettings = settings;
 
-            await Clients.All.SendAsync(HubEvents.OnSetAbstractNouns, (bool)setting);
+            await Clients.All.SendAsync(HubEvents.OnSetAbstractNouns, setting);
+
+            logger.LogInformation($"SetAbstractNouns: Setting set to {setting}");
         }
         catch (Exception ex)
         {
@@ -42,15 +39,10 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.SetDrawingTimeSeconds)]
-    public async Task SetDrawingTimeSeconds(string token, object setting)
+    public async Task SetDrawingTimeSeconds(string token, int setting)
     {
         try
         {
-            if (setting is not int)
-            {
-                return;
-            }
-
             Game game = gameManager.GetGame();
 
             if (game == null)
@@ -65,10 +57,12 @@ public partial class HubConnection : Hub
 
             GameSettings settings = game.GameSettings;
 
-            settings.DrawingTimeSeconds = (int)setting;
+            settings.DrawingTimeSeconds = setting;
             game.GameSettings = settings;
 
-            await Clients.All.SendAsync(HubEvents.OnSetDrawingTimeSeconds, (int)setting);
+            await Clients.All.SendAsync(HubEvents.OnSetDrawingTimeSeconds, setting);
+
+            logger.LogInformation($"SetDrawingTimeSeconds: Setting set to {setting}");
         }
         catch (Exception ex)
         {
@@ -77,15 +71,10 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.SetRoundsCount)]
-    public async Task SetRoundsCount(string token, object setting)
+    public async Task SetRoundsCount(string token, int setting)
     {
         try
         {
-            if (setting is not int)
-            {
-                return;
-            }
-
             Game game = gameManager.GetGame();
 
             if (game == null)
@@ -100,10 +89,12 @@ public partial class HubConnection : Hub
 
             GameSettings settings = game.GameSettings;
 
-            settings.RoundsCount = (int)setting;
+            settings.RoundsCount = setting;
             game.GameSettings = settings;
 
-            await Clients.All.SendAsync(HubEvents.OnSetRoundsCount, (int)setting);
+            await Clients.All.SendAsync(HubEvents.OnSetRoundsCount, setting);
+
+            logger.LogInformation($"SetRoundsCount: Setting set to {setting}");
         }
         catch (Exception ex)
         {
@@ -112,15 +103,10 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.SetWordLanguage)]
-    public async Task ChangeWordLanguageSetting(string token, object setting)
+    public async Task SetWordLanguageSetting(string token, string setting)
     {
         try
         {
-            if (setting is not string)
-            {
-                return;
-            }
-
             Game game = gameManager.GetGame();
 
             if (game == null)
@@ -135,10 +121,12 @@ public partial class HubConnection : Hub
 
             GameSettings settings = game.GameSettings;
 
-            settings.WordLanguage = (string)setting;
+            settings.WordLanguage = setting;
             game.GameSettings = settings;
 
-            await Clients.All.SendAsync(HubEvents.OnSetWordLanguage, (string)setting);
+            await Clients.All.SendAsync(HubEvents.OnSetWordLanguage, setting);
+
+            logger.LogInformation($"SetWordLanguageSetting: Setting set to {setting}");
         }
         catch (Exception ex)
         {
@@ -161,7 +149,9 @@ public partial class HubConnection : Hub
 
             await Clients
                 .Client(Context.ConnectionId)
-                .SendAsync(HubEvents.OnSetRoundsCount, JsonHelper.Serialize(settings));
+                .SendAsync(HubEvents.OnLoadGameSettings, JsonHelper.Serialize(settings));
+
+            logger.LogInformation($"LoadGameSettings: Settings loaded");
         }
         catch (Exception ex)
         {

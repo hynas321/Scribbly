@@ -20,7 +20,7 @@ public partial class HubConnection : Hub
 
         hubManager.Connections++;
         
-        logger.LogInformation($"New connection {Context.ConnectionId} established. Total connections: {hubManager.Connections}");
+        //logger.LogInformation($"New connection {Context.ConnectionId} established. Total connections: {hubManager.Connections}");
     }
 
     public override async Task OnDisconnectedAsync(Exception exception)
@@ -32,6 +32,6 @@ public partial class HubConnection : Hub
             hubManager.Connections--;
         }
 
-        logger.LogInformation($"Connection {Context.ConnectionId} terminated. Total clients connected: {hubManager.Connections}");
+        //logger.LogInformation($"Connection {Context.ConnectionId} terminated. Total clients connected: {hubManager.Connections}");
     }
 }

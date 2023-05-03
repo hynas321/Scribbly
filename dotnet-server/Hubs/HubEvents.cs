@@ -24,8 +24,11 @@ public static class HubEvents
     //Game
     public const string JoinGame = "JoinGame";
     public const string LeaveGame = "LeaveGame";
+    public const string FindPlayerHost = "FindPlayerHost";
     public const string OnPlayerJoinedGame = "OnPlayerJoinedGame";
     public const string OnPlayerLeftGame = "OnPlayerLeftGame";
+    public const string OnJoinGame = "OnJoinGame";
+    public const string OnFindPlayerHost = "OnFindPlayerHost";
 
     //GameState
     public const string StartGame = "StartGame";

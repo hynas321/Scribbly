@@ -8,39 +8,47 @@ import { Link, useNavigate } from 'react-router-dom';
 import PlayerList from '../PlayerList';
 import Chat from '../Chat';
 import { BsPlayCircle, BsDoorOpen } from 'react-icons/bs';
-import { Player } from '../../redux/slices/player-slice';
+import { PlayerScore, updatedPlayerScore } from '../../redux/slices/player-score-slice';
 import { useContext } from "react";
 import { ConnectionHubContext } from '../../context/ConnectionHubContext';
 import HubEvents from '../../hub/HubEvents';
 import Canvas from '../Canvas';
 import ControlPanel from '../ControlPanel';
 import { useDispatch } from 'react-redux';
-import { updatedPlayerScores } from '../../redux/slices/game-state-slice';
-import VerificationHelper from '../../utils/VerificationHelper';
 import HttpRequestHandler from '../../http/HttpRequestHandler';
 import { updatedAlert, updatedVisible } from '../../redux/slices/alert-slice';
+import useLocalStorage from 'use-local-storage';
+import { PlayerIsHostResponse } from '../../http/HttpInterfaces';
 
 function GameView() {
-  const hub = useContext(ConnectionHubContext);
-  const verificationHelper = new VerificationHelper();
   const httpRequestHandler = new HttpRequestHandler();
-  const player = useAppSelector((state) => state.player);
-  const alert = useAppSelector((state) => state.alert);
-  const gameState = useAppSelector((state) => state.gameState);
-  const gameSettings = useAppSelector((state) => state.gameSettings);
+
+  const hub = useContext(ConnectionHubContext);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const player = useAppSelector((state) => state.player);
+  const gameState = useAppSelector((state) => state.gameState);
+  const gameSettings = useAppSelector((state) => state.gameSettings);
   
   const isInitialEffectRender = useRef(true);
-  
 
-  const [isGameStarted, setGameStarted] = useState(false);
+  const [isGameStarted, setIsGameStarted] = useState(false);
+  const [isPlayerHost, setIsPlayerHost] = useState(false);
+  const [isGameVisible, setIsGameVisible] = useState(false);
   const [activeButton, setActiveButton] = useState(true);
-  const isPlayerHost = true;
+  const [playerScores, setPlayerScores] = useState<PlayerScore[]>([]);
+
+  const [token, setToken] = useLocalStorage("token", "");
 
   const handleStartGameButtonClick = async () => {
+    await hub.invoke(HubEvents.startGame, token);
+  }
 
-    navigate(config.gameClientEndpoint);
+  const handleLeaveGameButtonClick = async () => {
+    await hub.invoke(HubEvents.leaveGame, token, true);
+    setToken("");
+    navigate(config.mainClientEndpoint);
   }
 
   useEffect(() => {
@@ -48,17 +56,24 @@ function GameView() {
       return;
     }
 
-    const setLobbyHub = async () => {
-      const getPlayerList = (playerListSerialized: any) => {
-        const playerScore = JSON.parse(playerListSerialized) as Player[];
-        dispatch(updatedPlayerScores(playerScore));
+    const startHubAndJoinGame = async () => {
+      const getPlayerList = (playerScoresSerialized: string) => {
+        const playerScores = JSON.parse(playerScoresSerialized) as PlayerScore[];
+        setPlayerScores(playerScores);
       }
       
       hub.on(HubEvents.onPlayerJoinedGame, getPlayerList);
       hub.on(HubEvents.onPlayerLeftGame, getPlayerList);
+      hub.on(HubEvents.onStartGame, () => setIsGameStarted(true));
+      hub.on(HubEvents.onJoinGame, (playerSerialized: string) => {
+        const player = JSON.parse(playerSerialized) as Player;
+        
+        dispatch(updatedPlayerScore({username: player.username, score: player.score}));
+        setToken(player.token);
+      });
 
       await hub.start();
-      await hub.invoke(HubEvents.joinGame, player.token, player.username);
+      await hub.invoke(HubEvents.joinGame, token, player.username);
     }
 
     const checkIfGameExists = async () => {
@@ -82,28 +97,34 @@ function GameView() {
         });
     }
 
-    const checkIfPlayerExists = async () => {
-      
-      await httpRequestHandler.checkIfPlayerExists()
-        .then((data: boolean)) => {
+    const checkIfGameIsStarted = async () => {
+      await httpRequestHandler.checkIfGameIsStarted()
+        .then((data: boolean) => {
 
           if (typeof data != "boolean") {
             displayAlert("Unexpected error, try again", "danger");
             navigate(config.mainClientEndpoint);
             return;
           }
-        }
+
+          setIsGameStarted(data);
+        })
+        .catch(() => {
+          displayAlert("Unexpected error, try again", "danger");
+          navigate(config.mainClientEndpoint);
+        });
     }
 
-    const clearBeforeUnload = () => {
+    const clearBeforeUnload = async () => {
       hub.off(HubEvents.onPlayerJoinedGame);
       hub.off(HubEvents.onPlayerLeftGame);
-      hub.send(HubEvents.leaveGame, player.token);
-      hub.stop();
+      await hub.invoke(HubEvents.leaveGame, token, false);
+      await hub.stop();
     }
 
-    setLobbyHub();
     checkIfGameExists();
+    checkIfGameIsStarted();
+    startHubAndJoinGame();
 
     window.addEventListener("beforeunload", clearBeforeUnload);
 
@@ -112,6 +133,20 @@ function GameView() {
       window.removeEventListener("beforeunload", clearBeforeUnload);
     }
   }, []);
+
+  useEffect(() => {
+      const checkIfPlayerIsHost = async () => {
+        await httpRequestHandler.checkIfPlayerIsHost(token)
+        .then((data: PlayerIsHostResponse) => {
+          console.log(data.isHost);
+          if (data.isHost === true) {
+            setIsPlayerHost(true);
+          }
+        })
+      }
+      
+      checkIfPlayerIsHost();
+  }, [token]);
 
   const displayAlert = (message: string, type: string) => {
     dispatch(updatedAlert({
@@ -135,6 +170,7 @@ function GameView() {
               <div className="col-lg-2 col-md-6 col-12 order-lg-1 order-md-2 order-3 mb-3">
                 <PlayerList
                   title={"Players"}
+                  playerScores={playerScores}
                   displayPoints={true}
                   displayIndex={true}
                   round={{
@@ -165,14 +201,12 @@ function GameView() {
           :
 
           <div className="container mb-3">
-          <div className="row col-lg-6 col-sm-12 mx-auto text-center">
-            <Alert/>
-          </div>
           <div className="row">
             <div className="col-lg-4 col-sm-5 col-12 mx-auto mt-2 text-center order-lg-1 order-2 mb-3">
               <div className="col-lg-6">
                 <PlayerList
                   title={"Players in the lobby"}
+                  playerScores={playerScores}
                   displayPoints={false}
                   displayIndex={false}
                 />
@@ -190,14 +224,13 @@ function GameView() {
                 />
               }
               { !isPlayerHost && <h4 className="mt-3">Waiting for the host to start the game</h4> }
-              <Link to={config.mainClientEndpoint}>
                 <Button
-                  text="Leave the lobby"
+                  text="Leave the game"
                   active={true}
                   icon={<BsDoorOpen/>}
                   type={"danger"}
+                  onClick={handleLeaveGameButtonClick}
                 />
-              </Link>
               <div className="mt-3">
                 <GameSettingsBoard isPlayerHost={isPlayerHost} />
               </div>

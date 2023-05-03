@@ -22,13 +22,16 @@ class HubEvents {
     static startGame: string = "StartGame";
     static joinGame: string = "JoinGame";
     static leaveGame: string = "LeaveGame";
+    static findPlayerHost: string = "FindPlayerHost";
     static onStartGame: string = "OnStartGame";
+    static onJoinGame: string = "OnJoinGame";
     static onPlayerJoinedGame: string = "OnPlayerJoinedGame";
     static onPlayerLeftGame: string = "OnPlayerLeftGame";
+    static onFindPlayerHost: string = "OnFindPlayerHost";
     
     //Canvas
     static loadCanvas: string = "LoadCanvas";
-    static drawOnCanvas: string = "DrawnOnCanvas";
+    static drawOnCanvas: string = "DrawOnCanvas";
     static clearCanvas: string = "ClearCanvas";
     static onLoadCanvas: string = "OnLoadCanvas";
     static onDrawOnCanvas: string = "OnDrawOnCanvas";

@@ -6,6 +6,7 @@ import { useAppSelector } from '../redux/hooks';
 import { ConnectionHubContext } from '../context/ConnectionHubContext';
 import * as signalR from '@microsoft/signalr';
 import HubEvents from '../hub/HubEvents';
+import useLocalStorage from 'use-local-storage';
 
 interface ChatProps {
   placeholderValue: string;
@@ -15,6 +16,8 @@ interface ChatProps {
 function Chat({placeholderValue, wordLength}: ChatProps) {
   const hub = useContext(ConnectionHubContext);
   const player = useAppSelector((state) => state.player);
+
+  const [token, setToken] = useLocalStorage("token", "");
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputFormValue, setInputFormValue] = useState("");
@@ -32,7 +35,7 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
   const handleButtonPress = () => {
 
     const SendChatMessage = async () => {
-      await hub.invoke(HubEvents.sendChatMessage, player.token, inputFormValue);
+      await hub.invoke(HubEvents.sendChatMessage, token, inputFormValue);
       
       if (inputFormRef && inputFormRef.current) {
         inputFormRef.current.value = "";
@@ -53,7 +56,7 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
   }
 
   useEffect(() => {
-    if (hub.getState() != signalR.HubConnectionState.Connected) {
+    if (hub.getState() !== signalR.HubConnectionState.Connected) {
       return;
     }
 
@@ -64,7 +67,7 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
     });
 
     const loadChatMessages = async () => {
-      await hub.invoke(HubEvents.loadChatMessages, player.token);
+      await hub.invoke(HubEvents.loadChatMessages, token);
     };
 
     loadChatMessages();

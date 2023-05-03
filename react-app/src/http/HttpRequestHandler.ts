@@ -1,6 +1,6 @@
 import axios from 'axios';
 import config from '../../config.json';
-import { CreateGameBody, CreateGameResponse, JoinGameBody, JoinGameResponse } from './HttpInterfaces';
+import { CreateGameBody, CreateGameResponse, JoinGameBody, JoinGameResponse, PlayerIsHostResponse } from './HttpInterfaces';
 import ApiEndpoints from '../hub/ApiEndpoints';
 
 
@@ -99,8 +99,8 @@ class HttpRequestHandler {
     });
   }
 
-  async fetchPlayerIsHost(token: string): Promise<any> {
-    return await axios.get(`${this.httpServerUrl}${ApiEndpoints.playerIsHost}`, {
+  async checkIfPlayerExists(token: string): Promise<any> {
+    return await axios.get<boolean>(`${this.httpServerUrl}${ApiEndpoints.playerExists}`, {
       headers: {
         'Token': token
       }
@@ -116,6 +116,21 @@ class HttpRequestHandler {
     .catch(error => {
       return error;
     });
+  }
+
+  async checkIfPlayerIsHost(token: string): Promise<PlayerIsHostResponse> {
+    const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.playerIsHost}`, {
+      headers: {
+        'Token': token
+      }
+    });
+  
+    if (!response.ok) {
+      throw new Error("Error");
+    }
+  
+    const data = await response.json();
+    return data as PlayerIsHostResponse;
   }
 
   async fetchPlayerScores() {

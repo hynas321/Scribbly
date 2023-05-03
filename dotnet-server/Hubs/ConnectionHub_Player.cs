@@ -23,10 +23,10 @@ public partial class HubConnection : Hub
             {
                 logger.LogError($"JoinGame: Game does not exist");
             }
+            
+            Player player = gameManager.GetPlayerByToken(token);
 
-            Player player;
-
-            if (token == game.HostToken)
+            if (player == null && token == game.HostToken)
             {
                 player = new Player()
                 {
@@ -34,14 +34,36 @@ public partial class HubConnection : Hub
                     Score = 0,
                     Token = game.HostToken,
                 };
+
+                gameManager.AddPlayer(player);
             }
-            else
+            else if (player == null)
             {
                 player = new Player()
                 {
                     Username = username,
                     Score = 0,
                     Token = Guid.NewGuid().ToString().Replace("-", ""),
+                };
+
+                gameManager.AddPlayer(player);
+            }
+            else if (token == game.HostToken)
+            {
+                player = new Player()
+                {
+                    Username = player.Username,
+                    Score = player.Score,
+                    Token = game.HostToken,
+                };
+            }
+            else
+            {
+                player = new Player()
+                {
+                    Username = player.Username,
+                    Score = player.Score,
+                    Token = player.Token,
                 };
             }
 
@@ -51,15 +73,16 @@ public partial class HubConnection : Hub
                 Score = player.Score
             };
 
-            gameManager.AddPlayer(player);
             gameManager.AddPlayerScore(playerScore);
 
             List<PlayerScore> playerScores = gameManager.GetPlayersWithoutToken();
             bool gameIsStarted = game.GameState.IsStarted;
 
-            await Clients.All.SendAsync(HubEvents.OnPlayerJoinedGame, JsonHelper.Serialize(playerScore));
+            await Clients.All.SendAsync(HubEvents.OnPlayerJoinedGame, JsonHelper.Serialize(playerScores));
+            await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnJoinGame, JsonHelper.Serialize(player));
 
-            logger.LogInformation($"JoinGame: Player joined the game");    
+            logger.LogInformation($"JoinGame: Player {player.Username} joined the game.");
+            logger.LogInformation($"Online players: {game.GameState.PlayerScores.Count}. Total players: {game.GameState.Players.Count}");
         }
         catch (Exception ex)
         {
@@ -68,7 +91,7 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.LeaveGame)]
-    public async Task LeaveGame(string token)
+    public async Task LeaveGame(string token, bool leaveForGood)
     {
         try
         {
@@ -86,20 +109,30 @@ public partial class HubConnection : Hub
                 return;
             }
 
-            if (game.GameState.IsStarted)
+            if (leaveForGood)
             {
+                gameManager.RemovePlayer(token);
                 gameManager.RemovePlayerScore(player.Username);
             }
             else
             {
                 gameManager.RemovePlayerScore(player.Username);
-                gameManager.RemovePlayer(token);
+            }
+
+            if (gameManager.GetGame().GameState.PlayerScores.Count == 0)
+            {
+                gameManager.SetGame(null);
+                logger.LogInformation($"LeaveGame: Game removed - no online players");
+                return;
             }
 
             List<PlayerScore> playerScores = game.GameState.PlayerScores;
             string playerListSerialized = JsonHelper.Serialize(playerScores);
 
-            await Clients.All.SendAsync(HubEvents.OnPlayerLeftGame, playerListSerialized);
+            logger.LogInformation($"JoinGame: Player {player.Username} left the game");
+            logger.LogInformation($"Online players: {game.GameState.PlayerScores.Count}. Total players: {game.GameState.Players.Count}");
+
+            await Clients.AllExcept(Context.ConnectionId).SendAsync(HubEvents.OnPlayerLeftGame, playerListSerialized);
         }
         catch (Exception ex)
         {
