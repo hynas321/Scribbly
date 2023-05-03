@@ -1,12 +1,15 @@
+import { useAppSelector } from "../redux/hooks";
+
 interface PlayerListProps {
   title: string,
-  players: PlayerScore[],
   displayPoints: boolean,
   displayIndex: boolean,
   round?: Round
 }
 
-function PlayerList({title, players, displayPoints, displayIndex, round}: PlayerListProps) {
+function PlayerList({title, displayPoints, displayIndex, round}: PlayerListProps) {
+  const playerScores = useAppSelector((state) => state.gameState.playerScore);
+
   return (
     <>
       { round && <h5>Round {round.currentRound}/{round.roundCount}</h5>}
@@ -14,10 +17,10 @@ function PlayerList({title, players, displayPoints, displayIndex, round}: Player
         <li className="list-group-item justify-content-between align-items-center">
             <b>{title}</b>
         </li>
-        {players.map((player, index) => (
+        {playerScores.map((playerScore, index) => (
           <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-            { displayIndex && index + 1 + "."} {player.username}
-            { displayPoints && <span className="badge rounded-pill bg-dark">{player.score}</span> }
+            { displayIndex && index + 1 + "."} {playerScore.username}
+            { displayPoints && <span className="badge rounded-pill bg-dark">{playerScore.score}</span> }
           </li>
           ))}
       </ul>

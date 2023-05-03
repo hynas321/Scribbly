@@ -32,17 +32,7 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
   const handleButtonPress = () => {
 
     const SendChatMessage = async () => {
-      const sendChatMessageBody: SendChatMessageInvocation = {
-        gameHash: player.gameHash,
-        token: player.token,
-        text: inputFormValue
-      }
-
-      // await hub.invoke(HubEvents.sendChatMessage,
-      //   player.token,
-      //   player.gameHash,
-      //   { text: sendChatMessageBody }
-      // );
+      await hub.invoke(HubEvents.sendChatMessage, player.token, player.gameHash, inputFormValue);
       
       if (inputFormRef && inputFormRef.current) {
         inputFormRef.current.value = "";
@@ -67,19 +57,14 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
       return;
     }
 
-    hub.on(HubEvents.onLoadChatMessages, (chatMessageListSerialized: any) => {
-      const chatMessageList = JSON.parse(chatMessageListSerialized) as ChatMessage[];
+    hub.on(HubEvents.onLoadChatMessages, (chatMessagesSerialized: any) => {
+      const chatMessageList = JSON.parse(chatMessagesSerialized) as ChatMessage[];
 
       setMessages(chatMessageList);
     });
 
     const loadChatMessages = async () => {
-      const loadChatMessagesBody = {
-        gameHash: player.gameHash,
-        token: player.token
-      };
-
-      //await hub.invoke(HubEvents.loadChatMessages, loadChatMessagesBody);
+      await hub.invoke(HubEvents.loadChatMessages, player.token, player.gameHash);
     };
 
     loadChatMessages();

@@ -1,17 +1,13 @@
-interface AlertProps {
-  title?: string;
-  text: string;
-  visible: boolean;
-  type?: string;
-}
+import { useAppSelector } from "../redux/hooks";
 
-function Alert({title, text, visible, type}: AlertProps) {
+function Alert() {
+  const alert = useAppSelector((state) => state.alert);
+  
   return (
     <>
-      {visible && (
-        <div className={`alert alert-${ type == undefined ? "primary" : type }`} role="alert">
-          { title && <h3>{title}</h3> }
-          <h6>{text}</h6>
+      {alert.visible && (
+        <div className={`alert alert-${alert.type} text-center`} role="alert">
+          <h6><b>{alert.text}</b></h6>
         </div>
       )}
     </>

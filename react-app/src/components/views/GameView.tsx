@@ -15,8 +15,7 @@ function GameView() {
   const gameSettings = useAppSelector((state) => state.gameSettings);
   const gameState = useAppSelector((state) => state.gameState);;
   const player = useAppSelector((state) => state.player);
-  const [localStorageGameHash, setLocalStorageGameHash] = useLocalStorageState("gameHash", { defaultValue: "" });
-  const [playerList, setPlayerList] = useState<Player[]>([]);
+  const [playerScores, setPlayerScores] = useState<PlayerScore[]>([]);
   
   useEffect(() => {
       const setConnectionHub = async () => {
@@ -24,20 +23,20 @@ function GameView() {
         const getPlayerList = (playerListSerialized: any) => {
           const playerList = JSON.parse(playerListSerialized) as Player[];
   
-          setPlayerList(playerList);
+          setPlayerScores(playerList);
         }
         
         gameHub.on(HubEvents.onPlayerJoinedGame, getPlayerList);
         gameHub.on(HubEvents.onPlayerLeftGame, getPlayerList);
   
         await gameHub.start();
-        await gameHub.invoke(HubEvents.joinGame, localStorageGameHash, player.username);
+        await gameHub.invoke(HubEvents.joinGame, player.gameHash, player.username);
       }
   
       const clearBeforeUnload = () => {
         gameHub.off(HubEvents.onPlayerJoinedGame);
         gameHub.off(HubEvents.onPlayerLeftGame);
-        gameHub.send(HubEvents.leaveGame, localStorageGameHash, player.username);
+        gameHub.send(HubEvents.leaveGame, player.gameHash, player.username);
       }
   
       setConnectionHub();
@@ -56,7 +55,6 @@ function GameView() {
         <div className="col-lg-2 col-md-6 col-12 order-lg-1 order-md-2 order-3 mb-3">
           <PlayerList
             title={"Players"}
-            players={playerList}
             displayPoints={true}
             displayIndex={true}
             round={{

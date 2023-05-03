@@ -35,13 +35,13 @@ const playerSlice = createSlice({
       localStorage.setItem("gameHash", action.payload);
     },
     updatedPlayer(state, action: PayloadAction<Player>) {
-      localStorage.setItem("token", action.payload.token);
-      localStorage.setItem("gameHash", action.payload.gameHash);
-
       state.username = action.payload.username;
       state.score = action.payload.score;
       state.token = action.payload.token;
       state.gameHash = action.payload.gameHash;
+      
+      localStorage.setItem("token", action.payload.token);
+      localStorage.setItem("gameHash", action.payload.gameHash);
     }
   }
 })

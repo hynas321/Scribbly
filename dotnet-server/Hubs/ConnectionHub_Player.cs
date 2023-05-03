@@ -9,44 +9,35 @@ public partial class HubConnection : Hub
 
     [HubMethodName(HubEvents.JoinGame)]
     public async Task JoinGame(
+        string token,
         string gameHash,
-        string username,
-        string token = null
+        string username
     )
     {
         try 
         {
             if (username.Length < 1)
             {
-                return;
+                logger.LogError($"JoinGame: Username is too short {username}");
             }
 
             Game game = gamesManager.GetGameByHash(gameHash);
 
             if (game == null)
             {
-                return;
-            }
-
-            if (gamesManager.CheckIfPlayerExistsByUsername(game, username))
-            {
-                return;
+                logger.LogError($"JoinGame: Game with the hash {gameHash} does not exist");
             }
 
             Player player;
-            PlayerScore playerScore;
 
-            if (token != null &&
-                gamesManager.CheckIfPlayerExistsByToken(game, token) &&
-                token == gamesManager.GetPlayerByToken(game, token).Token
-            )
+            if (token == game.HostToken)
             {
-                player = gamesManager.GetPlayerByToken(game, token);
-
-                playerScore = new PlayerScore()
+                player = new Player()
                 {
-                    Username = player.Username,
-                    Score = player.Score
+                    Username = username,
+                    Score = 0,
+                    Token = game.HostToken,
+                    GameHash = gameHash
                 };
             }
             else
@@ -58,25 +49,27 @@ public partial class HubConnection : Hub
                     Token = Guid.NewGuid().ToString().Replace("-", ""),
                     GameHash = gameHash
                 };
-
-                playerScore = new PlayerScore()
-                {
-                    Username = player.Username,
-                    Score = player.Score
-                };
-
-                gamesManager.AddPlayer(game, player);
             }
 
+            PlayerScore playerScore = new PlayerScore()
+            {
+                Username = player.Username,
+                Score = player.Score
+            };
+
+            gamesManager.AddPlayer(game, player);
             gamesManager.AddPlayerScore(game, playerScore);
-        
-            List<PlayerScore> playerList = gamesManager.GetPlayersWithoutToken(gameHash);
+
+            List<PlayerScore> playerScores = gamesManager.GetPlayersWithoutToken(gameHash);
             bool gameIsStarted = game.GameState.IsStarted;
 
             await Groups.AddToGroupAsync(Context.ConnectionId, gameHash);
+
             await Clients
-                .Group(gameHash)
-                .SendAsync(HubEvents.OnPlayerJoinedGame, JsonHelper.Serialize(playerList));
+                .GroupExcept(gameHash, Context.ConnectionId)
+                .SendAsync(HubEvents.OnPlayerJoinedGame, JsonHelper.Serialize(playerScore));
+
+            logger.LogInformation($"JoinGame: Player joined the game with the hash {gameHash}");    
         }
         catch (Exception ex)
         {
@@ -86,8 +79,8 @@ public partial class HubConnection : Hub
 
     [HubMethodName(HubEvents.LeaveGame)]
     public async Task LeaveGame(
-        string gameHash,
-        string token
+        string token,
+        string gameHash
     )
     {
         try
@@ -120,7 +113,7 @@ public partial class HubConnection : Hub
             string playerListSerialized = JsonHelper.Serialize(playerScores);
 
             await Clients
-                .Group(gameHash)
+                .GroupExcept(gameHash, Context.ConnectionId)
                 .SendAsync(HubEvents.OnPlayerLeftGame, playerListSerialized);
 
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameHash);

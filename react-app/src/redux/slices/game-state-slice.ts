@@ -4,14 +4,14 @@ export interface GameState {
   currentDrawingTimeSeconds: number;
   currentRound: number;
   wordLength: number;
-  playerList: PlayerScore[];
+  playerScore: PlayerScore[];
 };
 
 const initialState: GameState = {
   currentDrawingTimeSeconds: 50,
   currentRound: 1,
   wordLength: 10,
-  playerList: []
+  playerScore: []
 };
 
 const gameStateSlice = createSlice({
@@ -28,10 +28,13 @@ const gameStateSlice = createSlice({
       state.wordLength = action.payload;
     },
     updatedPlayerList(state, action: PayloadAction<PlayerScore[]>) {
-      state.playerList = action.payload;
+      state.playerScore = action.payload;
     },
+    addedPlayerScore(state, action: PayloadAction<PlayerScore>) {
+      state.playerScore.push(action.payload);
+    }
   }
 })
 
-export const { updatedCurrentDrawingTimeSeconds, updatedCurrentRound, updatedWordLength, updatedPlayerList } = gameStateSlice.actions;
+export const { updatedCurrentDrawingTimeSeconds, updatedCurrentRound, updatedWordLength, updatedPlayerList, addedPlayerScore } = gameStateSlice.actions;
 export default gameStateSlice.reducer;
