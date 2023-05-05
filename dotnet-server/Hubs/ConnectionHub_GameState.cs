@@ -1,4 +1,3 @@
-using Dotnet.Server.Json;
 using Dotnet.Server.Models;
 using Microsoft.AspNetCore.SignalR;
 
@@ -23,8 +22,6 @@ public partial class HubConnection : Hub
                 logger.LogError($"StartGame: Token is not a host token");
             }
 
-            game.GameState.IsStarted = true;
-
             if (settings.DrawingTimeSeconds < 25 ||
                 settings.DrawingTimeSeconds > 120 ||
                 settings.RoundsCount < 1 ||
@@ -34,12 +31,16 @@ public partial class HubConnection : Hub
                 logger.LogError($"StartGame: Incorrect settings data");
             }
 
+            gameManager.RemoveChatMessages();
+            game.GameState.IsStarted = true;
+
             game.GameSettings.NonAbstractNounsOnly = settings.NonAbstractNounsOnly;
             game.GameSettings.DrawingTimeSeconds = settings.DrawingTimeSeconds;
             game.GameSettings.RoundsCount = settings.RoundsCount;
             game.GameSettings.WordLanguage = settings.WordLanguage;
-
+            
             await Clients.All.SendAsync(HubEvents.OnStartGame);
+            await SendAnnouncement("Game has started", BootstrapColors.Yellow);
             await StartTimer(token);
 
             logger.LogInformation($"StartGame: Game started");

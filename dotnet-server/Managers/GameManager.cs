@@ -102,6 +102,11 @@ class GameManager
         }
 
         messages.Add(message);
-        
     }
+
+    public void RemoveChatMessages()
+    {
+        game.ChatMessages.Clear();
+    }
+
 }

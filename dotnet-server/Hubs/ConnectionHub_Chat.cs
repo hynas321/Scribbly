@@ -82,4 +82,31 @@ public partial class HubConnection : Hub
         }
     }
 
+    public async Task SendAnnouncement(string text, string backgroundColor)
+    {
+        try 
+        {
+            Game game = new Game();
+
+            if (game == null)
+            {
+                return;
+            }
+
+            ChatMessage message = new ChatMessage()
+            {
+                Username = null,
+                Text = text,
+                BackgroundColor = backgroundColor
+            };
+
+            gameManager.AddChatMessage(message);
+            logger.LogInformation(Convert.ToString(game.ChatMessages.Count));
+            await Clients.All.SendAsync(HubEvents.OnLoadChatMessages, JsonHelper.Serialize(game.ChatMessages));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(Convert.ToString(ex));
+        }
+    }
 }

@@ -58,9 +58,9 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
       return;
     }
 
-    hub.on(HubEvents.onLoadChatMessages, (chatMessagesSerialized: any) => {
+    hub.on(HubEvents.onLoadChatMessages, (chatMessagesSerialized: string) => {
       const chatMessageList = JSON.parse(chatMessagesSerialized) as ChatMessage[];
-
+      console.log(chatMessageList);
       setMessages(chatMessageList);
     });
 

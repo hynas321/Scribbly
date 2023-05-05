@@ -109,6 +109,8 @@ public partial class HubConnection : Hub
                 JsonHelper.Serialize(stateClient)
             );
 
+            await SendAnnouncement($"Player {player.Username} has joined the game", BootstrapColors.Green);
+
             logger.LogInformation($"JoinGame: Player {player.Username} joined the game.");
             logger.LogInformation($"Online players: {game.GameState.PlayerScores.Count}. Total players: {game.GameState.Players.Count}");
         }
@@ -161,6 +163,8 @@ public partial class HubConnection : Hub
             logger.LogInformation($"Online players: {game.GameState.PlayerScores.Count}. Total players: {game.GameState.Players.Count}");
 
             await Clients.AllExcept(Context.ConnectionId).SendAsync(HubEvents.OnPlayerLeftGame, playerListSerialized);
+
+            await SendAnnouncement($"Player {player.Username} has left the game", BootstrapColors.Red);
         }
         catch (Exception ex)
         {
