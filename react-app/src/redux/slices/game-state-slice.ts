@@ -24,9 +24,14 @@ const gameStateSlice = createSlice({
     },
     updatedWordLength(state, action: PayloadAction<number>) {
       state.wordLength = action.payload;
+    },
+    updatedGameState(state, action: PayloadAction<GameState>) {
+      state.currentDrawingTimeSeconds = action.payload.currentDrawingTimeSeconds,
+      state.currentRound = action.payload.currentRound,
+      state.wordLength = action.payload.wordLength
     }
   }
 })
 
-export const { updatedCurrentDrawingTimeSeconds, updatedCurrentRound, updatedWordLength } = gameStateSlice.actions;
+export const { updatedCurrentDrawingTimeSeconds, updatedCurrentRound, updatedWordLength, updatedGameState } = gameStateSlice.actions;
 export default gameStateSlice.reducer;

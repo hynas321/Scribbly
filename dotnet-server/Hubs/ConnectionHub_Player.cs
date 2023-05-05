@@ -68,11 +68,11 @@ public partial class HubConnection : Hub
             }
             else if (player == null && gameManager.CheckIfPlayerExistsByUsername(username))
             {
-                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnJoinGame, null);
+                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnJoinGame, null, null, null);
             }
             else
             {
-                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnJoinGame, null);
+                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnJoinGame, null, null, null);
             }
 
             PlayerScore playerScore = new PlayerScore()
@@ -83,11 +83,31 @@ public partial class HubConnection : Hub
 
             gameManager.AddPlayerScore(playerScore);
 
+            GameSettings settings = new GameSettings()
+            {
+                NonAbstractNounsOnly = game.GameSettings.NonAbstractNounsOnly,
+                DrawingTimeSeconds = game.GameSettings.DrawingTimeSeconds,
+                RoundsCount = game.GameSettings.RoundsCount,
+                WordLanguage = game.GameSettings.WordLanguage
+            };
+
+            GameState stateClient = new GameState()
+            {
+                CurrentDrawingTimeSeconds = 75,
+                CurrentRound = 1,
+                WordLength = 10,
+            };
+
             List<PlayerScore> playerScores = gameManager.GetPlayersWithoutToken();
             bool gameIsStarted = game.GameState.IsStarted;
 
             await Clients.All.SendAsync(HubEvents.OnPlayerJoinedGame, JsonHelper.Serialize(playerScores));
-            await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnJoinGame, JsonHelper.Serialize(player));
+            await Clients.Client(Context.ConnectionId).SendAsync(
+                HubEvents.OnJoinGame,
+                JsonHelper.Serialize(player),
+                JsonHelper.Serialize(settings),
+                JsonHelper.Serialize(stateClient)
+            );
 
             logger.LogInformation($"JoinGame: Player {player.Username} joined the game.");
             logger.LogInformation($"Online players: {game.GameState.PlayerScores.Count}. Total players: {game.GameState.Players.Count}");

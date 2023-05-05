@@ -1,3 +1,4 @@
+using Dotnet.Server.Json;
 using Dotnet.Server.Models;
 using Microsoft.AspNetCore.SignalR;
 
@@ -6,7 +7,7 @@ namespace Dotnet.Server.Hubs;
 public partial class HubConnection : Hub
 {
     [HubMethodName(HubEvents.StartGame)]
-    public async Task StartGame(string token)
+    public async Task StartGame(string token, GameSettings settings)
     {
         try
         {
@@ -14,18 +15,34 @@ public partial class HubConnection : Hub
 
             if (game == null)
             {
-                return;
+                logger.LogError($"StartGame: Game does not exist");
             }
 
             if (token != game.HostToken)
             {
-                return;
+                logger.LogError($"StartGame: Token is not a host token");
             }
 
             game.GameState.IsStarted = true;
 
+            if (settings.DrawingTimeSeconds < 25 ||
+                settings.DrawingTimeSeconds > 120 ||
+                settings.RoundsCount < 1 ||
+                settings.RoundsCount < 6
+            )
+            {
+                logger.LogError($"StartGame: Incorrect settings data");
+            }
+
+            game.GameSettings.NonAbstractNounsOnly = settings.NonAbstractNounsOnly;
+            game.GameSettings.DrawingTimeSeconds = settings.DrawingTimeSeconds;
+            game.GameSettings.RoundsCount = settings.RoundsCount;
+            game.GameSettings.WordLanguage = settings.WordLanguage;
+
             await Clients.All.SendAsync(HubEvents.OnStartGame);
             await StartTimer(token);
+
+            logger.LogInformation($"StartGame: Game started");
 
         }
         catch (Exception ex)
@@ -68,7 +85,7 @@ public partial class HubConnection : Hub
             //     }
             // });
 
-            await Clients.All.SendAsync(HubEvents.OnStartTimer, currentTime);
+            await Clients.All.SendAsync(HubEvents.OnStartTimer, 25);
         }
         catch(Exception ex)
         {

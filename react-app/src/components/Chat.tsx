@@ -2,7 +2,6 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import ChatMessage from './ChatMessage';
 import InputForm from './InputForm';
 import Button from './Button';
-import { useAppSelector } from '../redux/hooks';
 import { ConnectionHubContext } from '../context/ConnectionHubContext';
 import * as signalR from '@microsoft/signalr';
 import HubEvents from '../hub/HubEvents';

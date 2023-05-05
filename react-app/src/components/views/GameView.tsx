@@ -19,8 +19,9 @@ import { updatedAlert, updatedVisible } from '../../redux/slices/alert-slice';
 import { PlayerIsHostResponse } from '../../http/HttpInterfaces';
 import useLocalStorageState from 'use-local-storage-state';
 import { useWorker, WORKER_STATUS } from "@koale/useworker";
-import { updatedDrawingTimeSeconds } from '../../redux/slices/game-settings-slice';
+import { GameSettings, updatedDrawingTimeSeconds, updatedGameSettings } from '../../redux/slices/game-settings-slice';
 import loading from './../../assets/loading.gif'
+import { GameState, updatedGameState } from '../../redux/slices/game-state-slice';
 
 function GameView() {
   const httpRequestHandler = new HttpRequestHandler();
@@ -32,7 +33,7 @@ function GameView() {
   const player = useAppSelector((state) => state.player);
   const gameState = useAppSelector((state) => state.gameState);
   const gameSettings = useAppSelector((state) => state.gameSettings);
-  
+
   const isInitialEffectRender = useRef(true);
 
   const [isGameStarted, setIsGameStarted] = useState(false);
@@ -44,14 +45,8 @@ function GameView() {
 
   const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
 
-  const [count, setCount] = useState(0);
-
-  const [worker, workerResult] = useWorker(() => {
-    console.log("test")
-  });
-
   const handleStartGameButtonClick = async () => {
-    await hub.invoke(HubEvents.startGame, token);
+    await hub.invoke(HubEvents.startGame, token, gameSettings);
   }
 
   const handleLeaveGameButtonClick = async () => {
@@ -73,11 +68,14 @@ function GameView() {
       
       hub.on(HubEvents.onPlayerJoinedGame, getPlayerList);
       hub.on(HubEvents.onPlayerLeftGame, getPlayerList);
+
       hub.on(HubEvents.onStartGame, () => setIsGameStarted(true));
+
       hub.on(HubEvents.onStartTimer, async (data: number) => {
-        worker();
+        dispatch((updatedDrawingTimeSeconds(data)));
       });
-      hub.on(HubEvents.onJoinGame, (playerSerialized: string) => {
+
+      hub.on(HubEvents.onJoinGame, (playerSerialized: string, gameSettingsSerialized: string, gameStateSerialized: string) => {
         if (playerSerialized == null)
         {
           displayAlert("Player with this username already exists", "primary");
@@ -85,8 +83,12 @@ function GameView() {
         }
 
         const player = JSON.parse(playerSerialized) as Player;
-        
+        const settings = JSON.parse(gameSettingsSerialized) as GameSettings;
+        const state = JSON.parse(gameStateSerialized) as GameState;
+
         dispatch(updatedPlayerScore({username: player.username, score: player.score}));
+        dispatch(updatedGameSettings(settings));
+        dispatch(updatedGameState(state));
         setToken(player.token);
 
         setTimeout(() => {
