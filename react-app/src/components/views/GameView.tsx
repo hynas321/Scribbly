@@ -3,7 +3,6 @@ import Button from '../Button';
 import GameSettingsBoard from '../GameSettingsBoard';
 import { useAppSelector } from '../../redux/hooks';
 import config from '../../../config.json';
-import Alert from '../Alert';
 import { Link, useNavigate } from 'react-router-dom';
 import PlayerList from '../PlayerList';
 import Chat from '../Chat';
@@ -17,8 +16,11 @@ import ControlPanel from '../ControlPanel';
 import { useDispatch } from 'react-redux';
 import HttpRequestHandler from '../../http/HttpRequestHandler';
 import { updatedAlert, updatedVisible } from '../../redux/slices/alert-slice';
-import useLocalStorage from 'use-local-storage';
 import { PlayerIsHostResponse } from '../../http/HttpInterfaces';
+import useLocalStorageState from 'use-local-storage-state';
+import { useWorker, WORKER_STATUS } from "@koale/useworker";
+import { updatedDrawingTimeSeconds } from '../../redux/slices/game-settings-slice';
+import loading from './../../assets/loading.gif'
 
 function GameView() {
   const httpRequestHandler = new HttpRequestHandler();
@@ -35,11 +37,18 @@ function GameView() {
 
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [isPlayerHost, setIsPlayerHost] = useState(false);
-  const [isGameVisible, setIsGameVisible] = useState(false);
+  const [isPlayerDrawing, setIsPlayerDrawing] = useState(false);
+  const [isGameDisplayed, setIsGameDisplayed] = useState(false);
   const [activeButton, setActiveButton] = useState(true);
   const [playerScores, setPlayerScores] = useState<PlayerScore[]>([]);
 
-  const [token, setToken] = useLocalStorage("token", "");
+  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
+
+  const [count, setCount] = useState(0);
+
+  const [worker, workerResult] = useWorker(() => {
+    console.log("test")
+  });
 
   const handleStartGameButtonClick = async () => {
     await hub.invoke(HubEvents.startGame, token);
@@ -55,7 +64,7 @@ function GameView() {
     if (!isInitialEffectRender.current) {
       return;
     }
-
+    
     const startHubAndJoinGame = async () => {
       const getPlayerList = (playerScoresSerialized: string) => {
         const playerScores = JSON.parse(playerScoresSerialized) as PlayerScore[];
@@ -65,15 +74,30 @@ function GameView() {
       hub.on(HubEvents.onPlayerJoinedGame, getPlayerList);
       hub.on(HubEvents.onPlayerLeftGame, getPlayerList);
       hub.on(HubEvents.onStartGame, () => setIsGameStarted(true));
+      hub.on(HubEvents.onStartTimer, async (data: number) => {
+        worker();
+      });
       hub.on(HubEvents.onJoinGame, (playerSerialized: string) => {
+        if (playerSerialized == null)
+        {
+          displayAlert("Player with this username already exists", "primary");
+          navigate(config.mainClientEndpoint);
+        }
+
         const player = JSON.parse(playerSerialized) as Player;
         
         dispatch(updatedPlayerScore({username: player.username, score: player.score}));
         setToken(player.token);
+
+        setTimeout(() => {
+          setIsGameDisplayed(true);
+        }, 1000);
       });
 
       await hub.start();
       await hub.invoke(HubEvents.joinGame, token, player.username);
+
+      isInitialEffectRender.current = false;
     }
 
     const checkIfGameExists = async () => {
@@ -127,10 +151,12 @@ function GameView() {
     startHubAndJoinGame();
 
     window.addEventListener("beforeunload", clearBeforeUnload);
+    window.addEventListener("unload", clearBeforeUnload);
 
     return () => {
       clearBeforeUnload();
       window.removeEventListener("beforeunload", clearBeforeUnload);
+      window.removeEventListener("unload", clearBeforeUnload);
     }
   }, []);
 
@@ -138,7 +164,7 @@ function GameView() {
       const checkIfPlayerIsHost = async () => {
         await httpRequestHandler.checkIfPlayerIsHost(token)
         .then((data: PlayerIsHostResponse) => {
-          console.log(data.isHost);
+
           if (data.isHost === true) {
             setIsPlayerHost(true);
           }
@@ -163,85 +189,93 @@ function GameView() {
   return (
     <>
       {
-        isGameStarted ?
+        !isGameDisplayed ? 
+          <div className='d-flex justify-content-center align-items-center mt-4'>
+            <img src={loading} alt="Loading" className="w-30 h-30 img-fluid" />
+          </div>
+        : 
+          (
+            isGameStarted ?
 
-          <div className="container text-center">
+            <div className="container text-center">
+              <div className="row">
+                <div className="col-lg-2 col-md-6 col-12 order-lg-1 order-md-2 order-3 mb-3">
+                  <PlayerList
+                    title={"Players"}
+                    playerScores={playerScores}
+                    displayPoints={true}
+                    displayIndex={true}
+                    round={{
+                      currentRound: gameState.currentRound,
+                      roundCount: gameSettings.roundsCount
+                    }}
+                  />
+                  <ControlPanel onClick={handleLeaveGameButtonClick} />
+                </div>
+                <div className="col-lg-7 col-md-12 col-12 order-lg-1 order-md-1 order-1 mb-3">
+                  <Canvas
+                    progressBarProperties={{
+                      currentProgress: gameState.currentDrawingTimeSeconds,
+                      minProgress: 0,
+                      maxProgress: gameSettings.drawingTimeSeconds
+                    }}
+                  />
+                </div>
+                <div className="col-lg-3 col-md-6 col-12 order-lg-1 order-md-3 order-2 mb-3">
+                  <Chat
+                    placeholderValue="Enter your guess"
+                    wordLength={gameState.wordLength}
+                  />
+                </div>
+              </div>
+            </div> 
+
+            :
+
+            <div className="container mb-3">
             <div className="row">
-              <div className="col-lg-2 col-md-6 col-12 order-lg-1 order-md-2 order-3 mb-3">
-                <PlayerList
-                  title={"Players"}
-                  playerScores={playerScores}
-                  displayPoints={true}
-                  displayIndex={true}
-                  round={{
-                    currentRound: gameState.currentRound,
-                    roundCount: gameSettings.roundsCount
-                  }}
-                />
-                <ControlPanel />
+              <div className="col-lg-4 col-sm-5 col-12 mx-auto mt-2 text-center order-lg-1 order-2 mb-3">
+                <div className="col-lg-6">
+                  <PlayerList
+                    title={"Players in the lobby"}
+                    playerScores={playerScores}
+                    displayPoints={false}
+                    displayIndex={false}
+                  />
+                </div>
               </div>
-              <div className="col-lg-7 col-md-12 col-12 order-lg-1 order-md-1 order-1 mb-3">
-                <Canvas
-                  progressBarProperties={{
-                    currentProgress: gameState.currentDrawingTimeSeconds,
-                    minProgress: 0,
-                    maxProgress: gameSettings.drawingTimeSeconds
-                  }}
-                />
+              <div className="col-lg-4 col-sm-10 col-12 mx-auto text-center order-lg-2 order-1">
+                <h5>Your username: {player.username}</h5>
+                { isPlayerHost && 
+                  <Button
+                    text="Start the game"
+                    type="success"
+                    active={activeButton}
+                    icon={<BsPlayCircle/>}
+                    onClick={handleStartGameButtonClick}
+                  />
+                }
+                { !isPlayerHost && <h4 className="mt-3">Waiting for the host to start the game</h4> }
+                  <Button
+                    text="Leave the game"
+                    active={true}
+                    icon={<BsDoorOpen/>}
+                    type={"danger"}
+                    onClick={handleLeaveGameButtonClick}
+                  />
+                <div className="mt-3">
+                  <GameSettingsBoard isPlayerHost={isPlayerHost} />
+                </div>
               </div>
-              <div className="col-lg-3 col-md-6 col-12 order-lg-1 order-md-3 order-2 mb-3">
-                <Chat
-                  placeholderValue="Enter your guess"
-                  wordLength={gameState.wordLength}
-                />
-              </div>
-            </div>
-          </div> 
-
-          :
-
-          <div className="container mb-3">
-          <div className="row">
-            <div className="col-lg-4 col-sm-5 col-12 mx-auto mt-2 text-center order-lg-1 order-2 mb-3">
-              <div className="col-lg-6">
-                <PlayerList
-                  title={"Players in the lobby"}
-                  playerScores={playerScores}
-                  displayPoints={false}
-                  displayIndex={false}
-                />
-              </div>
-            </div>
-            <div className="col-lg-4 col-sm-10 col-12 mx-auto text-center order-lg-2 order-1">
-              <h5>Your username: {player.username}</h5>
-              { isPlayerHost && 
-                <Button
-                  text="Start the game"
-                  type="success"
-                  active={activeButton}
-                  icon={<BsPlayCircle/>}
-                  onClick={handleStartGameButtonClick}
-                />
-              }
-              { !isPlayerHost && <h4 className="mt-3">Waiting for the host to start the game</h4> }
-                <Button
-                  text="Leave the game"
-                  active={true}
-                  icon={<BsDoorOpen/>}
-                  type={"danger"}
-                  onClick={handleLeaveGameButtonClick}
-                />
-              <div className="mt-3">
-                <GameSettingsBoard isPlayerHost={isPlayerHost} />
-              </div>
-            </div>
-            <div className="col-lg-4 order-lg-3 col-sm-7 col-12 order-3">
-              <div className="col-lg-9 col-sm-12 col-12 float-end mb-3">
-                <Chat placeholderValue={"Enter your message"}/>
+              <div className="col-lg-4 order-lg-3 col-sm-7 col-12 order-3">
+                <div className="col-lg-9 col-sm-12 col-12 float-end mb-3">
+                  <Chat placeholderValue={"Enter your message"}/>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )
+
       }
     </>
   );

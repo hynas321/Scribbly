@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import Hub from "../hub/Hub";
 import HubEvents from "../hub/HubEvents";
-import useLocalStorage from "use-local-storage";
+import useLocalStorageState from "use-local-storage-state";
 
 export const useDraw = (onDraw: (
     canvasContext: CanvasRenderingContext2D,
@@ -11,7 +11,7 @@ export const useDraw = (onDraw: (
   const [mouseDown, setMouseDown] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previousRelativePoint = useRef<Point | null>(null);
-  const [token, setToken] = useLocalStorage("token", "");
+  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
 
   const onMouseDown = () => {
     setMouseDown(true);

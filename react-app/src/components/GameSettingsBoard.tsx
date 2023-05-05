@@ -6,10 +6,10 @@ import { GameSettings, updatedDrawingTimeSeconds, updatedNonAbstractNounsOnly, u
 import { BsGearFill } from 'react-icons/bs';
 import InputSelect from './InputSelect';
 import { useContext, useEffect } from "react";
-import { ConnectionHubContext, connectionHub } from '../context/ConnectionHubContext';
+import { ConnectionHubContext } from '../context/ConnectionHubContext';
 import * as signalR from '@microsoft/signalr';
 import HubEvents from '../hub/HubEvents';
-import useLocalStorage from 'use-local-storage';
+import useLocalStorageState from 'use-local-storage-state';
 
 interface GameSettingsBoardProps {
   isPlayerHost: boolean;
@@ -18,7 +18,7 @@ interface GameSettingsBoardProps {
 function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
   const hub = useContext(ConnectionHubContext);
   const dispatch = useAppDispatch();
-  const [token, setToken] = useLocalStorage("token", "");
+  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
 
   let gameSettingsLoaded = false;
 

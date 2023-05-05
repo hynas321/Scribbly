@@ -1,19 +1,20 @@
-import { Link } from "react-router-dom";
 import Button from "./Button";
-import config from "./../../config.json"
 import { BsDoorOpen } from "react-icons/bs";
 
-function ControlPanel() {
+interface ControlPanelProps {
+  onClick: () => void;
+}
+
+function ControlPanel({onClick}: ControlPanelProps) {
   return (
     <>
-      <Link to={config.mainClientEndpoint}>
-        <Button
-          text="Leave the game"
-          active={true}
-          type="danger"
-          icon={<BsDoorOpen />}
-        />
-      </Link>
+      <Button
+        text="Leave the game"
+        active={true}
+        type="danger"
+        icon={<BsDoorOpen />}
+        onClick={onClick}
+      />
     </>
   )
 }

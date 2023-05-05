@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { useDraw } from "../hooks/useDraw";
 import { CirclePicker } from "react-color"
 import Button from "./Button";
-import ProgressBar from "./bars/ProgressBar";
+import DrawingTimeBar from "./bars/DrawingTimeBar";
 import { ConnectionHubContext } from "../context/ConnectionHubContext";
 import material from 'material-colors'
 
@@ -44,7 +44,7 @@ function Canvas({progressBarProperties}: CanvasProps) {
     <>
       <div className="d-flex justify-content-center">
         <div className="mb-3 col-10">
-          <ProgressBar
+          <DrawingTimeBar
             progressProperties={progressBarProperties}
             text="s"
           />

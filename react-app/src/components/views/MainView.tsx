@@ -10,7 +10,8 @@ import PlayerList from '../PlayerList';
 import HttpRequestHandler from '../../http/HttpRequestHandler';
 import { CreateGameResponse } from '../../http/HttpInterfaces';
 import { updatedAlert, updatedVisible } from '../../redux/slices/alert-slice';
-import useLocalStorage from 'use-local-storage';
+import useLocalStorageState from 'use-local-storage-state';
+
 
 function MainView() {
   const httpRequestHandler = new HttpRequestHandler();
@@ -22,13 +23,13 @@ function MainView() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState("");
   const [createGameActiveButton, setCreateGameActiveButton] = useState(false);
   const [joinGameActiveButton, setJoinGameActiveButton] = useState(false);
   const [playerListVisible, setPlayerListVisible] = useState(false);
   const [playerScores, setPlayerScores] = useState<PlayerScore[]>([]);
 
-  const [token, setToken] = useLocalStorage("token", "");
+  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
+  const [username, setUsername] = useLocalStorageState("username", { defaultValue: ""});
 
   const handleInputFormChange = (value: string) => {
     setUsername(value.trim());
@@ -48,8 +49,10 @@ function MainView() {
             return;
           }
 
+          setToken(data.hostToken);
           dispatch(updatedUsername(username));
           navigate(config.gameClientEndpoint);
+          console.log(data.hostToken);
         })
         .catch(() => {
           displayAlert("Error", "danger");
@@ -164,6 +167,7 @@ function MainView() {
       <div className="col-lg-4 col-sm-7 col-xs-6 mx-auto text-center">
         <Alert />
         <InputForm
+          defaultValue={username}
           placeholderValue="Enter username"
           smallTextValue={`Minimum username length ${minUsernameLength}`}
           onChange={handleInputFormChange}

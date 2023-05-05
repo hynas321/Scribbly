@@ -3,7 +3,7 @@ interface ProgressBarProps {
 	text?: string;
 }
 
-function ProgressBar({progressProperties, text}: ProgressBarProps) {
+function DrawingTimeBar({progressProperties, text}: ProgressBarProps) {
   return (
     <div className="progress" style={{height: "110%"}}>
       <div
@@ -20,4 +20,4 @@ function ProgressBar({progressProperties, text}: ProgressBarProps) {
   );
 }
 
-export default ProgressBar;
+export default DrawingTimeBar;

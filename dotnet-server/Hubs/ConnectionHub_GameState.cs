@@ -25,6 +25,7 @@ public partial class HubConnection : Hub
             game.GameState.IsStarted = true;
 
             await Clients.All.SendAsync(HubEvents.OnStartGame);
+            await StartTimer(token);
 
         }
         catch (Exception ex)
@@ -49,23 +50,25 @@ public partial class HubConnection : Hub
             int currentTime = initialTime;
             CancellationTokenSource cancellationToken = new CancellationTokenSource();
 
-            await Task.Run(async () =>
-            {
-                for (int i = 0; i < initialTime; i++)
-                {   
-                    await Clients.All.SendAsync(HubEvents.OnStartTimer, currentTime);
+            // await Task.Run(async () =>
+            // {
+            //     for (int i = 0; i < initialTime; i++)
+            //     {   
+            //         await Clients.All.SendAsync(HubEvents.OnStartTimer, currentTime);
 
-                    currentTime--;
+            //         currentTime--;
 
-                    await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken.Token);
+            //         await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken.Token);
 
-                    if (currentTime <= 0)
-                    {
-                        cancellationToken.Cancel();
-                        break;
-                    }
-                }
-            });
+            //         if (currentTime <= 0)
+            //         {
+            //             cancellationToken.Cancel();
+            //             break;
+            //         }
+            //     }
+            // });
+
+            await Clients.All.SendAsync(HubEvents.OnStartTimer, currentTime);
         }
         catch(Exception ex)
         {

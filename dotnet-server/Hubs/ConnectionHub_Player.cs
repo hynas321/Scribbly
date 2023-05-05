@@ -37,7 +37,25 @@ public partial class HubConnection : Hub
 
                 gameManager.AddPlayer(player);
             }
-            else if (player == null)
+            else if (player != null && token == game.HostToken)
+            {
+                player = new Player()
+                {
+                    Username = player.Username,
+                    Score = player.Score,
+                    Token = game.HostToken,
+                };
+            }
+            else if (player != null && token == player.Token)
+            {
+                player = new Player()
+                {
+                    Username = player.Username,
+                    Score = player.Score,
+                    Token = player.Token,
+                };
+            }
+            else if (player == null && !gameManager.CheckIfPlayerExistsByUsername(username))
             {
                 player = new Player()
                 {
@@ -48,23 +66,13 @@ public partial class HubConnection : Hub
 
                 gameManager.AddPlayer(player);
             }
-            else if (token == game.HostToken)
+            else if (player == null && gameManager.CheckIfPlayerExistsByUsername(username))
             {
-                player = new Player()
-                {
-                    Username = player.Username,
-                    Score = player.Score,
-                    Token = game.HostToken,
-                };
+                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnJoinGame, null);
             }
             else
             {
-                player = new Player()
-                {
-                    Username = player.Username,
-                    Score = player.Score,
-                    Token = player.Token,
-                };
+                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnJoinGame, null);
             }
 
             PlayerScore playerScore = new PlayerScore()

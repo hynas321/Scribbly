@@ -6,7 +6,7 @@ import { useAppSelector } from '../redux/hooks';
 import { ConnectionHubContext } from '../context/ConnectionHubContext';
 import * as signalR from '@microsoft/signalr';
 import HubEvents from '../hub/HubEvents';
-import useLocalStorage from 'use-local-storage';
+import useLocalStorageState from 'use-local-storage-state';
 
 interface ChatProps {
   placeholderValue: string;
@@ -15,9 +15,8 @@ interface ChatProps {
 
 function Chat({placeholderValue, wordLength}: ChatProps) {
   const hub = useContext(ConnectionHubContext);
-  const player = useAppSelector((state) => state.player);
 
-  const [token, setToken] = useLocalStorage("token", "");
+  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputFormValue, setInputFormValue] = useState("");
@@ -117,10 +116,11 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
           onClick={handleButtonPress}
         />
         <InputForm 
+          defaultValue={""} 
           placeholderValue={placeholderValue}
           onChange={handleInputFormChange}
           onKeyDown={handleEnterPress}
-          ref={inputFormRef}
+          ref={inputFormRef} 
         />
       </div>
     </div>
