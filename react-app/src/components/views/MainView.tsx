@@ -8,10 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import { PlayerScore, updatedUsername, } from '../../redux/slices/player-score-slice';
 import PlayerList from '../PlayerList';
 import HttpRequestHandler from '../../http/HttpRequestHandler';
-import { CreateGameResponse } from '../../http/HttpInterfaces';
 import { updatedAlert, updatedVisible } from '../../redux/slices/alert-slice';
 import useLocalStorageState from 'use-local-storage-state';
-
 
 function MainView() {
   const httpRequestHandler = new HttpRequestHandler();
@@ -39,27 +37,23 @@ function MainView() {
     if (username.length < minUsernameLength) {
       return;
     }
+  
+    try {
+      const data = await httpRequestHandler.createGame(username);
 
-    const createGame = async () => {
-      await httpRequestHandler.createGame(username)
-        .then(async (data: CreateGameResponse) => {
-          
-          if (!("hostToken" in data)) {
-            displayAlert("The game is already created. Join the game.", "primary");
-            return;
-          }
+      if (!("hostToken" in data)) {
+        displayAlert("The game is already created. Join the game.", "primary");
+        return;
+      }
 
-          setToken(data.hostToken);
-          dispatch(updatedUsername(username));
-          navigate(config.gameClientEndpoint);
-          console.log(data.hostToken);
-        })
-        .catch(() => {
-          displayAlert("Error", "danger");
-        });
+      setToken(data.hostToken);
+      dispatch(updatedUsername(username));
+      navigate(config.gameClientEndpoint);
+
     }
-    
-    await createGame();
+    catch (error) {
+      displayAlert("Error", "danger");
+    }
   }
 
   const handleJoinGameButtonClick = async () => {
@@ -68,26 +62,27 @@ function MainView() {
     }
 
     const checkIfGameExists = async () => {
-      await httpRequestHandler.checkIfGameExists()
-        .then((data: boolean) => {
-  
-          if (typeof data != "boolean") {
-            displayAlert("Unexpected error, try again", "danger");
-            return;
-          }
-  
-          if (data === true) {
-            dispatch(updatedUsername(username));
-            navigate(config.gameClientEndpoint);
-          }
-          else {
-            displayAlert("Game does not exist", "danger");
-          }
-        })
-        .catch(() => {
+      try {
+        const data = await httpRequestHandler.checkIfGameExists();
+    
+        if (typeof data != "boolean") {
           displayAlert("Unexpected error, try again", "danger");
-        });
-    }
+          return;
+        }
+    
+        if (data === true) {
+          dispatch(updatedUsername(username));
+          navigate(config.gameClientEndpoint);
+        }
+        else {
+          displayAlert("Game does not exist", "danger");
+        }
+      
+      }
+      catch (error) {
+        displayAlert("Unexpected error, try again", "danger");
+      }
+    };
 
     await checkIfGameExists();
   }
@@ -109,17 +104,21 @@ function MainView() {
     // }
 
     const fetchPlayerScores = async () => {
-      await httpRequestHandler.fetchPlayerScores()
-        .then((data) => {
-          if (!Array.isArray(data)) {
-            setPlayerListVisible(false);
-            return;
-          }
-
-          setPlayerScores(data);
-          setPlayerListVisible(true);
-      });
-    }
+      try {
+        const data = await httpRequestHandler.fetchPlayerScores();
+        
+        if (!Array.isArray(data)) {
+          setPlayerListVisible(false);
+          return;
+        }
+      
+        setPlayerScores(data);
+        setPlayerListVisible(true);
+      }
+      catch (error) {
+        console.error(error);
+      }
+    };
 
     //checkIfPlayerExists();
     fetchPlayerScores();

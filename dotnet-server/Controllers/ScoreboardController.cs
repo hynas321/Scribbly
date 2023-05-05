@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Dotnet.Server.Http.Requests;
 using Dotnet.Server.Database;
-using Dotnet.Server.Json;
+using Dotnet.Server.JsonConfig;
 using Dotnet.Server.Models;
 
 namespace Dotnet.Server.Controllers;

@@ -12,8 +12,6 @@ class Hub {
       })
       .withAutomaticReconnect()
       .build();
-
-
   }
 
   async start() {

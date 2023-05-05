@@ -1,7 +1,6 @@
 using Dotnet.Server.Http;
 using Dotnet.Server.Http.Requests;
-using Dotnet.Server.Hubs;
-using Dotnet.Server.Json;
+using Dotnet.Server.JsonConfig;
 using Dotnet.Server.Managers;
 using Dotnet.Server.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -86,6 +85,41 @@ public class PlayerController : ControllerBase
             logger.LogInformation("Exists Status: 200. OK.");
 
             return StatusCode(StatusCodes.Status200OK, playerExists);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Exists Status: 500. Internal server error. {ex}");
+
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+    [HttpGet("UsernameExists/{username}")]
+    public IActionResult UsernameExists([FromRoute] string username)
+    {
+        try 
+        {
+            if (!ModelState.IsValid)
+            {   
+                logger.LogError("Exists Status: 400. Invalid received request body.");
+
+                return StatusCode(StatusCodes.Status400BadRequest);
+            }
+
+            Game game = gamesManager.GetGame();
+
+            if (game == null)
+            {
+                logger.LogError("Exists Status: 404. Game not found.");
+
+                return StatusCode(StatusCodes.Status404NotFound);
+            }
+
+            bool usernameExists = gamesManager.CheckIfPlayerExistsByUsername(username);
+
+            logger.LogInformation("Exists Status: 200. OK.");
+
+            return StatusCode(StatusCodes.Status200OK, usernameExists);
         }
         catch (Exception ex)
         {

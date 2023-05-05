@@ -3,7 +3,7 @@ import Button from '../Button';
 import GameSettingsBoard from '../GameSettingsBoard';
 import { useAppSelector } from '../../redux/hooks';
 import config from '../../../config.json';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import PlayerList from '../PlayerList';
 import Chat from '../Chat';
 import { BsPlayCircle, BsDoorOpen } from 'react-icons/bs';
@@ -68,7 +68,6 @@ function GameView() {
       
       hub.on(HubEvents.onPlayerJoinedGame, getPlayerList);
       hub.on(HubEvents.onPlayerLeftGame, getPlayerList);
-
       hub.on(HubEvents.onStartGame, () => setIsGameStarted(true));
 
       hub.on(HubEvents.onStartTimer, async (data: number) => {
@@ -103,47 +102,50 @@ function GameView() {
     }
 
     const checkIfGameExists = async () => {
-      await httpRequestHandler.checkIfGameExists()
-        .then((data: boolean) => {
-  
-          if (typeof data != "boolean") {
-            displayAlert("Unexpected error, try again", "danger");
-            navigate(config.mainClientEndpoint);
-            return;
-          }
-  
-          if (data === false) {
-            displayAlert("Game does not exist", "danger");
-            navigate(config.mainClientEndpoint);
-          }
-        })
-        .catch(() => {
+      try {
+        const data = await httpRequestHandler.checkIfGameExists();
+
+        if (typeof data != "boolean") {
           displayAlert("Unexpected error, try again", "danger");
           navigate(config.mainClientEndpoint);
-        });
-    }
+          return;
+        }
+
+        if (data === false) {
+          displayAlert("Game does not exist", "danger");
+          navigate(config.mainClientEndpoint);
+        }
+      }
+      catch (error) {
+        displayAlert("Unexpected error, try again", "danger");
+        navigate(config.mainClientEndpoint);
+      }
+    };
 
     const checkIfGameIsStarted = async () => {
-      await httpRequestHandler.checkIfGameIsStarted()
-        .then((data: boolean) => {
+      try {
+        const data = await httpRequestHandler.checkIfGameIsStarted();
 
-          if (typeof data != "boolean") {
-            displayAlert("Unexpected error, try again", "danger");
-            navigate(config.mainClientEndpoint);
-            return;
-          }
-
-          setIsGameStarted(data);
-        })
-        .catch(() => {
+        if (typeof data != "boolean") {
           displayAlert("Unexpected error, try again", "danger");
           navigate(config.mainClientEndpoint);
-        });
-    }
+          return;
+        }
+
+        setIsGameStarted(data);
+      }
+      catch (error) {
+        displayAlert("Unexpected error, try again", "danger");
+        navigate(config.mainClientEndpoint);
+      }
+    };
 
     const clearBeforeUnload = async () => {
       hub.off(HubEvents.onPlayerJoinedGame);
       hub.off(HubEvents.onPlayerLeftGame);
+      hub.off(HubEvents.onStartGame);
+      hub.off(HubEvents.onJoinGame);
+      hub.off(HubEvents.onStartTimer);
       await hub.invoke(HubEvents.leaveGame, token, false);
       await hub.stop();
     }
@@ -277,7 +279,6 @@ function GameView() {
             </div>
           </div>
         )
-
       }
     </>
   );

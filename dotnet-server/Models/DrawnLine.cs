@@ -1,3 +1,5 @@
+namespace Dotnet.Server.Models;
+
 public class DrawnLine
 {
     public Point CurrentPoint { get; set; } = new Point();

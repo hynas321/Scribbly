@@ -1,6 +1,3 @@
-import { useEffect, useRef, useState } from "react";
-import { useAppSelector } from "../redux/hooks";
-
 interface PlayerListProps {
   title: string,
   playerScores: PlayerScore[],

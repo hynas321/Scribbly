@@ -17,3 +17,7 @@ export interface JoinGameResponse {
 export interface PlayerIsHostResponse {
   isHost: boolean;
 }
+
+export interface UsernameExistsBody {
+  username: string;
+}

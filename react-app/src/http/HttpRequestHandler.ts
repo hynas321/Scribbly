@@ -1,8 +1,6 @@
-import axios from 'axios';
 import config from '../../config.json';
-import { CreateGameBody, CreateGameResponse, JoinGameBody, JoinGameResponse, PlayerIsHostResponse } from './HttpInterfaces';
-import ApiEndpoints from '../hub/ApiEndpoints';
-
+import ApiEndpoints from '../hub/HttpEndpoints';
+import { CreateGameBody, JoinGameBody, PlayerIsHostResponse, UsernameExistsBody } from './HttpInterfaces';
 
 class HttpRequestHandler {
   private httpServerUrl: string = config.httpServerUrl;
@@ -12,18 +10,24 @@ class HttpRequestHandler {
       username: username
     };
 
-    return await axios.post<CreateGameResponse>(`${this.httpServerUrl}${ApiEndpoints.gameCreate}`, requestBody)
-      .then(response => {
-        switch (response.status) {
-          case 201:
-            return response.data
-          default:
-            throw new Error("Error");
+    try {
+      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.gameCreate}`, {
+        method: 'POST',
+        body: JSON.stringify(requestBody),
+        headers: {
+          'Content-Type': 'application/json'
         }
-      })
-      .catch(error => {
-        return error;
       });
+
+      if (!response.ok) {
+        throw new Error("Error");
+      } 
+
+      return await response.json();
+    }
+    catch (error) {
+      return error;
+    }
   }
 
   async joinGame(token: string, username: string): Promise<any> {
@@ -31,121 +35,143 @@ class HttpRequestHandler {
       username: username
     };
 
-    return await axios.post<JoinGameResponse>(`${this.httpServerUrl}${ApiEndpoints.playerJoinGame}`, requestBody, {
+    try {
+      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.playerJoinGame}`, {
+        method: 'POST',
+        body: JSON.stringify(requestBody),
         headers: {
-          "Token": token,
+          'Content-Type': 'application/json',
+          'Token': token
         }
-      })
-      .then(response => {
-        switch (response.status) {
-          case 200:
-            return response.data
-          default:
-            throw new Error("Error");
-        }
-      })
-      .catch(error => {
-        return error;
       });
+
+      if (!response.ok) {
+        throw new Error("Error");
+      }
+
+      return await response.json();
+    }
+    catch (error) {
+      return error;
+    }
   }
 
   async checkIfGameIsStarted(): Promise<any> {
-    return await axios.get<boolean>(`${this.httpServerUrl}${ApiEndpoints.gameIsStarted}`)
-      .then(response => {
-        switch (response.status) {
-          case 200:
-            return response.data as boolean
-          default:
-            throw new Error("Error");
-        }
-      })
-      .catch(error => {
-        return error;
-      });
+    try {
+      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.gameIsStarted}`);
+
+      if (!response.ok) {
+        throw new Error("Error");
+      }
+
+      return await response.json() as boolean;
+    } 
+    catch (error) {
+      return error;
+    }
   }
 
   async checkIfGameExists(): Promise<any> {
+    try {
+      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.gameExists}`);
 
-    return await axios.get<boolean>(`${this.httpServerUrl}${ApiEndpoints.gameExists}`)
-      .then(response => {
-        switch (response.status) {
-          case 200:
-            return response.data as boolean
-          default:
-            throw new Error("Error");
-        }
-      })
-      .catch(error => {
-        return error;
-      });
-  }
+      if (!response.ok) {
+        throw new Error("Error");
+      }
 
-  async fetchGameHash(token: string): Promise<any> {
-    return await axios.get(`${this.httpServerUrl}${ApiEndpoints.gameGetHash}`, {
-      headers: {
-        'Token': token
-      }
-    })
-    .then(response => {
-      switch (response.status) {
-        case 200:
-          return response.data as string
-        default:
-          throw new Error("Error");
-      }
-    })
-    .catch(error => {
-      return error;
-    });
-  }
-
-  async checkIfPlayerExists(token: string): Promise<any> {
-    return await axios.get<boolean>(`${this.httpServerUrl}${ApiEndpoints.playerExists}`, {
-      headers: {
-        'Token': token
-      }
-    })
-    .then(response => {
-      switch (response.status) {
-        case 200:
-          return response.data as boolean
-        default:
-          throw new Error("Error");
-      }
-    })
-    .catch(error => {
-      return error;
-    });
-  }
-
-  async checkIfPlayerIsHost(token: string): Promise<PlayerIsHostResponse> {
-    const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.playerIsHost}`, {
-      headers: {
-        'Token': token
-      }
-    });
-  
-    if (!response.ok) {
-      throw new Error("Error");
+      return await response.json();
     }
+    catch (error) {
+      return error;
+    }
+  }
   
-    const data = await response.json();
-    return data as PlayerIsHostResponse;
+  async fetchGameHash(token: string): Promise<any> {
+    try {
+      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.gameGetHash}`, {
+        headers: {
+          'Token': token
+        }
+      });
+  
+      if (!response.ok) {
+        throw new Error("Error");
+      }
+
+      return await response.text();
+
+    }
+    catch (error) {
+      return error;
+    }
+  }
+  
+  async checkIfPlayerExists(token: string): Promise<any> {
+    try {
+      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.playerExists}`, {
+        headers: {
+          'Token': token
+        }
+      });
+  
+      if (!response.ok) {
+        throw new Error("Error");
+      }
+
+      return await response.json() as boolean;
+    } 
+    catch (error) {
+      return error;
+    }
+  }
+  
+  async checkIfPlayerIsHost(token: string): Promise<any> {
+    try {
+      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.playerIsHost}`, {
+        headers: {
+          'Token': token
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("Error");
+      }
+
+      return await response.json() as PlayerIsHostResponse;
+    }
+    catch (error) {
+      return error;
+    }
   }
 
-  async fetchPlayerScores() {
-    return await axios.get(`${this.httpServerUrl}${ApiEndpoints.scoreboardGet}`)
-      .then(response => {
-        switch (response.status) {
-          case 200:
-            return response.data as PlayerScore[];
-          default:
-            throw new Error("Error");
-        }
-      })
-      .catch(error => {
-        return error;
-      });
+  async checkIfUsernameExists(username: string): Promise<any> {
+    try {
+      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.playerUsernameExists}${username}`)
+
+      if (!response.ok) {
+        throw new Error("Error");
+      }
+
+      return await response.json() as boolean;
+    }
+    catch (error) {
+      return error;
+    }
+  }
+
+  async fetchPlayerScores(): Promise<any> {
+    try {
+      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.scoreboardGet}`);
+
+      if (!response.ok) {
+        throw new Error("Error");
+      }
+
+      return await response.json() as PlayerScore[];
+    }
+    catch (error) {
+      return error;
+    }
   }
 }
 

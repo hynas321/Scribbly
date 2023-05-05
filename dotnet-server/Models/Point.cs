@@ -1,3 +1,5 @@
+namespace Dotnet.Server.Models;
+
 public class Point
 {
     public double X { get; set; } = 0;

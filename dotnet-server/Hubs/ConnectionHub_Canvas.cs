@@ -1,4 +1,4 @@
-using Dotnet.Server.Json;
+using Dotnet.Server.JsonConfig;
 using Dotnet.Server.Models;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
