@@ -92,6 +92,12 @@ class GameManager
         return game.HostToken == player.Token;
     }
 
+    public bool CheckIfHostIsOnline()
+    {
+        Player hostPlayer = GetPlayerByToken(game.HostToken);
+        return game.GameState.PlayerScores != null;
+    }
+
     public void AddChatMessage(ChatMessage message)
     {
         List<ChatMessage> messages = game.ChatMessages;

@@ -49,7 +49,6 @@ const InputForm = forwardRef((
             ref={ref}
           />
       }
-
         {placeholderValue && <small>{smallTextValue}</small>}
     </div>
   );

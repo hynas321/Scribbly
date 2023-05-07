@@ -25,6 +25,7 @@ class HubEvents {
     static onPlayerJoinedGame: string = "OnPlayerJoinedGame";
     static onPlayerLeftGame: string = "OnPlayerLeftGame";
     static onJoinGame: string = "OnJoinGame";
+    static onJoinGameError: string = "OnJoinGameError";
     static onFindPlayerHost: string = "OnFindPlayerHost";
 
     //GameState

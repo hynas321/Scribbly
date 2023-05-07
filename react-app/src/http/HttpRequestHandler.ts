@@ -127,7 +127,7 @@ class HttpRequestHandler {
   
   async checkIfPlayerIsHost(token: string): Promise<any> {
     try {
-      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.playerIsHost}`, {
+      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.playerHost}`, {
         headers: {
           'Token': token
         }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import Button from '../Button';
 import InputForm from '../InputForm';
 import { useAppDispatch } from '../../redux/hooks';
@@ -10,20 +10,21 @@ import PlayerList from '../PlayerList';
 import HttpRequestHandler from '../../http/HttpRequestHandler';
 import { updatedAlert, updatedVisible } from '../../redux/slices/alert-slice';
 import useLocalStorageState from 'use-local-storage-state';
+import { ConnectionHubContext } from '../../context/ConnectionHubContext';
+import * as signalR from '@microsoft/signalr'
+import tableLoading from './../../assets/table-loading.gif'
 
 function MainView() {
+  const hub = useContext(ConnectionHubContext);
   const httpRequestHandler = new HttpRequestHandler();
   const minUsernameLength: number = 1;
-
-  const isInitialEffectRender = useRef(true);
-  const isUsernameEffectRendered = useRef(false);
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const [createGameActiveButton, setCreateGameActiveButton] = useState(false);
   const [joinGameActiveButton, setJoinGameActiveButton] = useState(false);
-  const [playerListVisible, setPlayerListVisible] = useState(false);
+  const [isTableDisplayed, setIsTableDisplayed] = useState(false);
   const [playerScores, setPlayerScores] = useState<PlayerScore[]>([]);
 
   const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
@@ -88,65 +89,39 @@ function MainView() {
   }
 
   useEffect(() => {
-    if (!isInitialEffectRender.current) {
-      return;
-    }
-
-    // const checkIfPlayerExists = async () => {
-    //   await httpRequestHandler.checkIfPlayerExists(token)
-    //     .then((data: boolean) => {
-
-    //       if (data === true) {
-    //         console.log(token);
-    //         navigate(config.gameClientEndpoint);
-    //       }
-    //     });
-    // }
-
     const fetchPlayerScores = async () => {
       try {
         const data = await httpRequestHandler.fetchPlayerScores();
         
         if (!Array.isArray(data)) {
-          setPlayerListVisible(false);
+          setIsTableDisplayed(false);
           return;
         }
       
         setPlayerScores(data);
-        setPlayerListVisible(true);
+        setTimeout(() => {
+          setIsTableDisplayed(true);
+        }, 1000);
+
       }
       catch (error) {
         console.error(error);
       }
     };
 
-    //checkIfPlayerExists();
     fetchPlayerScores();
-    console.log("Player scores fetched");
-    isInitialEffectRender.current = false;
   }, []);
 
   
   useEffect(() => {
-    if (!isUsernameEffectRendered.current) {
-      isUsernameEffectRendered.current = true;
-      return;
-    }
-  
     if (username.length < minUsernameLength) {
       setJoinGameActiveButton(false);
       setCreateGameActiveButton(false);
-
-      console.log("Buttons inactive");
     } 
     else {
       setJoinGameActiveButton(true);
       setCreateGameActiveButton(true);
-
-      console.log("Buttons active");
     }
-  
-    isUsernameEffectRendered.current = false;
   }, [username]);
 
   const displayAlert = (message: string, type: string) => {
@@ -184,13 +159,15 @@ function MainView() {
         />
       </div>
       <div className="col-lg-3 col-sm-6 col-xs-6 mt-5 text-center mx-auto">
-        { playerListVisible &&
+        { isTableDisplayed ?
           <PlayerList
             title="Top 5 players"
             playerScores={playerScores}
             displayPoints={true}
             displayIndex={true}
           /> 
+          :
+          <img src={tableLoading} alt="Table loading" className="img-fluid" />
         }
       </div>
     </div>

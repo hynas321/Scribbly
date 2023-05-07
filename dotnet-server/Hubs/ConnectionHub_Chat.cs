@@ -14,6 +14,7 @@ public partial class HubConnection : Hub
             if (text.Length < 1)
             {
                 logger.LogError($"SendChatMessage: Text is too short {text}");
+                return;
             }
 
             Game game = gameManager.GetGame();
@@ -21,6 +22,7 @@ public partial class HubConnection : Hub
             if (game == null)
             {
                 logger.LogError($"SendChatMessage: Game does not exist");
+                return;
             }
 
             Player player = gameManager.GetPlayerByToken(token);
@@ -28,11 +30,13 @@ public partial class HubConnection : Hub
             if (player == null)
             {
                 logger.LogError($"SendChatMessage: Player with the token {token} does not exist");
+                return;
             }
 
             if (token == game.GameState.DrawingToken)
             {
                 logger.LogError($"SendChatMessage: Player with the drawing token {token} cannot send a message");
+                return;
             }
 
             ChatMessage message = new ChatMessage()
@@ -101,7 +105,6 @@ public partial class HubConnection : Hub
             };
 
             gameManager.AddChatMessage(message);
-            logger.LogInformation(Convert.ToString(game.ChatMessages.Count));
             await Clients.All.SendAsync(HubEvents.OnLoadChatMessages, JsonHelper.Serialize(game.ChatMessages));
         }
         catch (Exception ex)

@@ -15,11 +15,12 @@ function ChatMessage({chatMessage}: ChatMessageProps) {
       mb-1 px-2 py-1`}
     >
       <h6
-        className={playerUsername == chatMessage.username ? "text-start text-warning" : "text-start text-dark" }
+        className={playerUsername == chatMessage.username ? "text-start text-warning" : "text-start text-white" }
         style={{overflowWrap: "break-word"}}
       >
           <b>{ chatMessage.username == null ? "" : `${chatMessage.username}: ` }</b>
-          <span className="text-white">{chatMessage.text}</span>
+          <span className={
+            (playerUsername == chatMessage.username || chatMessage.username == null) ? "text-white" : "text-dark"}>{chatMessage.text}</span>
       </h6>
     </div>
   )

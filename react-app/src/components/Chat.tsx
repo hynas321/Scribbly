@@ -33,10 +33,15 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
   const handleButtonPress = () => {
 
     const SendChatMessage = async () => {
+      if (inputFormValue.length < 1) {
+        return;
+      }
+
       await hub.invoke(HubEvents.sendChatMessage, token, inputFormValue);
       
       if (inputFormRef && inputFormRef.current) {
         inputFormRef.current.value = "";
+        setInputFormValue("");
       }
     }
 
@@ -60,7 +65,6 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
 
     hub.on(HubEvents.onLoadChatMessages, (chatMessagesSerialized: string) => {
       const chatMessageList = JSON.parse(chatMessagesSerialized) as ChatMessage[];
-      console.log(chatMessageList);
       setMessages(chatMessageList);
     });
 
@@ -98,7 +102,7 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
         {characters.map((c, index) => <span key={index}>{c} </span>)}
         { wordLength &&`${wordLength}` }
       </h5>
-      <div id="messages" className="p-3 bg-light">
+      <div id="messages" className="rounded p-3 bg-light">
         <div ref={messagesRef} style={{height: "450px", overflowY: "auto"}}>
           {messages.map((chatMessage, index) => (
             <ChatMessage

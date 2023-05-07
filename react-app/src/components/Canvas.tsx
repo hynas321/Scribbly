@@ -7,9 +7,10 @@ import { ConnectionHubContext } from "../context/ConnectionHubContext";
 import material from 'material-colors'
 
 interface CanvasProps {
-  progressBarProperties: ProgressProperties
+  progressBarProperties: ProgressProperties,
+  isPlayerDrawing: boolean
 }
-function Canvas({progressBarProperties}: CanvasProps) {
+function Canvas({progressBarProperties, isPlayerDrawing}: CanvasProps) {
   const hub = useContext(ConnectionHubContext);
   const [color, setColor] = useState("#000000");
   const { canvasRef, onMouseDown, clearCanvas } = useDraw(draw, hub, color);
@@ -60,21 +61,26 @@ function Canvas({progressBarProperties}: CanvasProps) {
           onTouchStart={onMouseDown}
         />
       </div>
-      <div className="d-flex justify-content-center">
-        <CirclePicker
-          color={color}
-          width="100"
-          onChange={(e) => setColor(e.hex)}
-          colors={circlePickerColors}
-        />
-      </div>
-      <div>
-        <Button 
-          text={"Clear canvas"}
-          active={true}
-          onClick={clearCanvas}
-        />
-      </div>
+      {
+        isPlayerDrawing &&
+        <>
+          <div className="d-flex justify-content-center">
+            <CirclePicker
+              color={color}
+              width="100"
+              onChange={(e) => setColor(e.hex)}
+              colors={circlePickerColors}
+            />
+          </div>
+          <div>
+            <Button 
+              text={"Clear canvas"}
+              active={true}
+              onClick={clearCanvas}
+            />
+          </div>
+        </>
+      }
     </>
   )
 }

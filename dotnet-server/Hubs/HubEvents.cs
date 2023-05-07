@@ -26,7 +26,9 @@ public static class HubEvents
     public const string FindPlayerHost = "FindPlayerHost";
     public const string OnPlayerJoinedGame = "OnPlayerJoinedGame";
     public const string OnPlayerLeftGame = "OnPlayerLeftGame";
+    public const string OnHostLeftUnstartedGame = "OnHostLeftUnstartedGame";
     public const string OnJoinGame = "OnJoinGame";
+    public const string onJoinGameError = "OnJoinGameError";
     public const string OnFindPlayerHost = "OnFindPlayerHost";
 
     //GameState
@@ -34,6 +36,7 @@ public static class HubEvents
     public const string StartTimer = "StartTimer";
     public const string OnStartGame = "OnStartGame";
     public const string OnStartTimer = "OnStartTimer";
+    public const string OnGameFinished = "OnGameFinished";
     
 
     // Canvas

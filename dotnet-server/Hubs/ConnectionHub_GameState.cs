@@ -15,11 +15,13 @@ public partial class HubConnection : Hub
             if (game == null)
             {
                 logger.LogError($"StartGame: Game does not exist");
+                return;
             }
 
             if (token != game.HostToken)
             {
                 logger.LogError($"StartGame: Token is not a host token");
+                return;
             }
 
             if (settings.DrawingTimeSeconds < 25 ||
@@ -29,6 +31,7 @@ public partial class HubConnection : Hub
             )
             {
                 logger.LogError($"StartGame: Incorrect settings data");
+                return;
             }
 
             gameManager.RemoveChatMessages();
@@ -41,7 +44,6 @@ public partial class HubConnection : Hub
             
             await Clients.All.SendAsync(HubEvents.OnStartGame);
             await SendAnnouncement("Game has started", BootstrapColors.Yellow);
-            await StartTimer(token);
 
             logger.LogInformation($"StartGame: Game started");
 
@@ -50,6 +52,23 @@ public partial class HubConnection : Hub
         {
             logger.LogError(Convert.ToString(ex));
         }
+    }
+
+    public async Task ManageGameFlow()
+    {
+        await Task.Run(async () =>
+        {
+            Game game = gameManager.GetGame();
+
+            while (true)
+            {
+                if (game.GameState.CurrentRound > game.GameSettings.RoundsCount)
+                {
+                    await Clients.All.SendAsync(HubEvents.OnGameFinished);
+                    break;
+                }
+            }
+        });
     }
 
     [HubMethodName(HubEvents.StartTimer)]
@@ -68,25 +87,23 @@ public partial class HubConnection : Hub
             int currentTime = initialTime;
             CancellationTokenSource cancellationToken = new CancellationTokenSource();
 
-            // await Task.Run(async () =>
-            // {
-            //     for (int i = 0; i < initialTime; i++)
-            //     {   
-            //         await Clients.All.SendAsync(HubEvents.OnStartTimer, currentTime);
+            await Task.Run(async () =>
+            {
+                 for (int i = 0; i < initialTime; i++)
+                 {   
+                    await Clients.All.SendAsync(HubEvents.OnStartTimer, currentTime);
 
-            //         currentTime--;
+                    currentTime--;
 
-            //         await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken.Token);
+                    await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken.Token);
 
-            //         if (currentTime <= 0)
-            //         {
-            //             cancellationToken.Cancel();
-            //             break;
-            //         }
-            //     }
-            // });
-
-            await Clients.All.SendAsync(HubEvents.OnStartTimer, 25);
+                    if (currentTime <= 0 || game == null)
+                    {
+                        cancellationToken.Cancel();
+                        break;
+                    }
+                 }
+             });
         }
         catch(Exception ex)
         {

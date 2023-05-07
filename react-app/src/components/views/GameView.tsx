@@ -34,8 +34,6 @@ function GameView() {
   const gameState = useAppSelector((state) => state.gameState);
   const gameSettings = useAppSelector((state) => state.gameSettings);
 
-  const isInitialEffectRender = useRef(true);
-
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [isPlayerHost, setIsPlayerHost] = useState(false);
   const [isPlayerDrawing, setIsPlayerDrawing] = useState(false);
@@ -44,9 +42,11 @@ function GameView() {
   const [playerScores, setPlayerScores] = useState<PlayerScore[]>([]);
 
   const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
+  const [username, setUsername] = useLocalStorageState("username", { defaultValue: ""});
 
   const handleStartGameButtonClick = async () => {
-    await hub.invoke(HubEvents.startGame, token, gameSettings);
+    hub.invoke(HubEvents.startGame, token, gameSettings);
+    navigate(config.gameClientEndpoint);
   }
 
   const handleLeaveGameButtonClick = async () => {
@@ -56,31 +56,31 @@ function GameView() {
   }
 
   useEffect(() => {
-    if (!isInitialEffectRender.current) {
-      return;
-    }
-    
     const startHubAndJoinGame = async () => {
-      const getPlayerList = (playerScoresSerialized: string) => {
+      hub.on(HubEvents.onPlayerJoinedGame, (playerScoresSerialized: string) => {
         const playerScores = JSON.parse(playerScoresSerialized) as PlayerScore[];
         setPlayerScores(playerScores);
-      }
-      
-      hub.on(HubEvents.onPlayerJoinedGame, getPlayerList);
-      hub.on(HubEvents.onPlayerLeftGame, getPlayerList);
-      hub.on(HubEvents.onStartGame, () => setIsGameStarted(true));
-
-      hub.on(HubEvents.onStartTimer, async (data: number) => {
-        dispatch((updatedDrawingTimeSeconds(data)));
       });
 
-      hub.on(HubEvents.onJoinGame, (playerSerialized: string, gameSettingsSerialized: string, gameStateSerialized: string) => {
-        if (playerSerialized == null)
-        {
-          displayAlert("Player with this username already exists", "primary");
-          navigate(config.mainClientEndpoint);
-        }
+      hub.on(HubEvents.onPlayerLeftGame, (playerScoresSerialized: string) => {
+        const playerScores = JSON.parse(playerScoresSerialized) as PlayerScore[];
+        setPlayerScores(playerScores);
+      });
 
+      hub.on(HubEvents.onStartGame, () => {
+        setIsGameStarted(true)
+      });
+
+      hub.on(HubEvents.onStartTimer, async (data: number) => {
+        dispatch((updatedDrawingTimeSeconds(data)))
+      });
+
+      hub.on(HubEvents.onJoinGame, (
+        playerSerialized: string,
+        gameSettingsSerialized: string,
+        gameStateSerialized: string,
+        isStarted: boolean
+      ) => {
         const player = JSON.parse(playerSerialized) as Player;
         const settings = JSON.parse(gameSettingsSerialized) as GameSettings;
         const state = JSON.parse(gameStateSerialized) as GameState;
@@ -88,6 +88,7 @@ function GameView() {
         dispatch(updatedPlayerScore({username: player.username, score: player.score}));
         dispatch(updatedGameSettings(settings));
         dispatch(updatedGameState(state));
+        setIsGameStarted(isStarted);
         setToken(player.token);
 
         setTimeout(() => {
@@ -95,63 +96,28 @@ function GameView() {
         }, 1000);
       });
 
+      hub.on(HubEvents.onJoinGameError, (errorMessage: string) => {
+        displayAlert(errorMessage, "danger");
+        navigate(config.mainClientEndpoint);
+      });
+
+      const regex: RegExp = /^Player \d{4}$/;
+      const playerUsername = regex ? username : player.username;
+
       await hub.start();
-      await hub.invoke(HubEvents.joinGame, token, player.username);
-
-      isInitialEffectRender.current = false;
+      await hub.invoke(HubEvents.joinGame, token, playerUsername);
     }
-
-    const checkIfGameExists = async () => {
-      try {
-        const data = await httpRequestHandler.checkIfGameExists();
-
-        if (typeof data != "boolean") {
-          displayAlert("Unexpected error, try again", "danger");
-          navigate(config.mainClientEndpoint);
-          return;
-        }
-
-        if (data === false) {
-          displayAlert("Game does not exist", "danger");
-          navigate(config.mainClientEndpoint);
-        }
-      }
-      catch (error) {
-        displayAlert("Unexpected error, try again", "danger");
-        navigate(config.mainClientEndpoint);
-      }
-    };
-
-    const checkIfGameIsStarted = async () => {
-      try {
-        const data = await httpRequestHandler.checkIfGameIsStarted();
-
-        if (typeof data != "boolean") {
-          displayAlert("Unexpected error, try again", "danger");
-          navigate(config.mainClientEndpoint);
-          return;
-        }
-
-        setIsGameStarted(data);
-      }
-      catch (error) {
-        displayAlert("Unexpected error, try again", "danger");
-        navigate(config.mainClientEndpoint);
-      }
-    };
 
     const clearBeforeUnload = async () => {
       hub.off(HubEvents.onPlayerJoinedGame);
       hub.off(HubEvents.onPlayerLeftGame);
       hub.off(HubEvents.onStartGame);
       hub.off(HubEvents.onJoinGame);
+      hub.off(HubEvents.onJoinGameError);
       hub.off(HubEvents.onStartTimer);
       await hub.invoke(HubEvents.leaveGame, token, false);
-      await hub.stop();
     }
 
-    checkIfGameExists();
-    checkIfGameIsStarted();
     startHubAndJoinGame();
 
     window.addEventListener("beforeunload", clearBeforeUnload);
@@ -213,16 +179,18 @@ function GameView() {
                       currentRound: gameState.currentRound,
                       roundCount: gameSettings.roundsCount
                     }}
+                    username={player.username}
                   />
                   <ControlPanel onClick={handleLeaveGameButtonClick} />
                 </div>
                 <div className="col-lg-7 col-md-12 col-12 order-lg-1 order-md-1 order-1 mb-3">
                   <Canvas
                     progressBarProperties={{
-                      currentProgress: gameState.currentDrawingTimeSeconds,
+                      currentProgress: gameSettings.drawingTimeSeconds,
                       minProgress: 0,
                       maxProgress: gameSettings.drawingTimeSeconds
                     }}
+                    isPlayerDrawing={isPlayerDrawing}
                   />
                 </div>
                 <div className="col-lg-3 col-md-6 col-12 order-lg-1 order-md-3 order-2 mb-3">
@@ -245,6 +213,7 @@ function GameView() {
                     playerScores={playerScores}
                     displayPoints={false}
                     displayIndex={false}
+                    username={player.username}
                   />
                 </div>
               </div>

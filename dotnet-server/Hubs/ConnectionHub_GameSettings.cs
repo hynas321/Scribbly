@@ -16,11 +16,13 @@ public partial class HubConnection : Hub
             if (game == null)
             {
                 logger.LogError($"SetAbstractNouns: Game does not exist");
+                return;
             }
 
             if (token != game.HostToken)
             {
                 logger.LogError($"SetAbstractNouns: Player is not a host");
+                return;
             }
 
             GameSettings settings = game.GameSettings;

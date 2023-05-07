@@ -14,14 +14,22 @@ public partial class HubConnection : Hub
         {
             if (username.Length < 1)
             {
-                logger.LogError($"JoinGame: Username is too short {username}");
+                string errorMessage = "Username is too short";
+
+                logger.LogError($"JoinGame: {errorMessage}");
+                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.onJoinGameError, errorMessage);
+                return;
             }
 
             Game game = gameManager.GetGame();
 
             if (game == null)
             {
-                logger.LogError($"JoinGame: Game does not exist");
+                string errorMessage = "Game does not exist";
+
+                logger.LogError($"JoinGame: {errorMessage}");
+                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.onJoinGameError, errorMessage);
+                return;
             }
             
             Player player = gameManager.GetPlayerByToken(token);
@@ -68,11 +76,19 @@ public partial class HubConnection : Hub
             }
             else if (player == null && gameManager.CheckIfPlayerExistsByUsername(username))
             {
-                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnJoinGame, null, null, null);
+                string errorMessage = "User with your username already exists";
+
+                logger.LogError($"JoinGame: {errorMessage}");
+                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.onJoinGameError, errorMessage);
+                return;
             }
             else
             {
-                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnJoinGame, null, null, null);
+                string errorMessage = "Unexpected error, try again";
+
+                logger.LogError($"JoinGame: {errorMessage}");
+                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.onJoinGameError, errorMessage);
+                return;
             }
 
             PlayerScore playerScore = new PlayerScore()
@@ -106,7 +122,8 @@ public partial class HubConnection : Hub
                 HubEvents.OnJoinGame,
                 JsonHelper.Serialize(player),
                 JsonHelper.Serialize(settings),
-                JsonHelper.Serialize(stateClient)
+                JsonHelper.Serialize(stateClient),
+                game.GameState.IsStarted
             );
 
             await SendAnnouncement($"Player {player.Username} has joined the game", BootstrapColors.Green);
@@ -149,12 +166,18 @@ public partial class HubConnection : Hub
                 gameManager.RemovePlayerScore(player.Username);
             }
 
-            if (gameManager.GetGame().GameState.PlayerScores.Count == 0)
+            if (game.GameState.PlayerScores.Count == 0)
             {
                 gameManager.SetGame(null);
                 logger.LogInformation($"LeaveGame: Game removed - no online players");
                 return;
             }
+
+            if (!game.GameState.IsStarted && gameManager.CheckIfPlayerIsHost(player.Token))
+            {
+                
+            }
+
 
             List<PlayerScore> playerScores = game.GameState.PlayerScores;
             string playerListSerialized = JsonHelper.Serialize(playerScores);
