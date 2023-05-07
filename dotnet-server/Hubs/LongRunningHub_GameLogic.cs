@@ -1,11 +1,22 @@
 using Dotnet.Server.JsonConfig;
+using Dotnet.Server.Managers;
 using Dotnet.Server.Models;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Dotnet.Server.Hubs;
 
-public partial class HubConnection : Hub
+public partial class LongRunningHubConnection : Hub
 {
+    private readonly GameManager gameManager = new GameManager(25);
+    private readonly ILogger<HubConnection> logger;
+    private readonly IHubContext<HubConnection> hubContext;
+
+    public LongRunningHubConnection(ILogger<HubConnection> logger, IHubContext<HubConnection> hubContext)
+    {
+        this.logger = logger;
+        this.hubContext = hubContext;
+    }
+
     [HubMethodName(HubEvents.StartGame)]
     public async Task StartGame(string token, GameSettings settings)
     {
@@ -27,17 +38,7 @@ public partial class HubConnection : Hub
 
             if (game.GameState.PlayerScores.Count < 2)
             {
-                string errorMessage = "Too few players to start the game";
-
-                ChatMessage message = new ChatMessage()
-                {
-                    Username = null,
-                    Text = errorMessage,
-                    BootstrapBackgroundColor = BootstrapColors.Red
-                };
-
-                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnSendAnnouncement, JsonHelper.Serialize(message));
-                logger.LogError($"StartGame: {errorMessage}");
+                logger.LogError($"StartGame: Too few players to start the game");
                 return;
             }
 
@@ -58,13 +59,13 @@ public partial class HubConnection : Hub
             game.GameSettings.DrawingTimeSeconds = settings.DrawingTimeSeconds;
             game.GameSettings.RoundsCount = settings.RoundsCount;
             game.GameSettings.WordLanguage = settings.WordLanguage;
-            
-            await Clients.All.SendAsync(HubEvents.OnStartGame);
-            await SendAnnouncement("Game has started", BootstrapColors.Yellow);
+
+            await hubContext.Clients.All.SendAsync(HubEvents.OnStartGame);
             logger.LogInformation($"StartGame: Game started");
 
-            ManageGameFlow();
+            Context.Abort();
 
+            await Task.Run(() => UpdateTimer(game.HostToken));
         }
         catch (Exception ex)
         {
@@ -78,6 +79,7 @@ public partial class HubConnection : Hub
         {
             Game game = gameManager.GetGame();
 
+            //await SendAnnouncement("Game has started", BootstrapColors.Yellow);
             while (true)
             {
 
@@ -85,7 +87,7 @@ public partial class HubConnection : Hub
         });
     }
 
-    public async Task SetTimerValues(string token)
+    public async Task UpdateTimer(string token)
     {
         try
         {  
@@ -100,23 +102,21 @@ public partial class HubConnection : Hub
             int currentTime = initialTime;
             CancellationTokenSource cancellationToken = new CancellationTokenSource();
 
-            await Task.Run(async () =>
-            {
-                 for (int i = 0; i < initialTime; i++)
-                 {   
-                    //await Clients.All.SendAsync(HubEvents.OnStartTimer, currentTime);
+            for (int i = 0; i < initialTime; i++)
+            {   
+                logger.LogInformation(Convert.ToString(currentTime));
+                await hubContext.Clients.All.SendAsync(HubEvents.OnUpdateTimer, currentTime);
 
-                    currentTime--;
+                currentTime--;
 
-                    await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken.Token);
+                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken.Token);
 
-                    if (currentTime <= 0 || game == null)
-                    {
-                        cancellationToken.Cancel();
-                        break;
-                    }
-                 }
-             });
+                if (currentTime <= 0 || game == null)
+                {
+                    cancellationToken.Cancel();
+                    break;
+                }
+            }
         }
         catch(Exception ex)
         {

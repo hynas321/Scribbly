@@ -9,7 +9,7 @@ import Chat from '../Chat';
 import { BsPlayCircle, BsDoorOpen } from 'react-icons/bs';
 import { PlayerScore, updatedPlayerScore } from '../../redux/slices/player-score-slice';
 import { useContext } from "react";
-import { ConnectionHubContext } from '../../context/ConnectionHubContext';
+import { ConnectionHubContext, LongRunningConnectionHubContext } from '../../context/ConnectionHubContext';
 import HubEvents from '../../hub/HubEvents';
 import Canvas from '../Canvas';
 import ControlPanel from '../ControlPanel';
@@ -21,12 +21,13 @@ import useLocalStorageState from 'use-local-storage-state';
 import { useWorker, WORKER_STATUS } from "@koale/useworker";
 import { GameSettings, updatedDrawingTimeSeconds, updatedGameSettings } from '../../redux/slices/game-settings-slice';
 import loading from './../../assets/loading.gif'
-import { GameState, updatedGameState } from '../../redux/slices/game-state-slice';
+import { GameState, updatedCurrentDrawingTimeSeconds, updatedGameState } from '../../redux/slices/game-state-slice';
 
 function GameView() {
   const httpRequestHandler = new HttpRequestHandler();
 
   const hub = useContext(ConnectionHubContext);
+  const longRunningHub = useContext(LongRunningConnectionHubContext);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -38,15 +39,17 @@ function GameView() {
   const [isPlayerHost, setIsPlayerHost] = useState(false);
   const [isPlayerDrawing, setIsPlayerDrawing] = useState(false);
   const [isGameDisplayed, setIsGameDisplayed] = useState(false);
-  const [activeButton, setActiveButton] = useState(true);
+  const [isStartGameButtonActive, setIsStartGameButtonActive] = useState(false);
   const [playerScores, setPlayerScores] = useState<PlayerScore[]>([]);
+  const [drawingTimeSeconds, setDrawingTimeSeconds] = useState(gameState.currentDrawingTimeSeconds);
 
   const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
   const [username, setUsername] = useLocalStorageState("username", { defaultValue: ""});
 
   const handleStartGameButtonClick = async () => {
-    hub.invoke(HubEvents.startGame, token, gameSettings);
-    navigate(config.gameClientEndpoint);
+    await longRunningHub.start();
+    await longRunningHub.invoke(HubEvents.startGame, token, gameSettings);
+    await longRunningHub.stop();
   }
 
   const handleLeaveGameButtonClick = async () => {
@@ -91,6 +94,11 @@ function GameView() {
           setIsGameDisplayed(true);
         }, 1000);
       });
+
+      hub.on(HubEvents.onUpdateTimer, (time: number) => {
+        console.log(time);
+        setDrawingTimeSeconds(time);
+      })
 
       hub.on(HubEvents.onJoinGameError, (errorMessage: string) => {
         displayAlert(errorMessage, "danger");
@@ -148,6 +156,16 @@ function GameView() {
       checkIfPlayerIsHost();
   }, [token]);
 
+  useEffect(() => {
+    console.log(playerScores);
+    if (playerScores.length > 1) {
+      setIsStartGameButtonActive(true);
+    }
+    else {
+      setIsStartGameButtonActive(false);
+    }
+  }, [playerScores]);
+
   const displayAlert = (message: string, type: string) => {
     dispatch(updatedAlert({
       text: message,
@@ -190,7 +208,7 @@ function GameView() {
                 <div className="col-lg-7 col-md-12 col-12 order-lg-1 order-md-1 order-1 mb-3">
                   <Canvas
                     progressBarProperties={{
-                      currentProgress: gameSettings.drawingTimeSeconds,
+                      currentProgress: drawingTimeSeconds,
                       minProgress: 0,
                       maxProgress: gameSettings.drawingTimeSeconds
                     }}
@@ -227,7 +245,7 @@ function GameView() {
                   <Button
                     text="Start the game"
                     type="success"
-                    active={activeButton}
+                    active={isStartGameButtonActive}
                     icon={<BsPlayCircle/>}
                     onClick={handleStartGameButtonClick}
                   />

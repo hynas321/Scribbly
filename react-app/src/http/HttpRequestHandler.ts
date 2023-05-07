@@ -1,5 +1,5 @@
 import config from '../../config.json';
-import ApiEndpoints from '../hub/HttpEndpoints';
+import ApiEndpoints from '../hub/ApiEndpoints';
 import { CreateGameBody, JoinGameBody, PlayerIsHostResponse, UsernameExistsBody } from './HttpInterfaces';
 
 class HttpRequestHandler {

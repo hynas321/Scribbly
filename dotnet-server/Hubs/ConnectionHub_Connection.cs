@@ -20,6 +20,7 @@ public partial class HubConnection : Hub
 
         hubManager.Connections++;
         
+        logger.LogInformation(Context.ConnectionId);
         //logger.LogInformation($"New connection {Context.ConnectionId} established. Total connections: {hubManager.Connections}");
     }
 

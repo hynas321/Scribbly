@@ -1,4 +1,5 @@
 class ApiEndpoints {
+    static longRunningConnectionEndpoint: string = "/longrunninghub/connection";
     static hubConnectionEndpoint: string = "/hub/connection";
     static gameCreate: string = "/api/Game/Create";
     static gameIsStarted: string = "/api/Game/IsStarted";

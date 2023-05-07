@@ -10,12 +10,9 @@ import PlayerList from '../PlayerList';
 import HttpRequestHandler from '../../http/HttpRequestHandler';
 import { updatedAlert, updatedVisible } from '../../redux/slices/alert-slice';
 import useLocalStorageState from 'use-local-storage-state';
-import { ConnectionHubContext } from '../../context/ConnectionHubContext';
-import * as signalR from '@microsoft/signalr'
 import tableLoading from './../../assets/table-loading.gif'
 
 function MainView() {
-  const hub = useContext(ConnectionHubContext);
   const httpRequestHandler = new HttpRequestHandler();
   const minUsernameLength: number = 1;
 

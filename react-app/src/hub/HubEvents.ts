@@ -32,7 +32,8 @@ class HubEvents {
 
     //GameState
     static startGame: string = "StartGame";
-    static onStartGame: string = "onStartGame";
+    static onStartGame: string = "OnStartGame";
+    static onUpdateTimer: string = "OnUpdateTimer";
 
     //Canvas
     static loadCanvas: string = "LoadCanvas";

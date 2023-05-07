@@ -173,7 +173,7 @@ public partial class HubConnection : Hub
                 return;
             }
 
-            if (!game.GameState.IsStarted && token == game.HostToken)
+            if (/* !game.GameState.IsStarted && */ token == game.HostToken)
             {
                 gameManager.SetGame(null);
 

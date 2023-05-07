@@ -36,6 +36,7 @@ public static class HubEvents
     //GameState
     public const string StartGame = "StartGame";
     public const string OnStartGame = "OnStartGame";
+    public const string OnUpdateTimer = "OnUpdateTimer";
     public const string OnGameFinished = "OnGameFinished";
     
 
