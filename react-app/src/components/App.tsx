@@ -1,14 +1,13 @@
 import 'bootstrap/dist/css/bootstrap.css'
 import MainView from './views/MainView';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import LobbyView from './views/LobbyView';
-import GameView from './views/GameView';
 import config from '../../config.json'
 import PageNotFound from './views/PageNotFound';
 import Logo from './Logo';
 import { Provider } from 'react-redux';
 import { store } from '../redux/store';
-import { LobbyHubContext, lobbyHub } from "../context/LobbyHubContext";
+import { ConnectionHubContext, connectionHub } from "../context/ConnectionHubContext";
+import GameView from './views/GameView';
 
 function App() {
   const router = createBrowserRouter([
@@ -17,33 +16,8 @@ function App() {
       element: <MainView />
     },
     {
-      path: config.createGameClientEndpoint,
-      element: <LobbyView />,
-      children: [
-        {
-        path: '',
-        element: <LobbyView />
-        },
-        {
-        path: ':lobbyId',
-        element: <LobbyView />
-        }
-      ]
-    },
-    {
       path: config.gameClientEndpoint,
       element: <GameView />,
-      children: [
-        {
-        path: '',
-        element: <GameView />
-        },
-        {
-        path: ':gameId',
-        element: <GameView />
-        }
-      ]
-      
     },
     {
       path: "*",
@@ -52,12 +26,12 @@ function App() {
 ]);
 
 return (
-  <LobbyHubContext.Provider value={lobbyHub}>
+  <ConnectionHubContext.Provider value={connectionHub}>
     <Provider store={store}>
       <Logo />
       <RouterProvider router={router}/>
     </Provider>
-  </LobbyHubContext.Provider>
+  </ConnectionHubContext.Provider>
   )
 }
 

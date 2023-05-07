@@ -1,4 +1,4 @@
 type PlayerScore = {
-    username: string,
-    score: number
-  }
+  username: string,
+  score: number
+}

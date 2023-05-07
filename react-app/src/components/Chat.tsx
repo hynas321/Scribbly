@@ -2,21 +2,20 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import ChatMessage from './ChatMessage';
 import InputForm from './InputForm';
 import Button from './Button';
-import { useAppSelector } from '../redux/hooks';
-import { LobbyHubContext } from '../context/LobbyHubContext';
-import { GameHubContext } from '../context/GameHubContext';
-import { HubType } from '../enums/HubType';
+import { ConnectionHubContext } from '../context/ConnectionHubContext';
 import * as signalR from '@microsoft/signalr';
+import HubEvents from '../hub/HubEvents';
+import useLocalStorageState from 'use-local-storage-state';
 
 interface ChatProps {
-  hubType: HubType
   placeholderValue: string;
   wordLength?: number;
 }
 
-function Chat({hubType, placeholderValue, wordLength}: ChatProps) {
-  const hub = useContext(hubType === HubType.LOBBY ? LobbyHubContext : GameHubContext);
-  const username = useAppSelector((state) => state.player.username);
+function Chat({placeholderValue, wordLength}: ChatProps) {
+  const hub = useContext(ConnectionHubContext);
+
+  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputFormValue, setInputFormValue] = useState("");
@@ -24,7 +23,6 @@ function Chat({hubType, placeholderValue, wordLength}: ChatProps) {
   const inputFormRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
 
-  const testHash = (hubType === HubType.LOBBY ? "TestLobbyHash" : "TestGameHash"); //temporary
   let characters: any[] = [];
 
   if (wordLength) {
@@ -33,16 +31,17 @@ function Chat({hubType, placeholderValue, wordLength}: ChatProps) {
   }
 
   const handleButtonPress = () => {
-    const chatMessage: ChatMessage = {
-      username: username,
-      text: inputFormValue
-    }
 
     const SendChatMessage = async () => {
-      await hub.invoke("SendChatMessage", testHash, chatMessage);
+      if (inputFormValue.length < 1) {
+        return;
+      }
+
+      await hub.invoke(HubEvents.sendChatMessage, token, inputFormValue);
       
       if (inputFormRef && inputFormRef.current) {
         inputFormRef.current.value = "";
+        setInputFormValue("");
       }
     }
 
@@ -60,25 +59,33 @@ function Chat({hubType, placeholderValue, wordLength}: ChatProps) {
   }
 
   useEffect(() => {
-
-    if (hub.getState() != signalR.HubConnectionState.Connected) {
+    if (hub.getState() !== signalR.HubConnectionState.Connected) {
       return;
     }
 
-    hub.on("ReceiveChatMessages", (chatMessageListSerialized: any) => {
-      const chatMessageList = JSON.parse(chatMessageListSerialized) as ChatMessage[];
-
+    hub.on(HubEvents.onLoadChatMessages, (chatMessagesSerialized: string) => {
+      const chatMessageList = JSON.parse(chatMessagesSerialized) as ChatMessage[];
       setMessages(chatMessageList);
     });
 
-    const getChatMessages = async () => {
-      await hub.invoke("GetChatMessages", testHash, username);
+    hub.on(HubEvents.onSendChatMessage, (chatMessageSerialized: string) => {
+      const chatMessage = JSON.parse(chatMessageSerialized) as ChatMessage;
+      setMessages(prevMessages => [...prevMessages, chatMessage]);
+    });
+
+    hub.on(HubEvents.onSendAnnouncement, (chatMessageSerialized: string) => {
+      const chatMessage = JSON.parse(chatMessageSerialized) as ChatMessage;
+      setMessages(prevMessages => [...prevMessages, chatMessage]);
+    });
+
+    const loadChatMessages = async () => {
+      await hub.invoke(HubEvents.loadChatMessages, token);
     };
 
-    getChatMessages();
+    loadChatMessages();
 
     return () => {
-      hub.off("ReceiveChatMessages");
+      hub.off(HubEvents.onLoadChatMessages);
     }
     }, [hub.getState()]);
 
@@ -105,7 +112,7 @@ function Chat({hubType, placeholderValue, wordLength}: ChatProps) {
         {characters.map((c, index) => <span key={index}>{c} </span>)}
         { wordLength &&`${wordLength}` }
       </h5>
-      <div id="messages" className="p-3 bg-light">
+      <div id="messages" className="rounded p-3 bg-light">
         <div ref={messagesRef} style={{height: "450px", overflowY: "auto"}}>
           {messages.map((chatMessage, index) => (
             <ChatMessage
@@ -122,10 +129,11 @@ function Chat({hubType, placeholderValue, wordLength}: ChatProps) {
           onClick={handleButtonPress}
         />
         <InputForm 
+          defaultValue={""} 
           placeholderValue={placeholderValue}
           onChange={handleInputFormChange}
           onKeyDown={handleEnterPress}
-          ref={inputFormRef}
+          ref={inputFormRef} 
         />
       </div>
     </div>

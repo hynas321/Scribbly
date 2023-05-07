@@ -1,14 +1,16 @@
-import { Player } from "../redux/slices/player-slice";
+import { useEffect } from "react";
+import { useAppSelector } from "../redux/hooks";
 
 interface PlayerListProps {
   title: string,
-  players: Player[],
+  playerScores: PlayerScore[],
   displayPoints: boolean,
   displayIndex: boolean,
+  username?: string,
   round?: Round
 }
 
-function PlayerList({title, players, displayPoints, displayIndex, round}: PlayerListProps) {
+function PlayerList({title, playerScores, displayPoints, displayIndex, username, round}: PlayerListProps) {
   return (
     <>
       { round && <h5>Round {round.currentRound}/{round.roundCount}</h5>}
@@ -16,10 +18,11 @@ function PlayerList({title, players, displayPoints, displayIndex, round}: Player
         <li className="list-group-item justify-content-between align-items-center">
             <b>{title}</b>
         </li>
-        {players.map((player, index) => (
+        {playerScores.map((playerScore, index) => (
           <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-            { displayIndex && index + 1 + "."} {player.username}
-            { displayPoints && <span className="badge rounded-pill bg-dark">{player.score}</span> }
+            { displayIndex && index + 1 + "."}
+            <span className={username == playerScore.username ? "text-warning" : "text-dark"}>{playerScore.username}</span>
+            { displayPoints && <span className="badge rounded-pill bg-dark">{playerScore.score}</span> }
           </li>
           ))}
       </ul>

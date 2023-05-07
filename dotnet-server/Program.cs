@@ -12,6 +12,7 @@ builder.Services.AddControllers()
     });
 
 builder.Services.AddSignalR(); 
+builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options => 
@@ -36,6 +37,5 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 app.UseCors("AllowReactApp");
-app.MapHub<LobbyHub>($"/hub/lobby");
-app.MapHub<GameHub>($"/hub/game");
+app.MapHub<HubConnection>($"/hub/connection");
 app.Run(config?.HttpServerUrl);

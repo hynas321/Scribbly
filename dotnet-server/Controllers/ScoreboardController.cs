@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using HttpRequests;
+using Dotnet.Server.Http.Requests;
 using Dotnet.Server.Database;
-using Dotnet.Server.Database.Models;
-using System.Text.Json;
+using Dotnet.Server.JsonConfig;
+using Dotnet.Server.Models;
 
 namespace Dotnet.Server.Controllers;
 
@@ -10,21 +10,21 @@ namespace Dotnet.Server.Controllers;
 [Route("api/[controller]")]
 public class ScoreboardController : ControllerBase
 {
-    private readonly ILogger<GameController> logger;
+    private readonly ILogger<ScoreboardController> logger;
 
-    public ScoreboardController(ILogger<GameController> logger)
+    public ScoreboardController(ILogger<ScoreboardController> logger)
     {
         this.logger = logger;
     }
 
     [HttpPost("Add")]
-    public IActionResult AddPlayerScore([FromBody] AddPlayerScoreRequestBody requestBody)
+    public IActionResult AddPlayerScore([FromBody] AddPlayerScoreBody requestBody)
     {
         try 
         {
             if (!ModelState.IsValid)
             {   
-                logger.LogError("Status: 400. Invalid received request body.");
+                logger.LogError("AddPlayerScore Status: 400. Invalid received request body.");
 
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
@@ -38,11 +38,13 @@ public class ScoreboardController : ControllerBase
 
             playerScoreRepository.AddPlayerScore(playerScore);
 
+            logger.LogInformation("AddPlayerScore Status: 201. Created.");
+
             return StatusCode(StatusCodes.Status201Created);
         }
         catch (Exception ex)
         {   
-            logger.LogError($"Status: 500. Internal server error. {ex}");
+            logger.LogError($"AddPlayerScore Status: 500. Internal server error. {ex}");
 
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
@@ -55,19 +57,15 @@ public class ScoreboardController : ControllerBase
         {
             PlayerScoreRepository playerScoreRepository = new PlayerScoreRepository();
             IEnumerable<PlayerScore> topPlayerScores = playerScoreRepository.GetTopPlayerScores();
-
-            JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            };
-
-            string topPlayerScoresSerialized = System.Text.Json.JsonSerializer.Serialize<IEnumerable<PlayerScore>>(topPlayerScores, jsonSerializerOptions);
+            string topPlayerScoresSerialized = JsonHelper.Serialize(topPlayerScores);
             
+            logger.LogInformation("GetTopPlayerScores Status: 200. OK.");
+
             return StatusCode(StatusCodes.Status200OK, topPlayerScoresSerialized);
         }
         catch (Exception ex)
         {   
-            logger.LogError($"Status: 500. Internal server error. {ex}");
+            logger.LogError($"GetTopPlayerScores Status: 500. Internal server error. {ex}");
 
             return StatusCode(StatusCodes.Status500InternalServerError);
         }

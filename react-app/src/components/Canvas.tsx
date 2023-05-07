@@ -2,18 +2,18 @@ import { useContext, useState } from "react";
 import { useDraw } from "../hooks/useDraw";
 import { CirclePicker } from "react-color"
 import Button from "./Button";
-import ProgressBar from "./bars/ProgressBar";
-import { GameHubContext } from "../context/GameHubContext";
+import DrawingTimeBar from "./bars/DrawingTimeBar";
+import { ConnectionHubContext } from "../context/ConnectionHubContext";
 import material from 'material-colors'
 
 interface CanvasProps {
-  progressBarProperties: ProgressProperties
+  progressBarProperties: ProgressProperties,
+  isPlayerDrawing: boolean
 }
-function Canvas({progressBarProperties}: CanvasProps) {
-  const hub = useContext(GameHubContext);
-  const gameHash = "TestGameHash"; //temporary
+function Canvas({progressBarProperties, isPlayerDrawing}: CanvasProps) {
+  const hub = useContext(ConnectionHubContext);
   const [color, setColor] = useState("#000000");
-  const { canvasRef, onMouseDown, clearCanvas } = useDraw(draw, hub, gameHash, color);;
+  const { canvasRef, onMouseDown, clearCanvas } = useDraw(draw, hub, color);
 
   const circlePickerColors = [material.black, material.red['500'],
     material.pink['500'], material.purple['500'], material.deepPurple['500'],
@@ -45,7 +45,7 @@ function Canvas({progressBarProperties}: CanvasProps) {
     <>
       <div className="d-flex justify-content-center">
         <div className="mb-3 col-10">
-          <ProgressBar
+          <DrawingTimeBar
             progressProperties={progressBarProperties}
             text="s"
           />
@@ -61,21 +61,26 @@ function Canvas({progressBarProperties}: CanvasProps) {
           onTouchStart={onMouseDown}
         />
       </div>
-      <div className="d-flex justify-content-center">
-        <CirclePicker
-          color={color}
-          width="100"
-          onChange={(e) => setColor(e.hex)}
-          colors={circlePickerColors}
-        />
-      </div>
-      <div>
-        <Button 
-          text={"Clear canvas"}
-          active={true}
-          onClick={clearCanvas}
-        />
-      </div>
+      {
+        isPlayerDrawing &&
+        <>
+          <div className="d-flex justify-content-center">
+            <CirclePicker
+              color={color}
+              width="100"
+              onChange={(e) => setColor(e.hex)}
+              colors={circlePickerColors}
+            />
+          </div>
+          <div>
+            <Button 
+              text={"Clear canvas"}
+              active={true}
+              onClick={clearCanvas}
+            />
+          </div>
+        </>
+      }
     </>
   )
 }

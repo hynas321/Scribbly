@@ -1,123 +1,174 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import Button from '../Button';
 import InputForm from '../InputForm';
 import { useAppDispatch } from '../../redux/hooks';
 import config from '../../../config.json';
 import Alert from '../Alert';
 import { useNavigate } from 'react-router-dom';
-import { Player, updatedGameHash, updatedToken, updatedUsername } from '../../redux/slices/player-slice';
+import { PlayerScore, updatedUsername, } from '../../redux/slices/player-score-slice';
 import PlayerList from '../PlayerList';
-import Popup from '../Popup';
-import HttpRequestHandler from '../../utils/HttpRequestHandler';
+import HttpRequestHandler from '../../http/HttpRequestHandler';
+import { updatedAlert, updatedVisible } from '../../redux/slices/alert-slice';
+import useLocalStorageState from 'use-local-storage-state';
+import { ConnectionHubContext } from '../../context/ConnectionHubContext';
+import * as signalR from '@microsoft/signalr'
+import tableLoading from './../../assets/table-loading.gif'
 
 function MainView() {
+  const hub = useContext(ConnectionHubContext);
   const httpRequestHandler = new HttpRequestHandler();
-  const minUsernameLength: number = 5;
+  const minUsernameLength: number = 1;
+
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState("");
-  const [createLobbyActiveButton, setCreateLobbyActiveButton] = useState(false);
-  const [joinLobbyActiveButton, setJoinLobbyActiveButton] = useState(false);
-  const [alertText, setAlertText] = useState("");
-  const [alertVisible, setAlertVisible] = useState(false);
-  const [alertType, setAlertType] = useState("primary");
-  const [popupVisible, setPopupVisible] = useState(false);
-  const [playerList, setPlayerList] = useState<Player[]>([]);
+  const [createGameActiveButton, setCreateGameActiveButton] = useState(false);
+  const [joinGameActiveButton, setJoinGameActiveButton] = useState(false);
+  const [isTableDisplayed, setIsTableDisplayed] = useState(false);
+  const [playerScores, setPlayerScores] = useState<PlayerScore[]>([]);
+
+  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
+  const [username, setUsername] = useLocalStorageState("username", { defaultValue: ""});
 
   const handleInputFormChange = (value: string) => {
     setUsername(value.trim());
   }
 
-  const handleCreateLobbyButtonClick = () => {
+  const handleCreateGameButtonClick = async () => {
+    if (username.length < minUsernameLength) {
+      return;
+    }
+  
+    try {
+      const data = await httpRequestHandler.createGame(username);
+
+      if (!("hostToken" in data)) {
+        displayAlert("The game is already created. Join the game.", "primary");
+        return;
+      }
+
+      setToken(data.hostToken);
+      dispatch(updatedUsername(username));
+      navigate(config.gameClientEndpoint);
+
+    }
+    catch (error) {
+      displayAlert("Error", "danger");
+    }
+  }
+
+  const handleJoinGameButtonClick = async () => {
     if (username.length < minUsernameLength) {
       return;
     }
 
-    dispatch(updatedUsername(username));
-    dispatch(updatedGameHash("TestGameHash"));
-    dispatch(updatedToken("HostToken"));
-    navigate(config.createGameClientEndpoint);
-  }
+    const checkIfGameExists = async () => {
+      try {
+        const data = await httpRequestHandler.checkIfGameExists();
+    
+        if (typeof data != "boolean") {
+          displayAlert("Unexpected error, try again", "danger");
+          return;
+        }
+    
+        if (data === true) {
+          dispatch(updatedUsername(username));
+          navigate(config.gameClientEndpoint);
+        }
+        else {
+          displayAlert("Game does not exist", "danger");
+        }
+      
+      }
+      catch (error) {
+        displayAlert("Unexpected error, try again", "danger");
+      }
+    };
 
-  const handleJoinLobbyButtonClick = () => {
-    if (username.length < minUsernameLength) {
-      return;
-    }
-
-    setPopupVisible(true);
-  }
-
-  const handleClosePopup = () => {
-    setPopupVisible(false);
-  }
-
-  const handleOnSubmitPopup = (value: string) => {
-    dispatch(updatedUsername(username));
-    dispatch(updatedGameHash("TestGameHash"));
-    dispatch(updatedToken("TestToken"));
-    navigate(config.createGameClientEndpoint);
+    await checkIfGameExists();
   }
 
   useEffect(() => {
-    httpRequestHandler.fetchPlayerScores()
-    .then((data) => {
-      if (Array.isArray(data)) {
-        setPlayerList(data);
+    const fetchPlayerScores = async () => {
+      try {
+        const data = await httpRequestHandler.fetchPlayerScores();
+        
+        if (!Array.isArray(data)) {
+          setIsTableDisplayed(false);
+          return;
+        }
+      
+        setPlayerScores(data);
+        setTimeout(() => {
+          setIsTableDisplayed(true);
+        }, 1000);
+
       }
-    });
+      catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchPlayerScores();
   }, []);
 
+  
   useEffect(() => {
-    if (username.length >= minUsernameLength) {
-      setCreateLobbyActiveButton(true);
-      setJoinLobbyActiveButton(true);
+    if (username.length < minUsernameLength) {
+      setJoinGameActiveButton(false);
+      setCreateGameActiveButton(false);
     } 
     else {
-      setCreateLobbyActiveButton(false);
-      setJoinLobbyActiveButton(false);
+      setJoinGameActiveButton(true);
+      setCreateGameActiveButton(true);
     }
   }, [username]);
+
+  const displayAlert = (message: string, type: string) => {
+    dispatch(updatedAlert({
+      text: message,
+      visible: true,
+      type: type
+    }));
+
+    setTimeout(() => {
+      dispatch(updatedVisible(false));
+    }, 3000);
+  }
 
   return (
     <div className="container">
       <div className="col-lg-4 col-sm-7 col-xs-6 mx-auto text-center">
-        <Popup 
-          title={"Join the lobby"}
-          inputFormPlaceholderText={"Paste the invitation URL here"}
-          visible={popupVisible}
-          onSubmit={handleOnSubmitPopup}
-          onClose={handleClosePopup}
-        />
-        <Alert
-            visible={alertVisible}
-            text={alertText}
-            type={alertType}
-        />
+        <Alert />
         <InputForm
+          defaultValue={username}
           placeholderValue="Enter username"
           smallTextValue={`Minimum username length ${minUsernameLength}`}
           onChange={handleInputFormChange}
         />
         <Button
-          text={"Create the lobby"}
+          text={"Create the game"}
           type="success"
-          active={createLobbyActiveButton}
-          onClick={handleCreateLobbyButtonClick}
+          active={createGameActiveButton}
+          onClick={handleCreateGameButtonClick}
         />
         <Button
-          text="Join the lobby"
-          active={joinLobbyActiveButton}
-          onClick={handleJoinLobbyButtonClick}
+          text="Join the game"
+          active={joinGameActiveButton}
+          onClick={handleJoinGameButtonClick}
         />
       </div>
       <div className="col-lg-3 col-sm-6 col-xs-6 mt-5 text-center mx-auto">
-        <PlayerList
-          title="Top 5 players"
-          players={playerList}
-          displayPoints={true}
-          displayIndex={true}
-        />
+        { isTableDisplayed ?
+          <PlayerList
+            title="Top 5 players"
+            playerScores={playerScores}
+            displayPoints={true}
+            displayIndex={true}
+          /> 
+          :
+          <img src={tableLoading} alt="Table loading" className="img-fluid" />
+        }
       </div>
     </div>
   );

@@ -1,9 +1,17 @@
 namespace Dotnet.Server.Models;
 
-class GameState
-{
-    public int CurrentDrawingTimeSeconds { get; set; } = 50;
+public class GameState
+{   
+    //Client-side and server-side
+    public int CurrentDrawingTimeSeconds { get; set; } = 75;
     public int CurrentRound { get; set; } = 1;
-    public List<Player> Players { get; set; } = new List<Player>();
-    public List<string> OnlinePlayersTokens { get; set; } = new List<string>();
+    public int WordLength { get; set; } = 10;
+
+    //Server-side only
+    public List<PlayerScore> PlayerScores = new List<PlayerScore>();
+    public List<Player> Players = new List<Player>();
+    public List<string> NoChatPermissionTokens = new List<string>();
+    public string DrawingToken { get; set; } = string.Empty;
+    public bool IsStarted { get; set; } = false;
+    public string Word { get; set; } = "";
 }

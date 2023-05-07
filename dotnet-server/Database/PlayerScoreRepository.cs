@@ -1,19 +1,18 @@
 using Dapper;
-using Dotnet.Server.Database.Models;
 using Dotnet.Server.JsonConfig;
+using Dotnet.Server.Models;
 using Microsoft.Data.Sqlite;
 
 namespace Dotnet.Server.Database;
 
 public class PlayerScoreRepository
-
 {
     private readonly string connectionString;
 
     public PlayerScoreRepository()
     {
         ConfigHelper configHelper = new ConfigHelper();
-        Config? config = configHelper.GetConfig();
+        Config config = configHelper.GetConfig();
         connectionString = config.DatabaseConnectionString ?? "null";
         
         using (SqliteConnection db = new SqliteConnection(connectionString))
@@ -21,8 +20,7 @@ public class PlayerScoreRepository
             db.Open();
             string createTableQuery = $"CREATE TABLE IF NOT EXISTS PlayerScore (Username Text, Score INTEGER)";
             db.Execute(createTableQuery);
-        }
-            
+        } 
     }
 
     public IEnumerable<PlayerScore> GetTopPlayerScores()

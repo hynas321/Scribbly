@@ -29,9 +29,15 @@ const gameSettingsSlice = createSlice({
     },
     updatedWordLanguage(state, action: PayloadAction<string>) {
       state.wordLanguage = action.payload;
+    },
+    updatedGameSettings(state, action: PayloadAction<GameSettings>) {
+      state.nonAbstractNounsOnly = action.payload.nonAbstractNounsOnly,
+      state.drawingTimeSeconds = action.payload.drawingTimeSeconds,
+      state.roundsCount = action.payload.roundsCount,
+      state.wordLanguage = action.payload.wordLanguage
     }
   }
 })
 
-export const { updatedNonAbstractNounsOnly, updatedDrawingTimeSeconds, updatedRoundsCount, updatedWordLanguage } = gameSettingsSlice.actions;
+export const { updatedNonAbstractNounsOnly, updatedDrawingTimeSeconds, updatedRoundsCount, updatedWordLanguage, updatedGameSettings } = gameSettingsSlice.actions;
 export default gameSettingsSlice.reducer;
