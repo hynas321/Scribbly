@@ -17,6 +17,7 @@ class HubEvents {
     static loadChatMessages: string = "LoadChatMessages";
     static onSendChatMessage: string = "OnSendChatMessage";
     static onLoadChatMessages: string = "OnLoadChatMessages";
+    static onSendAnnouncement: string = "OnSendAnnouncement";
 
     //Game
     static joinGame: string = "JoinGame";
@@ -24,15 +25,14 @@ class HubEvents {
     static findPlayerHost: string = "FindPlayerHost";
     static onPlayerJoinedGame: string = "OnPlayerJoinedGame";
     static onPlayerLeftGame: string = "OnPlayerLeftGame";
+    static onGameProblem: string = "OnGameProblem";
     static onJoinGame: string = "OnJoinGame";
     static onJoinGameError: string = "OnJoinGameError";
     static onFindPlayerHost: string = "OnFindPlayerHost";
 
     //GameState
     static startGame: string = "StartGame";
-    static startTimer: string = "StartTimer";
     static onStartGame: string = "onStartGame";
-    static onStartTimer: string = "onStartTimer";
 
     //Canvas
     static loadCanvas: string = "LoadCanvas";

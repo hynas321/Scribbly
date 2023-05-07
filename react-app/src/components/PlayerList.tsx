@@ -11,10 +11,6 @@ interface PlayerListProps {
 }
 
 function PlayerList({title, playerScores, displayPoints, displayIndex, username, round}: PlayerListProps) {
-  useEffect(() => {
-    console.log(playerScores);
-  }, []);
-
   return (
     <>
       { round && <h5>Round {round.currentRound}/{round.roundCount}</h5>}

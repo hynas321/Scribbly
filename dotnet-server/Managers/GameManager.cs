@@ -85,13 +85,6 @@ class GameManager
         return game.GameState.PlayerScores.Find(obj => obj.Username == username) != null;
     }
 
-    public bool CheckIfPlayerIsHost(string token)
-    {
-        Player player = GetPlayerByToken(token);
-
-        return game.HostToken == player.Token;
-    }
-
     public bool CheckIfHostIsOnline()
     {
         Player hostPlayer = GetPlayerByToken(game.HostToken);

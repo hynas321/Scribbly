@@ -1,3 +1,4 @@
+using Dotnet.Server.JsonConfig;
 using Dotnet.Server.Models;
 using Microsoft.AspNetCore.SignalR;
 
@@ -24,6 +25,22 @@ public partial class HubConnection : Hub
                 return;
             }
 
+            if (game.GameState.PlayerScores.Count < 2)
+            {
+                string errorMessage = "Too few players to start the game";
+
+                ChatMessage message = new ChatMessage()
+                {
+                    Username = null,
+                    Text = errorMessage,
+                    BootstrapBackgroundColor = BootstrapColors.Red
+                };
+
+                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnSendAnnouncement, JsonHelper.Serialize(message));
+                logger.LogError($"StartGame: {errorMessage}");
+                return;
+            }
+
             if (settings.DrawingTimeSeconds < 25 ||
                 settings.DrawingTimeSeconds > 120 ||
                 settings.RoundsCount < 1 ||
@@ -44,8 +61,9 @@ public partial class HubConnection : Hub
             
             await Clients.All.SendAsync(HubEvents.OnStartGame);
             await SendAnnouncement("Game has started", BootstrapColors.Yellow);
-
             logger.LogInformation($"StartGame: Game started");
+
+            ManageGameFlow();
 
         }
         catch (Exception ex)
@@ -62,17 +80,12 @@ public partial class HubConnection : Hub
 
             while (true)
             {
-                if (game.GameState.CurrentRound > game.GameSettings.RoundsCount)
-                {
-                    await Clients.All.SendAsync(HubEvents.OnGameFinished);
-                    break;
-                }
+
             }
         });
     }
 
-    [HubMethodName(HubEvents.StartTimer)]
-    public async Task StartTimer(string token)
+    public async Task SetTimerValues(string token)
     {
         try
         {  
@@ -91,7 +104,7 @@ public partial class HubConnection : Hub
             {
                  for (int i = 0; i < initialTime; i++)
                  {   
-                    await Clients.All.SendAsync(HubEvents.OnStartTimer, currentTime);
+                    //await Clients.All.SendAsync(HubEvents.OnStartTimer, currentTime);
 
                     currentTime--;
 
@@ -109,5 +122,17 @@ public partial class HubConnection : Hub
         {
             logger.LogError(Convert.ToString(ex));
         }
+    }
+
+    public string FetchWord()
+    {
+        List<string> words = new List<string>()
+        {
+            "application", "server", "project"
+        };
+
+        Random random = new Random();
+
+        return words[random.Next(words.Count)];
     }
 }

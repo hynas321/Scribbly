@@ -10,6 +10,8 @@ public class GameState
     //Server-side only
     public List<PlayerScore> PlayerScores = new List<PlayerScore>();
     public List<Player> Players = new List<Player>();
+    public List<string> NoChatPermissionTokens = new List<string>();
     public string DrawingToken { get; set; } = string.Empty;
     public bool IsStarted { get; set; } = false;
+    public string Word { get; set; } = "";
 }

@@ -18,7 +18,9 @@ public static class HubEvents
     //Chat
     public const string SendChatMessage = "SendChatMessage";
     public const string LoadChatMessages = "LoadChatMessages";
+    public const string OnSendChatMessage = "OnSendChatMessage";
     public const string OnLoadChatMessages = "OnLoadChatMessages";
+    public const string OnSendAnnouncement = "OnSendAnnouncement";
 
     //Game
     public const string JoinGame = "JoinGame";
@@ -26,16 +28,14 @@ public static class HubEvents
     public const string FindPlayerHost = "FindPlayerHost";
     public const string OnPlayerJoinedGame = "OnPlayerJoinedGame";
     public const string OnPlayerLeftGame = "OnPlayerLeftGame";
-    public const string OnHostLeftUnstartedGame = "OnHostLeftUnstartedGame";
     public const string OnJoinGame = "OnJoinGame";
-    public const string onJoinGameError = "OnJoinGameError";
+    public const string OnJoinGameError = "OnJoinGameError";
+    public const string OnGameProblem = "OnGameProblem";
     public const string OnFindPlayerHost = "OnFindPlayerHost";
 
     //GameState
     public const string StartGame = "StartGame";
-    public const string StartTimer = "StartTimer";
     public const string OnStartGame = "OnStartGame";
-    public const string OnStartTimer = "OnStartTimer";
     public const string OnGameFinished = "OnGameFinished";
     
 

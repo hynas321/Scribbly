@@ -68,6 +68,16 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
       setMessages(chatMessageList);
     });
 
+    hub.on(HubEvents.onSendChatMessage, (chatMessageSerialized: string) => {
+      const chatMessage = JSON.parse(chatMessageSerialized) as ChatMessage;
+      setMessages(prevMessages => [...prevMessages, chatMessage]);
+    });
+
+    hub.on(HubEvents.onSendAnnouncement, (chatMessageSerialized: string) => {
+      const chatMessage = JSON.parse(chatMessageSerialized) as ChatMessage;
+      setMessages(prevMessages => [...prevMessages, chatMessage]);
+    });
+
     const loadChatMessages = async () => {
       await hub.invoke(HubEvents.loadChatMessages, token);
     };

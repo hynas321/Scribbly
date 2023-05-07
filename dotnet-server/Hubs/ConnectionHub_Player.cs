@@ -17,7 +17,7 @@ public partial class HubConnection : Hub
                 string errorMessage = "Username is too short";
 
                 logger.LogError($"JoinGame: {errorMessage}");
-                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.onJoinGameError, errorMessage);
+                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnJoinGameError, errorMessage);
                 return;
             }
 
@@ -28,7 +28,7 @@ public partial class HubConnection : Hub
                 string errorMessage = "Game does not exist";
 
                 logger.LogError($"JoinGame: {errorMessage}");
-                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.onJoinGameError, errorMessage);
+                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnJoinGameError, errorMessage);
                 return;
             }
             
@@ -79,7 +79,7 @@ public partial class HubConnection : Hub
                 string errorMessage = "User with your username already exists";
 
                 logger.LogError($"JoinGame: {errorMessage}");
-                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.onJoinGameError, errorMessage);
+                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnJoinGameError, errorMessage);
                 return;
             }
             else
@@ -87,7 +87,7 @@ public partial class HubConnection : Hub
                 string errorMessage = "Unexpected error, try again";
 
                 logger.LogError($"JoinGame: {errorMessage}");
-                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.onJoinGameError, errorMessage);
+                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnJoinGameError, errorMessage);
                 return;
             }
 
@@ -173,11 +173,34 @@ public partial class HubConnection : Hub
                 return;
             }
 
-            if (!game.GameState.IsStarted && gameManager.CheckIfPlayerIsHost(player.Token))
+            if (!game.GameState.IsStarted && token == game.HostToken)
             {
-                
+                gameManager.SetGame(null);
+
+                ProblemMessage message = new ProblemMessage()
+                {
+                    Text = "Host left the lobby",
+                    BootstrapColor = BootstrapColors.Red
+                };
+
+                await Clients.AllExcept(Context.ConnectionId).SendAsync(HubEvents.OnGameProblem, JsonHelper.Serialize(message));
+
+                logger.LogInformation($"LeaveGame: Host left the unstarted game - game removed");
+                return;
             }
 
+            if (game.GameState.IsStarted && game.GameState.PlayerScores.Count < 2)
+            {
+                gameManager.SetGame(null);
+
+                ProblemMessage message = new ProblemMessage()
+                {
+                    Text = "Not enough players to continue the game",
+                    BootstrapColor = BootstrapColors.Red
+                };
+
+                await Clients.AllExcept(Context.ConnectionId).SendAsync(HubEvents.OnGameProblem, JsonHelper.Serialize(message));
+            }
 
             List<PlayerScore> playerScores = game.GameState.PlayerScores;
             string playerListSerialized = JsonHelper.Serialize(playerScores);

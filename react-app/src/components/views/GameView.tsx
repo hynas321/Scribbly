@@ -71,10 +71,6 @@ function GameView() {
         setIsGameStarted(true)
       });
 
-      hub.on(HubEvents.onStartTimer, async (data: number) => {
-        dispatch((updatedDrawingTimeSeconds(data)))
-      });
-
       hub.on(HubEvents.onJoinGame, (
         playerSerialized: string,
         gameSettingsSerialized: string,
@@ -101,6 +97,14 @@ function GameView() {
         navigate(config.mainClientEndpoint);
       });
 
+      hub.on(HubEvents.onGameProblem, (problemMessageSerialized: string) => {
+        const problemMessage = JSON.parse(problemMessageSerialized) as ProblemMessage;
+
+        displayAlert(problemMessage.text, problemMessage.bootstrapColor);
+        navigate(config.mainClientEndpoint);
+      });
+
+
       const regex: RegExp = /^Player \d{4}$/;
       const playerUsername = regex ? username : player.username;
 
@@ -114,7 +118,7 @@ function GameView() {
       hub.off(HubEvents.onStartGame);
       hub.off(HubEvents.onJoinGame);
       hub.off(HubEvents.onJoinGameError);
-      hub.off(HubEvents.onStartTimer);
+      hub.off(HubEvents.onGameProblem);
       await hub.invoke(HubEvents.leaveGame, token, false);
     }
 

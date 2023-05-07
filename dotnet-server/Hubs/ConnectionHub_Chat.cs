@@ -39,15 +39,28 @@ public partial class HubConnection : Hub
                 return;
             }
 
+            if (game.GameState.NoChatPermissionTokens.Contains(token))
+            {
+                logger.LogError($"SendChatMessage: Player with the token {token} cannot send a message");
+                return;
+            }
+
             ChatMessage message = new ChatMessage()
             {
                 Username = player.Username,
                 Text = text
             };
 
+            if (message.Text.ToLower().Trim() == game.GameState.Word)
+            {
+                await SendAnnouncement($"{player.Username} guessed the word", BootstrapColors.Green);
+                game.GameState.NoChatPermissionTokens.Add(token);
+                return;
+            }
+
             gameManager.AddChatMessage(message);
 
-            await Clients.All.SendAsync(HubEvents.OnLoadChatMessages, JsonHelper.Serialize(game.ChatMessages));
+            await Clients.All.SendAsync(HubEvents.OnSendChatMessage, JsonHelper.Serialize(message));
 
             logger.LogInformation($"SendChatMessage: Message {text} sent by player {player.Username}");
         }
@@ -101,11 +114,10 @@ public partial class HubConnection : Hub
             {
                 Username = null,
                 Text = text,
-                BackgroundColor = backgroundColor
+                BootstrapBackgroundColor = backgroundColor
             };
 
-            gameManager.AddChatMessage(message);
-            await Clients.All.SendAsync(HubEvents.OnLoadChatMessages, JsonHelper.Serialize(game.ChatMessages));
+            await Clients.All.SendAsync(HubEvents.OnSendAnnouncement, JsonHelper.Serialize(message));
         }
         catch (Exception ex)
         {

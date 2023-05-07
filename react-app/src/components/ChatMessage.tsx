@@ -9,8 +9,8 @@ function ChatMessage({chatMessage}: ChatMessageProps) {
 
   return (
     <div className={
-      `bg-${chatMessage.backgroundColor != null ?
-      chatMessage.backgroundColor : chatMessage.username == playerUsername ?
+      `bg-${chatMessage.bootstrapBackgroundColor != null ?
+      chatMessage.bootstrapBackgroundColor : chatMessage.username == playerUsername ?
       "primary" :"info"}
       mb-1 px-2 py-1`}
     >

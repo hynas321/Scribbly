@@ -4,7 +4,7 @@ public class ChatMessage
 {
     public string Username { get; set; }
     public string Text { get; set; }
-    public string BackgroundColor { get; set; }
+    public string BootstrapBackgroundColor { get; set; }
 }
 
 public class BootstrapColors
