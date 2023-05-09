@@ -51,7 +51,7 @@ public partial class HubConnection : Hub
                 Text = text
             };
 
-            if (message.Text.ToLower().Trim() == game.GameState.Word)
+            if (message.Text.ToLower().Trim() == game.GameState.SecretWord)
             {
                 await SendAnnouncement($"{player.Username} guessed the word", BootstrapColors.Green);
                 game.GameState.NoChatPermissionTokens.Add(token);
@@ -110,9 +110,8 @@ public partial class HubConnection : Hub
                 return;
             }
 
-            ChatMessage message = new ChatMessage()
+            AnnouncementMessage message = new AnnouncementMessage()
             {
-                Username = null,
                 Text = text,
                 BootstrapBackgroundColor = backgroundColor
             };

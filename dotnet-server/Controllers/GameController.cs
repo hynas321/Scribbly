@@ -149,7 +149,7 @@ public class GameController : ControllerBase
 
             logger.LogInformation("IsStarted - Status: 200. OK.");
 
-            return StatusCode(StatusCodes.Status200OK, game.GameState.IsStarted);
+            return StatusCode(StatusCodes.Status200OK, game.GameState.IsGameStarted);
 
         }
         catch (Exception ex)

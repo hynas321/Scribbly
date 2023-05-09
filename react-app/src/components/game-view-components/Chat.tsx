@@ -1,37 +1,33 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import ChatMessage from './ChatMessage';
-import InputForm from './InputForm';
-import Button from './Button';
-import { ConnectionHubContext } from '../context/ConnectionHubContext';
+import ChatMessage from '../ChatMessage';
+import InputForm from '../InputForm';
+import Button from '../Button';
+import { ConnectionHubContext } from '../../context/ConnectionHubContext';
 import * as signalR from '@microsoft/signalr';
-import HubEvents from '../hub/HubEvents';
+import HubEvents from '../../hub/HubEvents';
 import useLocalStorageState from 'use-local-storage-state';
+import { useAppSelector } from '../../redux/hooks';
 
 interface ChatProps {
   placeholderValue: string;
-  wordLength?: number;
+  displaySecretWord: boolean;
 }
 
-function Chat({placeholderValue, wordLength}: ChatProps) {
+function Chat({placeholderValue, displaySecretWord}: ChatProps) {
   const hub = useContext(ConnectionHubContext);
-
-  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
+  const player = useAppSelector((state) => state.player);
+  const gameState = useAppSelector((state) => state.gameState);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [inputFormValue, setInputFormValue] = useState("");
-  const [activeButton, setActiveButton] = useState(false);
+  const [inputFormValue, setInputFormValue] = useState<string>("");
+  const [isSendButtonActive, setIsSendButtonActive] = useState<boolean>(false);
+
   const inputFormRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
 
-  let characters: any[] = [];
-
-  if (wordLength) {
-    const character = '_';
-    characters = new Array(wordLength).fill(character);
-  }
+  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
 
   const handleButtonPress = () => {
-
     const SendChatMessage = async () => {
       if (inputFormValue.length < 1) {
         return;
@@ -86,15 +82,17 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
 
     return () => {
       hub.off(HubEvents.onLoadChatMessages);
+      hub.off(HubEvents.onSendChatMessage);
+      hub.off(HubEvents.onSendAnnouncement);
     }
     }, [hub.getState()]);
 
   useEffect(() => {
     if (inputFormValue.length > 0) {
-      setActiveButton(true);
+      setIsSendButtonActive(true);
     } 
     else {
-      setActiveButton(false);
+      setIsSendButtonActive(false);
     }
   }, [inputFormValue]);
 
@@ -109,8 +107,7 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
   return (
     <div>
       <h5>
-        {characters.map((c, index) => <span key={index}>{c} </span>)}
-        { wordLength &&`${wordLength}` }
+        { displaySecretWord && `${gameState.secretWord} ${gameState.secretWord.length}` }
       </h5>
       <div id="messages" className="rounded p-3 bg-light">
         <div ref={messagesRef} style={{height: "450px", overflowY: "auto"}}>
@@ -122,20 +119,24 @@ function Chat({placeholderValue, wordLength}: ChatProps) {
           ))}
         </div>
       </div>
-      <div className="d-flex justify-content-center align-items-center">
-        <Button
-          text={"Send"}
-          active={activeButton}
-          onClick={handleButtonPress}
-        />
-        <InputForm 
-          defaultValue={""} 
-          placeholderValue={placeholderValue}
-          onChange={handleInputFormChange}
-          onKeyDown={handleEnterPress}
-          ref={inputFormRef} 
-        />
-      </div>
+      {
+        (player.username != gameState.drawingPlayerUsername || gameState.drawingPlayerUsername == "") &&
+        <div className="d-flex justify-content-center align-items-center">
+          <Button
+            text={"Send"}
+            active={isSendButtonActive}
+            onClick={handleButtonPress}
+          />
+          <InputForm 
+            defaultValue={""} 
+            placeholderValue={placeholderValue}
+            onChange={handleInputFormChange}
+            onKeyDown={handleEnterPress}
+            ref={inputFormRef} 
+          />
+        </div>
+      }
+
     </div>
   );
 }

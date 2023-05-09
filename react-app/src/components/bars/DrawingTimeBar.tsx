@@ -1,20 +1,22 @@
 interface ProgressBarProps {
-	progressProperties: ProgressProperties
+  currentProgress: number;
+  minProgress: number;
+  maxProgress: number;
 	text?: string;
 }
 
-function DrawingTimeBar({progressProperties, text}: ProgressBarProps) {
+function DrawingTimeBar({currentProgress, minProgress, maxProgress, text}: ProgressBarProps) {
   return (
     <div className="progress" style={{height: "110%"}}>
       <div
         className="progress-bar"
         role="progressbar"
-        style={{ width: `${(progressProperties.currentProgress / progressProperties.maxProgress) * 100}%`}}
-        aria-valuenow={progressProperties.currentProgress}
-        aria-valuemin={progressProperties.minProgress}
-        aria-valuemax={progressProperties.maxProgress}
+        style={{ width: `${(currentProgress / maxProgress) * 100}%`}}
+        aria-valuenow={currentProgress}
+        aria-valuemin={minProgress}
+        aria-valuemax={maxProgress}
       >
-        {progressProperties.currentProgress}{text}
+        {currentProgress}{text}
       </div>
     </div>
   );

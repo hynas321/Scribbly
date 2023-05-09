@@ -87,7 +87,7 @@ public partial class HubConnection : Hub
         }
         catch (Exception ex)
         {
-            logger.LogInformation(Convert.ToString(ex));
+            logger.LogError(Convert.ToString(ex));
         }
     }
 }

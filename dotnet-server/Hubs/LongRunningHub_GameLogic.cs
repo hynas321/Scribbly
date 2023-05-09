@@ -42,10 +42,10 @@ public partial class LongRunningHubConnection : Hub
                 return;
             }
 
-            if (settings.DrawingTimeSeconds < 25 ||
+            if (settings.DrawingTimeSeconds < 30 ||
                 settings.DrawingTimeSeconds > 120 ||
                 settings.RoundsCount < 1 ||
-                settings.RoundsCount < 6
+                settings.RoundsCount > 6
             )
             {
                 logger.LogError($"StartGame: Incorrect settings data");
@@ -53,7 +53,7 @@ public partial class LongRunningHubConnection : Hub
             }
 
             gameManager.RemoveChatMessages();
-            game.GameState.IsStarted = true;
+            game.GameState.IsGameStarted = true;
 
             game.GameSettings.NonAbstractNounsOnly = settings.NonAbstractNounsOnly;
             game.GameSettings.DrawingTimeSeconds = settings.DrawingTimeSeconds;
@@ -65,7 +65,7 @@ public partial class LongRunningHubConnection : Hub
 
             Context.Abort();
 
-            await Task.Run(() => UpdateTimer(game.HostToken));
+            await Task.Run(() => ManageGameFlow());
         }
         catch (Exception ex)
         {
@@ -75,19 +75,69 @@ public partial class LongRunningHubConnection : Hub
 
     public async Task ManageGameFlow()
     {
-        await Task.Run(async () =>
+        try
         {
             Game game = gameManager.GetGame();
+            List<string> drawingPlayersLeft = new List<string>();
 
-            //await SendAnnouncement("Game has started", BootstrapColors.Yellow);
             while (true)
             {
+                drawingPlayersLeft = gameManager.GetOnlinePlayersTokens();
 
+                await hubContext.Clients.All.SendAsync(HubEvents.OnClearCanvas);
+                await SetCanvasText($"Round {game.GameState.CurrentRound}", BootstrapColors.Green);
+                await Task.Delay(2000);
+
+                while (drawingPlayersLeft.Count != 0)
+                {
+                    game.GameState.DrawingToken = null;
+
+                    Random random = new Random();
+                    int randomTokenIndex = random.Next(drawingPlayersLeft.Count);
+                    string drawingToken = drawingPlayersLeft[randomTokenIndex];
+                    string secretWord = FetchWord();
+
+                    drawingPlayersLeft.RemoveAt(randomTokenIndex);
+
+                    game.GameState.SecretWord = secretWord;
+
+                    string drawingPlayerUsername = gameManager.GetPlayerByToken(drawingToken).Username;
+
+                    await hubContext.Clients.All.SendAsync(HubEvents.OnUpdateDrawingPlayer, drawingPlayerUsername);
+                    await SetCanvasText($"{drawingPlayerUsername} is going to draw in 5s", BootstrapColors.Green);
+                    await Task.Delay(5000);
+
+                    game.GameState.DrawingToken = drawingToken;
+
+                    await hubContext.Clients.All.SendAsync(HubEvents.OnUpdateTimerVisibility, true);
+                    await Task.Run(() => UpdateTimer());
+                    await hubContext.Clients.All.SendAsync(HubEvents.OnUpdateTimerVisibility, false);
+                    await SetCanvasText($"Time is up, the correct answer was: {secretWord}", BootstrapColors.Green);
+
+                    game.GameState.DrawingToken = null;
+
+                    await Task.Delay(3000);
+                }
+
+                game.GameState.CurrentRound++;
+
+                if (game.GameState.CurrentRound > game.GameSettings.RoundsCount)
+                {   
+                    await SetCanvasText($"The end", BootstrapColors.Green);
+                    break;
+                }
+
+                await hubContext.Clients.All.SendAsync(HubEvents.OnUpdateCurrentRound, game.GameState.CurrentRound);
             }
-        });
+            }
+            catch (Exception ex)
+            {
+                logger.LogInformation(Convert.ToString(ex));
+            }
+        
     }
 
-    public async Task UpdateTimer(string token)
+    public async Task UpdateTimer()
     {
         try
         {  
@@ -98,27 +148,54 @@ public partial class LongRunningHubConnection : Hub
                 return;
             }
 
+            game.GameState.CurrentDrawingTimeSeconds = game.GameSettings.DrawingTimeSeconds;
+
             int initialTime = game.GameState.CurrentDrawingTimeSeconds;
             int currentTime = initialTime;
             CancellationTokenSource cancellationToken = new CancellationTokenSource();
 
             for (int i = 0; i < initialTime; i++)
             {   
+                if (currentTime < 0 || game == null)
+                {
+                    cancellationToken.Cancel();
+                    break;
+                }
+
                 logger.LogInformation(Convert.ToString(currentTime));
                 await hubContext.Clients.All.SendAsync(HubEvents.OnUpdateTimer, currentTime);
 
                 currentTime--;
 
                 await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken.Token);
-
-                if (currentTime <= 0 || game == null)
-                {
-                    cancellationToken.Cancel();
-                    break;
-                }
             }
         }
         catch(Exception ex)
+        {
+            logger.LogError(Convert.ToString(ex));
+        }
+    }
+
+    public async Task SetCanvasText(string text, string color)
+    {
+        try
+        {
+            Game game = new Game();
+
+            if (game == null)
+            {
+                return;
+            }
+
+            AnnouncementMessage message = new AnnouncementMessage()
+            {
+                Text = text,
+                BootstrapBackgroundColor = color
+            };
+
+            await hubContext.Clients.All.SendAsync(HubEvents.OnSetCanvasText, JsonHelper.Serialize(message));
+        }
+        catch (Exception ex)
         {
             logger.LogError(Convert.ToString(ex));
         }

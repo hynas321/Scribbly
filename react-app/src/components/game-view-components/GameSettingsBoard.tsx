@@ -1,14 +1,14 @@
-import Range from './Range';
-import CheckForm from './CheckForm';
-import CheckBox from './CheckBox';
-import { useAppDispatch, useAppSelector } from '../redux/hooks';
-import { GameSettings, updatedDrawingTimeSeconds, updatedNonAbstractNounsOnly, updatedRoundsCount, updatedWordLanguage } from '../redux/slices/game-settings-slice';
+import Range from '../Range';
+import CheckForm from '../CheckForm';
+import CheckBox from '../CheckBox';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { GameSettings, updatedDrawingTimeSeconds, updatedNonAbstractNounsOnly, updatedRoundsCount, updatedWordLanguage } from '../../redux/slices/game-settings-slice';
 import { BsGearFill } from 'react-icons/bs';
-import InputSelect from './InputSelect';
+import InputSelect from '../InputSelect';
 import { useContext, useEffect } from "react";
-import { ConnectionHubContext } from '../context/ConnectionHubContext';
+import { ConnectionHubContext } from '../../context/ConnectionHubContext';
 import * as signalR from '@microsoft/signalr';
-import HubEvents from '../hub/HubEvents';
+import HubEvents from '../../hub/HubEvents';
 import useLocalStorageState from 'use-local-storage-state';
 
 interface GameSettingsBoardProps {
@@ -18,6 +18,8 @@ interface GameSettingsBoardProps {
 function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
   const hub = useContext(ConnectionHubContext);
   const dispatch = useAppDispatch();
+  const settings = useAppSelector((state) => state.gameSettings);
+
   const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
 
   let gameSettingsLoaded = false;
@@ -26,13 +28,6 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
   const drawingTimeText = "Drawing time";
   const numberOfRoundsText = "Number of rounds";
   const chooseLanguageText = "Language of random words";
-
-  const settings = {
-    nonAbstractNounsOnly: useAppSelector((state) => state.gameSettings.nonAbstractNounsOnly),
-    drawingTimeSeconds: useAppSelector((state) => state.gameSettings.drawingTimeSeconds),
-    roundsCount: useAppSelector((state) => state.gameSettings.roundsCount),
-    wordLanguage: useAppSelector((state) => state.gameSettings.wordLanguage)
-  };
 
   useEffect(() => {
     if (hub.getState() != signalR.HubConnectionState.Connected) {

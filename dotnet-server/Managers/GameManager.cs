@@ -70,6 +70,24 @@ class GameManager
         return playerObjs;
     }
 
+    public List<string> GetOnlinePlayersTokens()
+    {
+        List<PlayerScore> onlinePlayers = game.GameState.PlayerScores;
+        List<string> playerTokens = new List<string>();
+
+        foreach(Player player in game.GameState.Players)
+        {
+            bool playerIsOnline = onlinePlayers.Exists(obj => obj.Username == player.Username);
+
+            if (playerIsOnline)
+            {
+                playerTokens.Add(player.Token);
+            }
+        }
+
+        return playerTokens;
+    }
+
     public bool CheckIfPlayerExistsByToken(string token)
     {
         return game.GameState.Players.Find(obj => obj.Token == token) != null;

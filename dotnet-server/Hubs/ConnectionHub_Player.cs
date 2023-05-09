@@ -43,6 +43,7 @@ public partial class HubConnection : Hub
                     Token = game.HostToken,
                 };
 
+                game.GameState.HostPlayerUsername = player.Username;
                 gameManager.AddPlayer(player);
             }
             else if (player != null && token == game.HostToken)
@@ -99,7 +100,7 @@ public partial class HubConnection : Hub
 
             gameManager.AddPlayerScore(playerScore);
 
-            GameSettings settings = new GameSettings()
+            GameSettings settingsClient = new GameSettings()
             {
                 NonAbstractNounsOnly = game.GameSettings.NonAbstractNounsOnly,
                 DrawingTimeSeconds = game.GameSettings.DrawingTimeSeconds,
@@ -109,26 +110,27 @@ public partial class HubConnection : Hub
 
             GameState stateClient = new GameState()
             {
-                CurrentDrawingTimeSeconds = 75,
-                CurrentRound = 1,
-                WordLength = 10,
+                CurrentDrawingTimeSeconds = game.GameState.CurrentDrawingTimeSeconds,
+                CurrentRound = game.GameState.CurrentRound,
+                SecretWord = game.GameState.SecretWord,
+                DrawingPlayerUsername = game.GameState.DrawingPlayerUsername,
+                HostPlayerUsername = game.GameState.HostPlayerUsername,
+                IsGameStarted = game.GameState.IsGameStarted
             };
 
             List<PlayerScore> playerScores = gameManager.GetPlayersWithoutToken();
-            bool gameIsStarted = game.GameState.IsStarted;
 
             await Clients.All.SendAsync(HubEvents.OnPlayerJoinedGame, JsonHelper.Serialize(playerScores));
             await Clients.Client(Context.ConnectionId).SendAsync(
                 HubEvents.OnJoinGame,
                 JsonHelper.Serialize(player),
-                JsonHelper.Serialize(settings),
-                JsonHelper.Serialize(stateClient),
-                game.GameState.IsStarted
+                JsonHelper.Serialize(settingsClient),
+                JsonHelper.Serialize(stateClient)
             );
 
-            await SendAnnouncement($"Player {player.Username} has joined the game", BootstrapColors.Green);
+            await SendAnnouncement($"{player.Username} has joined the game", BootstrapColors.Green);
 
-            logger.LogInformation($"JoinGame: Player {player.Username} joined the game.");
+            logger.LogInformation($"JoinGame: {player.Username} joined the game.");
             logger.LogInformation($"Online players: {game.GameState.PlayerScores.Count}. Total players: {game.GameState.Players.Count}");
         }
         catch (Exception ex)
@@ -173,14 +175,14 @@ public partial class HubConnection : Hub
                 return;
             }
 
-            if (/* !game.GameState.IsStarted && */ token == game.HostToken)
+            if (!game.GameState.IsGameStarted && token == game.HostToken)
             {
                 gameManager.SetGame(null);
 
-                ProblemMessage message = new ProblemMessage()
+                AnnouncementMessage message = new AnnouncementMessage()
                 {
                     Text = "Host left the lobby",
-                    BootstrapColor = BootstrapColors.Red
+                    BootstrapBackgroundColor = BootstrapColors.Red
                 };
 
                 await Clients.AllExcept(Context.ConnectionId).SendAsync(HubEvents.OnGameProblem, JsonHelper.Serialize(message));
@@ -189,14 +191,14 @@ public partial class HubConnection : Hub
                 return;
             }
 
-            if (game.GameState.IsStarted && game.GameState.PlayerScores.Count < 2)
+            if (game.GameState.IsGameStarted && game.GameState.PlayerScores.Count < 2)
             {
                 gameManager.SetGame(null);
 
-                ProblemMessage message = new ProblemMessage()
+                AnnouncementMessage message = new AnnouncementMessage()
                 {
                     Text = "Not enough players to continue the game",
-                    BootstrapColor = BootstrapColors.Red
+                    BootstrapBackgroundColor = BootstrapColors.Red
                 };
 
                 await Clients.AllExcept(Context.ConnectionId).SendAsync(HubEvents.OnGameProblem, JsonHelper.Serialize(message));
@@ -205,12 +207,12 @@ public partial class HubConnection : Hub
             List<PlayerScore> playerScores = game.GameState.PlayerScores;
             string playerListSerialized = JsonHelper.Serialize(playerScores);
 
-            logger.LogInformation($"JoinGame: Player {player.Username} left the game");
+            logger.LogInformation($"JoinGame: {player.Username} left the game");
             logger.LogInformation($"Online players: {game.GameState.PlayerScores.Count}. Total players: {game.GameState.Players.Count}");
 
             await Clients.AllExcept(Context.ConnectionId).SendAsync(HubEvents.OnPlayerLeftGame, playerListSerialized);
 
-            await SendAnnouncement($"Player {player.Username} has left the game", BootstrapColors.Red);
+            await SendAnnouncement($"{player.Username} has left the game", BootstrapColors.Red);
         }
         catch (Exception ex)
         {

@@ -2,7 +2,6 @@ namespace Dotnet.Server.Hubs;
 
 public static class HubEvents
 {
-    
     //GameSettings
     public const string LoadGameSettings = "LoadGameSettings";
     public const string SetAbstractNouns = "SetAbstractNouns";
@@ -37,9 +36,11 @@ public static class HubEvents
     public const string StartGame = "StartGame";
     public const string OnStartGame = "OnStartGame";
     public const string OnUpdateTimer = "OnUpdateTimer";
+    public const string OnUpdateTimerVisibility = "OnUpdateTimerVisibility";
     public const string OnGameFinished = "OnGameFinished";
+    public const string OnUpdateDrawingPlayer = "OnUpdateDrawingPlayer";
+    public const string OnUpdateCurrentRound = "OnUpdateCurrentRound";
     
-
     // Canvas
     public const string LoadCanvas = "LoadCanvas";
     public const string DrawOnCanvas = "DrawOnCanvas";
@@ -47,4 +48,5 @@ public static class HubEvents
     public const string OnLoadCanvas = "OnLoadCanvas";
     public const string OnDrawOnCanvas = "OnDrawOnCanvas";
     public const string OnClearCanvas = "OnClearCanvas";
+    public const string OnSetCanvasText = "OnSetCanvasText";
 }
