@@ -118,8 +118,7 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
   return (
     <div>
       <h5>
-        { (displaySecretWord && gameState.hiddenSecretWord.length > 0) && `${gameState.hiddenSecretWord}`}
-        { player.username != gameState.drawingPlayerUsername && ` ${gameState.hiddenSecretWord.length}`}
+        { displaySecretWord && `${gameState.hiddenSecretWord}`}
       </h5>
       <div id="messages" className="rounded p-3 bg-light">
         <div ref={messagesRef} style={{height: "450px", overflowY: "auto"}}>

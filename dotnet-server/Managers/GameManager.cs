@@ -35,7 +35,7 @@ class GameManager
     public void AddPlayerScore(PlayerScore playerScore)
     {
         Game.GameState.PlayerScores.Add(playerScore);
-        Game.GameState.PlayerScores.Sort((score1, score2) => score1.Score.CompareTo(score2.Score));
+        Game.GameState.PlayerScores.Sort((score1, score2) => score2.Score.CompareTo(score1.Score));
     }
 
     public void RemovePlayer(string token)
@@ -128,14 +128,14 @@ class GameManager
 
         if (player != null)
         {
-            player.Score = score;
+            player.Score += score;
 
             PlayerScore playerScore = Game.GameState.PlayerScores.Find(playerScore => playerScore.Username == player.Username);
             
             if (playerScore != null)
             {
                 playerScore.Score = score;
-                Game.GameState.PlayerScores.Sort((score1, score2) => score1.Score.CompareTo(score2.Score));
+                Game.GameState.PlayerScores.Sort((score1, score2) => score2.Score.CompareTo(score1.Score));
             }
         }
     }

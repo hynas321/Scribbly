@@ -37,10 +37,6 @@ function Canvas() {
   ]
 
   function draw(canvasContext: CanvasRenderingContext2D, drawnLine: DrawnLine) {
-    if (!isPlayerDrawing) {
-      return;
-    }
-
     const {x: currentRelativeX, y: currentRelativeY} = drawnLine.currentPoint;
     const lineWidth = 5;
 
@@ -78,8 +74,6 @@ function Canvas() {
       else {
         setIsPlayerDrawing(false);
       }
-
-      hub.invoke(HubEvents.getSecretWord, token);
     });
 
     hub.on(HubEvents.OnSetCanvasText, (announcementMessageSerialized: string) => {
@@ -124,7 +118,7 @@ function Canvas() {
         />
       </div>
       {
-        isPlayerDrawing &&
+        player.username == gameState.drawingPlayerUsername &&
         <>
           <div className="d-flex justify-content-center">
             <CirclePicker

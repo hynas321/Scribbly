@@ -31,10 +31,10 @@ public partial class HubConnection : Hub
                 await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnJoinGameError, errorMessage);
                 return;
             }
-            
-            Player player = gameManager.GetPlayerByToken(token);
 
-            if (player == null && token == game.HostToken)
+            Player player = null;
+            
+            if (token == game.HostToken)
             {
                 player = new Player()
                 {
@@ -46,25 +46,7 @@ public partial class HubConnection : Hub
                 game.GameState.HostPlayerUsername = player.Username;
                 gameManager.AddPlayer(player);
             }
-            else if (player != null && token == game.HostToken)
-            {
-                player = new Player()
-                {
-                    Username = player.Username,
-                    Score = player.Score,
-                    Token = game.HostToken,
-                };
-            }
-            else if (player != null && token == player.Token)
-            {
-                player = new Player()
-                {
-                    Username = player.Username,
-                    Score = player.Score,
-                    Token = player.Token,
-                };
-            }
-            else if (player == null && !gameManager.CheckIfPlayerExistsByUsername(username))
+            else if (!gameManager.CheckIfPlayerExistsByUsername(username))
             {
                 player = new Player()
                 {
@@ -75,7 +57,7 @@ public partial class HubConnection : Hub
 
                 gameManager.AddPlayer(player);
             }
-            else if (player == null && gameManager.CheckIfPlayerExistsByUsername(username))
+            else if (gameManager.CheckIfPlayerExistsByUsername(username))
             {
                 string errorMessage = "User with your username already exists";
 
@@ -141,7 +123,7 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.LeaveGame)]
-    public async Task LeaveGame(string token, bool leaveForGood)
+    public async Task LeaveGame(string token)
     {
         try
         {
@@ -159,15 +141,8 @@ public partial class HubConnection : Hub
                 logger.LogError($"LeaveGame: Player with the token {token} does not exist");
             }
 
-            if (leaveForGood)
-            {
-                gameManager.RemovePlayer(token);
-                gameManager.RemovePlayerScore(player.Username);
-            }
-            else
-            {
-                gameManager.RemovePlayerScore(player.Username);
-            }
+            gameManager.RemovePlayer(token);
+            gameManager.RemovePlayerScore(player.Username);
 
             if (game.GameState.PlayerScores.Count == 0)
             {

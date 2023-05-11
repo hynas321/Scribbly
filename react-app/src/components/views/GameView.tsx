@@ -20,7 +20,7 @@ import { PlayerIsHostResponse } from '../../http/HttpInterfaces';
 import useLocalStorageState from 'use-local-storage-state';
 import { GameSettings, updatedGameSettings } from '../../redux/slices/game-settings-slice';
 import loading from './../../assets/loading.gif'
-import { GameState, clearedGameState, updatedGameState } from '../../redux/slices/game-state-slice';
+import { GameState, clearedGameState, updatedGameState, updatedIsGameStarted } from '../../redux/slices/game-state-slice';
 
 function GameView() {
   const httpRequestHandler = new HttpRequestHandler();
@@ -32,10 +32,10 @@ function GameView() {
   const dispatch = useDispatch();
 
   const player = useAppSelector((state) => state.player);
+  const gameState = useAppSelector((state) => state.gameState);
   const gameSettings = useAppSelector((state) => state.gameSettings);
 
   const [playerScores, setPlayerScores] = useState<PlayerScore[]>([]);
-  const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
   const [isPlayerHost, setIsPlayerHost] = useState<boolean>(false);
   const [isGameDisplayed, setIsGameDisplayed] = useState<boolean>(false);
   const [isStartGameButtonActive, setIsStartGameButtonActive] = useState<boolean>(false);
@@ -46,11 +46,10 @@ function GameView() {
   const handleStartGameButtonClick = async () => {
     await longRunningHub.start();
     await longRunningHub.invoke(HubEvents.startGame, token, gameSettings);
-    await longRunningHub.stop();
   }
 
   const handleLeaveGameButtonClick = async () => {
-    await hub.invoke(HubEvents.leaveGame, token, true);
+    await hub.invoke(HubEvents.leaveGame, token);
     setToken("");
     navigate(config.mainClientEndpoint);
   }
@@ -63,7 +62,7 @@ function GameView() {
       });
 
       hub.on(HubEvents.onStartGame, () => {
-        setIsGameStarted(true)
+        dispatch(updatedIsGameStarted(true));
       });
 
       hub.on(HubEvents.onJoinGame, (
@@ -115,8 +114,8 @@ function GameView() {
       hub.off(HubEvents.onJoinGame);
       hub.off(HubEvents.onJoinGameError);
       hub.off(HubEvents.onGameProblem);
+      await hub.invoke(HubEvents.leaveGame, token);
       dispatch(clearedGameState());
-      await hub.invoke(HubEvents.leaveGame, token, false);
     }
 
     startHubAndJoinGame();
@@ -175,7 +174,7 @@ function GameView() {
           </div>
         : 
           (
-            isGameStarted ?
+            gameState.isGameStarted ?
 
             <div className="container text-center">
               <div className="row">

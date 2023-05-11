@@ -22,7 +22,7 @@ public partial class HubConnection : Hub
 
             if (token != game.GameState.DrawingToken)
             {
-                logger.LogError($"DrawOnCanvas: Player with the token {token} cannot draw on canvas");
+                //logger.LogError($"DrawOnCanvas: Player with the token {token} cannot draw on canvas");
                 return;
             }
 

@@ -22,22 +22,22 @@ public partial class HubConnection : Hub
 
             if (player == null)
             {
-                logger.LogError($"GetSecretWord: Player with the token {token} does not exist");
+                //logger.LogError($"GetSecretWord: Player with the token {token} does not exist");
                 return;
             }
 
-            string secretWord = "";
+            string secretWordMessage = "";
 
             if (player.Token == game.GameState.DrawingToken)
             {
-                secretWord = game.GameState.ActualSecretWord;
+                secretWordMessage = $"Secret word: {game.GameState.ActualSecretWord}";
             }
             else
             {
-                secretWord = game.GameState.HiddenSecretWord;
+                secretWordMessage = game.GameState.HiddenSecretWord;
             }
 
-            await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnGetSecretWord, secretWord);
+            await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnGetSecretWord, secretWordMessage);
         }
         catch (Exception ex)
         {
