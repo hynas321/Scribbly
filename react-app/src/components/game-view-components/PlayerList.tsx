@@ -1,7 +1,7 @@
 import { useContext, useEffect } from "react";
 import { BsPaletteFill, BsShieldShaded } from "react-icons/bs";
 import { useDispatch } from "react-redux";
-import { updatedCurrentRound, updatedDrawingPlayerUsername } from "../../redux/slices/game-state-slice";
+import { updatedCorrectGuessPlayerUsernames, updatedCurrentRound, updatedDrawingPlayerUsername } from "../../redux/slices/game-state-slice";
 import HubEvents from "../../hub/HubEvents";
 import { ConnectionHubContext } from "../../context/ConnectionHubContext";
 import { useAppSelector } from "../../redux/hooks";
@@ -35,6 +35,12 @@ function PlayerList({title, playerScores, displayPoints, displayIndex, displayRo
       dispatch((updatedDrawingPlayerUsername(drawingPlayerUsername)));
     });
 
+    hub.on(HubEvents.onUpdateCorrectGuessPlayerUsernames, (usernamesSerialized: string) => {
+      const usernames = JSON.parse(usernamesSerialized) as string[];
+  
+      dispatch((updatedCorrectGuessPlayerUsernames(usernames)));
+    });
+
     return () => {
       hub.off(HubEvents.onUpdateCurrentRound);
       hub.off(HubEvents.onUpdateDrawingPlayer);
@@ -45,14 +51,23 @@ function PlayerList({title, playerScores, displayPoints, displayIndex, displayRo
       { displayRound && <h5>Round {gameState.currentRound}/{gameSettings.roundsCount}</h5>}
       <ul className="list-group">
         <li className="list-group-item justify-content-between align-items-center">
-            <b>{title}</b>
+          <b>{title}</b>
         </li>
         {playerScores.map((playerScore, index) => (
-          <li key={index} className="list-group-item d-flex justify-content-between align-items-center" style={{overflowWrap: "break-word"}}>
+          <li
+            key={index}
+            className={`list-group-item d-flex justify-content-between align-items-center
+            ${gameState.correctGuessPlayerUsernames != undefined &&
+              gameState.correctGuessPlayerUsernames.includes(playerScore.username) ? "bg-success" :
+              gameState.drawingPlayerUsername == playerScore.username ? "bg-light" : "bg-white"}`}
+            style={{overflowWrap: "break-word"}}
+          >
             { displayIndex && "#" + (index + 1)}
             <div className="d-flex flex-column align-items-center">
-              <span className={player.username == playerScore.username ? "text-warning" : "text-dark"}>
-                {playerScore.username}
+              <span 
+                className={player.username == playerScore.username ? "text-warning" : "text-dark"}
+              >
+                <b>{playerScore.username} </b>
                 { gameState.hostPlayerUsername == playerScore.username && <BsShieldShaded/> }
                 { gameState.drawingPlayerUsername == playerScore.username && <BsPaletteFill/> }
               </span>

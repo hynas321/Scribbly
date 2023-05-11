@@ -8,16 +8,18 @@ export interface GameState {
   hostPlayerUsername: string;
   isGameStarted: boolean;
   isTimerVisible: boolean;
+  correctGuessPlayerUsernames: string[];
 };
 
 const initialState: GameState = {
   currentDrawingTimeSeconds: 50,
   currentRound: 1,
-  hiddenSecretWord: "",
+  hiddenSecretWord: "? ? ?",
   drawingPlayerUsername: "",
   hostPlayerUsername: "",
   isGameStarted: false,
-  isTimerVisible: false
+  isTimerVisible: false,
+  correctGuessPlayerUsernames: []
 };
 
 const gameStateSlice = createSlice({
@@ -45,6 +47,9 @@ const gameStateSlice = createSlice({
     updatedIsTimerVisible(state, action: PayloadAction<boolean>) {
       state.isTimerVisible = action.payload;
     },
+    updatedCorrectGuessPlayerUsernames(state, action: PayloadAction<string[]>) {
+      state.correctGuessPlayerUsernames = action.payload;
+    },
     updatedGameState(state, action: PayloadAction<GameState>) {
       state.currentDrawingTimeSeconds = action.payload.currentDrawingTimeSeconds,
       state.currentRound = action.payload.currentRound,
@@ -52,7 +57,8 @@ const gameStateSlice = createSlice({
       state.drawingPlayerUsername = action.payload.drawingPlayerUsername,
       state.hostPlayerUsername = action.payload.hostPlayerUsername,
       state.isGameStarted = action.payload.isGameStarted,
-      state.isTimerVisible = action.payload.isTimerVisible
+      state.isTimerVisible = action.payload.isTimerVisible,
+      state.correctGuessPlayerUsernames = action.payload.correctGuessPlayerUsernames
     },
     clearedGameState(state) {
       state.currentDrawingTimeSeconds = initialState.currentDrawingTimeSeconds,
@@ -61,10 +67,11 @@ const gameStateSlice = createSlice({
       state.drawingPlayerUsername = initialState.drawingPlayerUsername,
       state.hostPlayerUsername = initialState.hostPlayerUsername,
       state.isGameStarted = initialState.isGameStarted,
-      state.isTimerVisible = initialState.isTimerVisible
+      state.isTimerVisible = initialState.isTimerVisible,
+      state.correctGuessPlayerUsernames = initialState.correctGuessPlayerUsernames
     }
   }
 })
 
-export const { updatedCurrentDrawingTimeSeconds, updatedCurrentRound, updatedHiddenSecretWord, updatedDrawingPlayerUsername, updatedHostPlayerUsername, updatedIsGameStarted, updatedGameState, updatedIsTimerVisible, clearedGameState } = gameStateSlice.actions;
+export const { updatedCurrentDrawingTimeSeconds, updatedCurrentRound, updatedHiddenSecretWord, updatedDrawingPlayerUsername,updatedHostPlayerUsername, updatedIsGameStarted, updatedIsTimerVisible, updatedCorrectGuessPlayerUsernames, updatedGameState, clearedGameState } = gameStateSlice.actions;
 export default gameStateSlice.reducer;

@@ -1,5 +1,5 @@
 class ApiHeaders {
-    static token = "Token";
+  static token = "Token";
 }
 
 export default ApiHeaders;

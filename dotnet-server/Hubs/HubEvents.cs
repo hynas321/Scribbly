@@ -43,6 +43,7 @@ public static class HubEvents
     public const string OnGameFinished = "OnGameFinished";
     public const string OnUpdateDrawingPlayer = "OnUpdateDrawingPlayer";
     public const string OnUpdateCurrentRound = "OnUpdateCurrentRound";
+    public const string onUpdateCorrectGuessPlayerUsernames = "OnUpdateCorrectGuessPlayerUsernames";
     
     // Canvas
     public const string LoadCanvas = "LoadCanvas";

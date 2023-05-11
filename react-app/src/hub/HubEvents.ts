@@ -39,6 +39,7 @@ class HubEvents {
   static onUpdateTimerVisibility: string = "OnUpdateTimerVisibility";
   static onUpdateDrawingPlayer: string = "OnUpdateDrawingPlayer";
   static onUpdateCurrentRound: string = "OnUpdateCurrentRound";
+  static onUpdateCorrectGuessPlayerUsernames: string = "OnUpdateCorrectGuessPlayerUsernames";
 
   //Canvas
   static loadCanvas: string = "LoadCanvas";

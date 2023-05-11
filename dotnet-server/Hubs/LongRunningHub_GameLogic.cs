@@ -104,6 +104,7 @@ public partial class LongRunningHubConnection : Hub
                     game.GameState.NoChatPermissionTokens.Clear();
                     game.GameState.DrawnLines.Clear();
                     game.GameState.CorrectAnswerCount = 0;
+                    game.GameState.CorrectGuessPlayerUsernames.Clear();
 
                     await hubContext.Clients.All.SendAsync(HubEvents.OnClearCanvas);
 
@@ -122,6 +123,7 @@ public partial class LongRunningHubConnection : Hub
                     game.GameState.HiddenSecretWord = $"Secret word length: {hiddenSecretWord}";
                     game.GameState.IsTimerVisible = true;
 
+                    await hubContext.Clients.All.SendAsync(HubEvents.onUpdateCorrectGuessPlayerUsernames, JsonHelper.Serialize(game.GameState.CorrectGuessPlayerUsernames));
                     await hubContext.Clients.All.SendAsync(HubEvents.OnUpdateDrawingPlayer, drawingPlayerUsername);
                     await SetCanvasText($"{drawingPlayerUsername} is going to draw in 5s", BootstrapColors.Green);
                     await Task.Delay(5000);
@@ -294,6 +296,8 @@ public partial class LongRunningHubConnection : Hub
                 Text = text,
                 BootstrapBackgroundColor = backgroundColor
             };
+
+            //gameManager.AddChatMessage(message);
 
             await hubContext.Clients.All.SendAsync(HubEvents.OnSendAnnouncement, JsonHelper.Serialize(message));
         }

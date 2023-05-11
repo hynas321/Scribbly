@@ -56,9 +56,13 @@ public partial class HubConnection : Hub
                 await AddPlayerScoreAndAnnouncement(player.Token);
 
                 List<PlayerScore> playerScores = gameManager.GetPlayerObjectsWithoutToken();
+                List<string> correctguessPlayerUsernames = game.GameState.CorrectGuessPlayerUsernames;
+
                 game.GameState.NoChatPermissionTokens.Add(token);
+                game.GameState.CorrectGuessPlayerUsernames.Add(player.Username);
                 
                 await Clients.All.SendAsync(HubEvents.OnUpdatePlayerScores, JsonHelper.Serialize(playerScores));
+                await Clients.All.SendAsync(HubEvents.onUpdateCorrectGuessPlayerUsernames, JsonHelper.Serialize(correctguessPlayerUsernames));
                 return;
             }
 
@@ -122,6 +126,8 @@ public partial class HubConnection : Hub
                 Text = text,
                 BootstrapBackgroundColor = backgroundColor
             };
+
+            //gameManager.AddChatMessage(message);
 
             await Clients.All.SendAsync(HubEvents.OnSendAnnouncement, JsonHelper.Serialize(message));
         }

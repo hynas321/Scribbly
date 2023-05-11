@@ -88,7 +88,7 @@ class GameManager
         return Game.GameState.Players.Find(obj => obj.Username == username) != null;
     }
 
-    public void AddChatMessage(ChatMessage message)
+    public void AddChatMessage(ChatMessage chatMessage)
     {
         List<ChatMessage> messages = Game.ChatMessages;
 
@@ -97,7 +97,26 @@ class GameManager
             messages.RemoveAt(0);
         }
 
-        messages.Add(message);
+        messages.Add(chatMessage);
+    }
+
+    public void AddChatMessage(AnnouncementMessage message)
+    {
+        List<ChatMessage> messages = Game.ChatMessages;
+
+        if (messages.Count == maxChatMessageCount)
+        {
+            messages.RemoveAt(0);
+        }
+
+        ChatMessage chatMessage = new ChatMessage()
+        {
+            Username = null,
+            Text = message.Text,
+            BootstrapBackgroundColor = message.BootstrapBackgroundColor
+        };
+
+        messages.Add(chatMessage);
     }
 
     public void UpdatePlayerScore(string token, int score)

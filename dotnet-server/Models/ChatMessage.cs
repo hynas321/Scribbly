@@ -13,4 +13,5 @@ public class BootstrapColors
     public static string Yellow = "warning";
     public static string Green = "success";
     public static string Blue = "primary";
+    public static string Cyan = "info";
 }
