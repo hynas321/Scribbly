@@ -5,7 +5,7 @@ namespace Dotnet.Server.Managers;
 class GameManager
 {
     private int maxChatMessageCount;
-    private static Game game = null;
+    public static Game Game = null;
     
     public GameManager(int maxChatMessageCount)
     {
@@ -14,49 +14,50 @@ class GameManager
 
     public void SetGame(Game game)
     {
-        GameManager.game = game;
+        GameManager.Game = game;
     }
 
     public Game GetGame()
     {
-        return GameManager.game;
+        return GameManager.Game;
     }
 
     public void RemoveGame()
     {
-        GameManager.game = null;
+        GameManager.Game = null;
     }
 
     public void AddPlayer(Player player)
     {   
-        game.GameState.Players.Add(player);
+        Game.GameState.Players.Add(player);
     }
 
     public void AddPlayerScore(PlayerScore playerScore)
     {
-        game.GameState.PlayerScores.Add(playerScore);
+        Game.GameState.PlayerScores.Add(playerScore);
+        Game.GameState.PlayerScores.Sort((score1, score2) => score1.Score.CompareTo(score2.Score));
     }
 
     public void RemovePlayer(string token)
     {
-        game.GameState.Players.RemoveAll(obj => obj.Token == token);
+        Game.GameState.Players.RemoveAll(obj => obj.Token == token);
     }
 
     public void RemovePlayerScore(string username)
     {
-        game.GameState.PlayerScores.RemoveAll(obj => obj.Username == username);
+        Game.GameState.PlayerScores.RemoveAll(obj => obj.Username == username);
     }
 
     public Player GetPlayerByToken(string token)
     {
-        return game.GameState.Players.Find(obj => obj.Token == token);
+        return Game.GameState.Players.Find(obj => obj.Token == token);
     }
 
-    public List<PlayerScore> GetPlayersWithoutToken()
+    public List<PlayerScore> GetPlayerObjectsWithoutToken()
     {
         List<PlayerScore> playerObjs = new List<PlayerScore>();
 
-        foreach(Player player in game.GameState.Players)
+        foreach(Player player in Game.GameState.Players)
         {
             playerObjs.Add(
                 new PlayerScore
@@ -72,10 +73,10 @@ class GameManager
 
     public List<string> GetOnlinePlayersTokens()
     {
-        List<PlayerScore> onlinePlayers = game.GameState.PlayerScores;
+        List<PlayerScore> onlinePlayers = Game.GameState.PlayerScores;
         List<string> playerTokens = new List<string>();
 
-        foreach(Player player in game.GameState.Players)
+        foreach(Player player in Game.GameState.Players)
         {
             bool playerIsOnline = onlinePlayers.Exists(obj => obj.Username == player.Username);
 
@@ -90,28 +91,28 @@ class GameManager
 
     public bool CheckIfPlayerExistsByToken(string token)
     {
-        return game.GameState.Players.Find(obj => obj.Token == token) != null;
+        return Game.GameState.Players.Find(obj => obj.Token == token) != null;
     }
 
     public bool CheckIfPlayerExistsByUsername(string username)
     {
-        return game.GameState.Players.Find(obj => obj.Username == username) != null;
+        return Game.GameState.Players.Find(obj => obj.Username == username) != null;
     }
 
     public bool CheckIfPlayerScoreExistByUsername(string username)
     {
-        return game.GameState.PlayerScores.Find(obj => obj.Username == username) != null;
+        return Game.GameState.PlayerScores.Find(obj => obj.Username == username) != null;
     }
 
     public bool CheckIfHostIsOnline()
     {
-        Player hostPlayer = GetPlayerByToken(game.HostToken);
-        return game.GameState.PlayerScores != null;
+        Player hostPlayer = GetPlayerByToken(Game.HostToken);
+        return Game.GameState.PlayerScores != null;
     }
 
     public void AddChatMessage(ChatMessage message)
     {
-        List<ChatMessage> messages = game.ChatMessages;
+        List<ChatMessage> messages = Game.ChatMessages;
 
         if (messages.Count == maxChatMessageCount)
         {
@@ -121,9 +122,21 @@ class GameManager
         messages.Add(message);
     }
 
-    public void RemoveChatMessages()
+    public void UpdatePlayerScore(string token, int score)
     {
-        game.ChatMessages.Clear();
-    }
+        Player player = Game.GameState.Players.Find(player => player.Token == token);
 
+        if (player != null)
+        {
+            player.Score = score;
+
+            PlayerScore playerScore = Game.GameState.PlayerScores.Find(playerScore => playerScore.Username == player.Username);
+            
+            if (playerScore != null)
+            {
+                playerScore.Score = score;
+                Game.GameState.PlayerScores.Sort((score1, score2) => score1.Score.CompareTo(score2.Score));
+            }
+        }
+    }
 }

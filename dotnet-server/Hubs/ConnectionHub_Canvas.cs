@@ -16,11 +16,13 @@ public partial class HubConnection : Hub
 
             if (game == null)
             {
+                logger.LogError($"DrawOnCanvas: Game does not exist");
                 return;
             }
 
             if (token != game.GameState.DrawingToken)
             {
+                logger.LogError($"DrawOnCanvas: Player with the token {token} cannot draw on canvas");
                 return;
             }
 
@@ -28,10 +30,11 @@ public partial class HubConnection : Hub
 
             if (drawnLine == null)
             {
+                logger.LogError($"DrawOnCanvas: Serialized drawnline {drawnLineSerialized} has an incorrect format");
                 return;
             }
 
-            game.DrawnLines.Add(drawnLine);
+            game.GameState.DrawnLines.Add(drawnLine);
 
             await Clients.All.SendAsync(HubEvents.OnDrawOnCanvas, JsonHelper.Serialize(drawnLine));
         }
@@ -50,10 +53,11 @@ public partial class HubConnection : Hub
 
             if (game == null)
             {
+                logger.LogError($"LoadCanvas: Game does not exist");
                 return;
             }
 
-            List<DrawnLine> drawnLines = game.DrawnLines;
+            List<DrawnLine> drawnLines = game.GameState.DrawnLines;
 
             await Clients
                 .Client(Context.ConnectionId)
@@ -62,7 +66,7 @@ public partial class HubConnection : Hub
         }
         catch (Exception ex)
         {
-            logger.LogInformation(Convert.ToString(ex));
+            logger.LogError(Convert.ToString(ex));
         }
     }
 
@@ -75,11 +79,13 @@ public partial class HubConnection : Hub
 
             if (game == null)
             {
+                logger.LogError($"ClearCanvas: Game does not exist");
                 return;
             }
 
             if (token != game.GameState.DrawingToken)
             {
+                logger.LogError($"ClearCanvas: Player with the token {token} cannot clear the canvas");
                 return;
             }
 

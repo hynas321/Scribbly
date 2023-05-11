@@ -51,10 +51,11 @@ public partial class HubConnection : Hub
                 Text = text
             };
 
-            if (message.Text.ToLower().Trim() == game.GameState.SecretWord)
+            if (message.Text.ToLower().Trim() == game.GameState.ActualSecretWord && game.GameState.DrawingToken != "")
             {
-                await SendAnnouncement($"{player.Username} guessed the word", BootstrapColors.Green);
+                await AddPlayerScoreAndAnnouncement(player.Token);
                 game.GameState.NoChatPermissionTokens.Add(token);
+                await Clients.All.SendAsync(HubEvents.OnUpdatePlayerScores, JsonHelper.Serialize(game.GameState.PlayerScores));
                 return;
             }
 
@@ -79,6 +80,7 @@ public partial class HubConnection : Hub
 
             if (game == null)
             {
+                logger.LogError($"LoadChatMessages: Game does not exist");
                 return;
             }
 
@@ -86,6 +88,7 @@ public partial class HubConnection : Hub
 
             if (player == null)
             {
+                logger.LogError($"LoadChatMessages: Player with the token {token} does not exist");
                 return;
             }
 
@@ -107,6 +110,7 @@ public partial class HubConnection : Hub
 
             if (game == null)
             {
+                logger.LogError($"SendAnnouncement: Game does not exist");
                 return;
             }
 

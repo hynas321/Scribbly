@@ -7,6 +7,8 @@ import * as signalR from '@microsoft/signalr';
 import HubEvents from '../../hub/HubEvents';
 import useLocalStorageState from 'use-local-storage-state';
 import { useAppSelector } from '../../redux/hooks';
+import { useDispatch } from 'react-redux';
+import { updatedHiddenSecretWord } from '../../redux/slices/game-state-slice';
 
 interface ChatProps {
   placeholderValue: string;
@@ -15,6 +17,7 @@ interface ChatProps {
 
 function Chat({placeholderValue, displaySecretWord}: ChatProps) {
   const hub = useContext(ConnectionHubContext);
+  const dispatch = useDispatch();
   const player = useAppSelector((state) => state.player);
   const gameState = useAppSelector((state) => state.gameState);
 
@@ -74,6 +77,14 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
       setMessages(prevMessages => [...prevMessages, chatMessage]);
     });
 
+    hub.on(HubEvents.onRequestSecretWord, () => {
+      hub.invoke(HubEvents.getSecretWord, token);
+    });
+
+    hub.on(HubEvents.onGetSecretWord, (secretWord: string) => {
+      dispatch(updatedHiddenSecretWord(secretWord));
+    })
+
     const loadChatMessages = async () => {
       await hub.invoke(HubEvents.loadChatMessages, token);
     };
@@ -107,7 +118,8 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
   return (
     <div>
       <h5>
-        { displaySecretWord && `${gameState.secretWord} ${gameState.secretWord.length}` }
+        { (displaySecretWord && gameState.hiddenSecretWord.length > 0) && `${gameState.hiddenSecretWord}`}
+        { player.username != gameState.drawingPlayerUsername && ` ${gameState.hiddenSecretWord.length}`}
       </h5>
       <div id="messages" className="rounded p-3 bg-light">
         <div ref={messagesRef} style={{height: "450px", overflowY: "auto"}}>

@@ -3,19 +3,21 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 export interface GameState {
   currentDrawingTimeSeconds: number;
   currentRound: number;
-  secretWord: string;
+  hiddenSecretWord: string;
   drawingPlayerUsername: string;
   hostPlayerUsername: string;
   isGameStarted: boolean;
+  isTimerVisible: boolean;
 };
 
 const initialState: GameState = {
   currentDrawingTimeSeconds: 50,
   currentRound: 1,
-  secretWord: "",
+  hiddenSecretWord: "",
   drawingPlayerUsername: "",
   hostPlayerUsername: "",
-  isGameStarted: false
+  isGameStarted: false,
+  isTimerVisible: false
 };
 
 const gameStateSlice = createSlice({
@@ -28,8 +30,8 @@ const gameStateSlice = createSlice({
     updatedCurrentRound(state, action: PayloadAction<number>) {
       state.currentRound = action.payload;
     },
-    updatedWordLength(state, action: PayloadAction<string>) {
-      state.secretWord = action.payload;
+    updatedHiddenSecretWord(state, action: PayloadAction<string>) {
+      state.hiddenSecretWord = action.payload;
     },
     updatedDrawingPlayerUsername(state, action: PayloadAction<string>) {
       state.drawingPlayerUsername = action.payload;
@@ -40,24 +42,29 @@ const gameStateSlice = createSlice({
     updatedIsGameStarted(state, action: PayloadAction<boolean>) {
       state.isGameStarted = action.payload;
     },
+    updatedIsTimerVisible(state, action: PayloadAction<boolean>) {
+      state.isTimerVisible = action.payload;
+    },
     updatedGameState(state, action: PayloadAction<GameState>) {
       state.currentDrawingTimeSeconds = action.payload.currentDrawingTimeSeconds,
       state.currentRound = action.payload.currentRound,
-      state.secretWord = action.payload.secretWord,
+      state.hiddenSecretWord = action.payload.hiddenSecretWord,
       state.drawingPlayerUsername = action.payload.drawingPlayerUsername,
       state.hostPlayerUsername = action.payload.hostPlayerUsername,
-      state.isGameStarted = action.payload.isGameStarted
+      state.isGameStarted = action.payload.isGameStarted,
+      state.isTimerVisible = action.payload.isTimerVisible
     },
     clearedGameState(state) {
       state.currentDrawingTimeSeconds = initialState.currentDrawingTimeSeconds,
       state.currentRound = initialState.currentRound,
-      state.secretWord = initialState.secretWord,
+      state.hiddenSecretWord = initialState.hiddenSecretWord,
       state.drawingPlayerUsername = initialState.drawingPlayerUsername,
       state.hostPlayerUsername = initialState.hostPlayerUsername,
-      state.isGameStarted = initialState.isGameStarted
+      state.isGameStarted = initialState.isGameStarted,
+      state.isTimerVisible = initialState.isTimerVisible
     }
   }
 })
 
-export const { updatedCurrentDrawingTimeSeconds, updatedCurrentRound, updatedWordLength, updatedDrawingPlayerUsername, updatedHostPlayerUsername, updatedGameState, clearedGameState } = gameStateSlice.actions;
+export const { updatedCurrentDrawingTimeSeconds, updatedCurrentRound, updatedHiddenSecretWord, updatedDrawingPlayerUsername, updatedHostPlayerUsername, updatedIsGameStarted, updatedGameState, updatedIsTimerVisible, clearedGameState } = gameStateSlice.actions;
 export default gameStateSlice.reducer;

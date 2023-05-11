@@ -21,7 +21,7 @@ public partial class HubConnection : Hub
 
             if (token != game.HostToken)
             {
-                logger.LogError($"SetAbstractNouns: Player is not a host");
+                logger.LogError($"SetAbstractNouns: Player with the token {token} is not a host");
                 return;
             }
 
@@ -49,11 +49,13 @@ public partial class HubConnection : Hub
 
             if (game == null)
             {
+                logger.LogError($"SetDrawingTimeSeconds: Game does not exist");
                 return;
             }
 
             if (token != game.HostToken)
             {
+                logger.LogError($"SetDrawingTimeSeconds: Player with the token {token} is not a host");
                 return;
             }
 
@@ -81,11 +83,13 @@ public partial class HubConnection : Hub
 
             if (game == null)
             {
+                logger.LogError($"SetRoundsCount: Game does not exist");
                 return;
             }
 
             if (token != game.HostToken)
             {
+                logger.LogError($"SetRoundsCount: Player with the token {token} is not a host");
                 return;
             }
 
@@ -113,11 +117,13 @@ public partial class HubConnection : Hub
 
             if (game == null)
             {
+                logger.LogError($"SetWordLanguageSetting: Game does not exist");
                 return;
             }
 
             if (token != game.HostToken)
             {
+                logger.LogError($"SetWordLanguageSetting: Player with the token {token} is not a host");
                 return;
             }
 
@@ -142,8 +148,18 @@ public partial class HubConnection : Hub
         try
         {
             Game game = gameManager.GetGame();
+
             if (game == null)
             {
+                logger.LogError($"LoadGameSettings: Game does not exist");
+                return;
+            }
+
+            bool playerExists = gameManager.CheckIfPlayerExistsByToken(token);
+
+            if (!playerExists)
+            {
+                logger.LogError($"LoadGameSettings: Player with the token {token} does not exist");
                 return;
             }
 

@@ -14,9 +14,9 @@ function Scoreboard({title, playerScores, displayPoints, displayIndex}: Scoreboa
         </li>
         {playerScores.map((playerScore, index) => (
           <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-            { displayIndex && index + 1 + "."}
+            { displayIndex && "#" + (index + 1)}
             <span className="text-dark">{playerScore.username}</span>
-            { displayPoints && <span className="badge rounded-pill bg-dark">{playerScore.score}</span> }
+            { displayPoints && <span className="badge rounded-pill bg-dark">{playerScore.score} points</span> }
           </li>
           ))}
       </ul>

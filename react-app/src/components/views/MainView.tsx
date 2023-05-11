@@ -15,6 +15,7 @@ import Scoreboard from '../Scoreboard';
 function MainView() {
   const httpRequestHandler = new HttpRequestHandler();
   const minUsernameLength: number = 1;
+  const maxUsernameLength: number = 18;
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -32,7 +33,8 @@ function MainView() {
   }
 
   const handleCreateGameButtonClick = async () => {
-    if (username.length < minUsernameLength) {
+    if (username.length < minUsernameLength ||
+        username.length > maxUsernameLength) {
       return;
     }
   
@@ -111,7 +113,8 @@ function MainView() {
 
   
   useEffect(() => {
-    if (username.length < minUsernameLength) {
+    if (username.length < minUsernameLength ||
+        username.length > maxUsernameLength) {
       setIsJoinGameButtonActive(false);
       setIsCreateGameButtonActive(false);
     } 
@@ -140,7 +143,7 @@ function MainView() {
         <InputForm
           defaultValue={username}
           placeholderValue="Enter username"
-          smallTextValue={`Minimum username length ${minUsernameLength}`}
+          smallTextValue={`Allowed username length ${minUsernameLength}-${maxUsernameLength}`}
           onChange={handleInputFormChange}
         />
         <Button

@@ -100,6 +100,8 @@ public partial class HubConnection : Hub
 
             gameManager.AddPlayerScore(playerScore);
 
+            List<PlayerScore> playerScores = gameManager.GetPlayerObjectsWithoutToken();
+
             GameSettings settingsClient = new GameSettings()
             {
                 NonAbstractNounsOnly = game.GameSettings.NonAbstractNounsOnly,
@@ -112,15 +114,14 @@ public partial class HubConnection : Hub
             {
                 CurrentDrawingTimeSeconds = game.GameState.CurrentDrawingTimeSeconds,
                 CurrentRound = game.GameState.CurrentRound,
-                SecretWord = game.GameState.SecretWord,
+                HiddenSecretWord = game.GameState.HiddenSecretWord,
                 DrawingPlayerUsername = game.GameState.DrawingPlayerUsername,
                 HostPlayerUsername = game.GameState.HostPlayerUsername,
-                IsGameStarted = game.GameState.IsGameStarted
+                IsGameStarted = game.GameState.IsGameStarted,
+                IsTimerVisible = game.GameState.IsTimerVisible,
             };
 
-            List<PlayerScore> playerScores = gameManager.GetPlayersWithoutToken();
-
-            await Clients.All.SendAsync(HubEvents.OnPlayerJoinedGame, JsonHelper.Serialize(playerScores));
+            await Clients.All.SendAsync(HubEvents.OnUpdatePlayerScores, JsonHelper.Serialize(playerScores));
             await Clients.Client(Context.ConnectionId).SendAsync(
                 HubEvents.OnJoinGame,
                 JsonHelper.Serialize(player),
@@ -148,14 +149,14 @@ public partial class HubConnection : Hub
 
             if (game == null)
             {
-                return;
+                logger.LogError($"LeaveGame: Game does not exist");
             }
 
             Player player = gameManager.GetPlayerByToken(token);
 
             if (player == null)
             {
-                return;
+                logger.LogError($"LeaveGame: Player with the token {token} does not exist");
             }
 
             if (leaveForGood)
@@ -210,7 +211,7 @@ public partial class HubConnection : Hub
             logger.LogInformation($"JoinGame: {player.Username} left the game");
             logger.LogInformation($"Online players: {game.GameState.PlayerScores.Count}. Total players: {game.GameState.Players.Count}");
 
-            await Clients.AllExcept(Context.ConnectionId).SendAsync(HubEvents.OnPlayerLeftGame, playerListSerialized);
+            await Clients.AllExcept(Context.ConnectionId).SendAsync(HubEvents.OnUpdatePlayerScores, playerListSerialized);
 
             await SendAnnouncement($"{player.Username} has left the game", BootstrapColors.Red);
         }

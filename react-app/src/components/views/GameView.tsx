@@ -32,7 +32,6 @@ function GameView() {
   const dispatch = useDispatch();
 
   const player = useAppSelector((state) => state.player);
-  const gameState = useAppSelector((state) => state.gameState);
   const gameSettings = useAppSelector((state) => state.gameSettings);
 
   const [playerScores, setPlayerScores] = useState<PlayerScore[]>([]);
@@ -58,12 +57,7 @@ function GameView() {
 
   useEffect(() => {
     const startHubAndJoinGame = async () => {
-      hub.on(HubEvents.onPlayerJoinedGame, (playerScoresSerialized: string) => {
-        const playerScores = JSON.parse(playerScoresSerialized) as PlayerScore[];
-        setPlayerScores(playerScores);
-      });
-
-      hub.on(HubEvents.onPlayerLeftGame, (playerScoresSerialized: string) => {
+      hub.on(HubEvents.onUpdatePlayerScores, (playerScoresSerialized: string) => {
         const playerScores = JSON.parse(playerScoresSerialized) as PlayerScore[];
         setPlayerScores(playerScores);
       });
@@ -103,6 +97,11 @@ function GameView() {
         navigate(config.mainClientEndpoint);
       });
 
+      hub.on(HubEvents.onEndGame, () => {
+        displayAlert("Game has ended", "success");
+        navigate(config.mainClientEndpoint);
+      });
+
       const regex: RegExp = /^Player \d{4}$/;
       const playerUsername = regex ? username : player.username;
 
@@ -111,8 +110,7 @@ function GameView() {
     }
 
     const clearBeforeUnload = async () => {
-      hub.off(HubEvents.onPlayerJoinedGame);
-      hub.off(HubEvents.onPlayerLeftGame);
+      hub.off(HubEvents.onUpdatePlayerScores);
       hub.off(HubEvents.onStartGame);
       hub.off(HubEvents.onJoinGame);
       hub.off(HubEvents.onJoinGameError);

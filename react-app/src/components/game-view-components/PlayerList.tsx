@@ -48,16 +48,21 @@ function PlayerList({title, playerScores, displayPoints, displayIndex, displayRo
             <b>{title}</b>
         </li>
         {playerScores.map((playerScore, index) => (
-          <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-            { displayIndex && index + 1 + "."}
-            <span className={player.username == playerScore.username ? "text-warning" : "text-dark"}>
-              {playerScore.username}
-              { gameState.hostPlayerUsername == playerScore.username && <BsShieldShaded/> }
-              { gameState.drawingPlayerUsername == playerScore.username && <BsPaletteFill/> }
-            </span>
-            { displayPoints && <span className="badge rounded-pill bg-dark">{playerScore.score}</span> }
+          <li key={index} className="list-group-item d-flex justify-content-between align-items-center" style={{overflowWrap: "break-word"}}>
+            { displayIndex && "#" + (index + 1)}
+            <div className="d-flex flex-column align-items-center">
+              <span className={player.username == playerScore.username ? "text-warning" : "text-dark"}>
+                {playerScore.username}
+                { gameState.hostPlayerUsername == playerScore.username && <BsShieldShaded/> }
+                { gameState.drawingPlayerUsername == playerScore.username && <BsPaletteFill/> }
+              </span>
+              { displayPoints &&
+                <span className="badge rounded-pill bg-dark mt-2">{playerScore.score} points</span>
+              }
+            </div>
+            <div></div>
           </li>
-          ))}
+        ))}
       </ul>
     </>
   )

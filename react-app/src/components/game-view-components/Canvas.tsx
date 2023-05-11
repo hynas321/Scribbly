@@ -9,7 +9,8 @@ import HubEvents from "../../hub/HubEvents";
 import * as signalR from '@microsoft/signalr';
 import { useAppSelector } from "../../redux/hooks";
 import { useDispatch } from "react-redux";
-import { updatedCurrentDrawingTimeSeconds } from "../../redux/slices/game-state-slice";
+import { updatedCurrentDrawingTimeSeconds, updatedIsTimerVisible } from "../../redux/slices/game-state-slice";
+import useLocalStorageState from "use-local-storage-state";
 
 function Canvas() {
   const hub = useContext(ConnectionHubContext);
@@ -21,8 +22,9 @@ function Canvas() {
 
   const [color, setColor] = useState<string>("#000000");
   const [canvasTitle, setCanvasTitle] = useState<AnnouncementMessage | null>(null);
-  const [isTimerVisible, setIsTimerVisible] = useState<boolean>(false);
   const [isPlayerDrawing, setIsPlayerDrawing] = useState<boolean>(false);
+
+  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
 
   const { canvasRef, onMouseDown, clearCanvas } = useDraw(draw, hub, color);
 
@@ -35,6 +37,10 @@ function Canvas() {
   ]
 
   function draw(canvasContext: CanvasRenderingContext2D, drawnLine: DrawnLine) {
+    if (!isPlayerDrawing) {
+      return;
+    }
+
     const {x: currentRelativeX, y: currentRelativeY} = drawnLine.currentPoint;
     const lineWidth = 5;
 
@@ -62,7 +68,7 @@ function Canvas() {
     })
 
     hub.on(HubEvents.onUpdateTimerVisibility, (visible: boolean) => {
-      setIsTimerVisible(visible);
+      dispatch((updatedIsTimerVisible(visible)));
     });
 
     hub.on(HubEvents.onUpdateDrawingPlayer, (drawingPlayerUsername: string) => {
@@ -72,6 +78,8 @@ function Canvas() {
       else {
         setIsPlayerDrawing(false);
       }
+
+      hub.invoke(HubEvents.getSecretWord, token);
     });
 
     hub.on(HubEvents.OnSetCanvasText, (announcementMessageSerialized: string) => {
@@ -91,7 +99,7 @@ function Canvas() {
   return (
     <>
       {
-        isTimerVisible ?
+        gameState.isTimerVisible ?
         <div className="d-flex justify-content-center">
           <div className="mb-3 col-10">
             <DrawingTimeBar
