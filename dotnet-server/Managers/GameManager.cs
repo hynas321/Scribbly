@@ -32,20 +32,9 @@ class GameManager
         Game.GameState.Players.Add(player);
     }
 
-    public void AddPlayerScore(PlayerScore playerScore)
-    {
-        Game.GameState.PlayerScores.Add(playerScore);
-        Game.GameState.PlayerScores.Sort((score1, score2) => score2.Score.CompareTo(score1.Score));
-    }
-
     public void RemovePlayer(string token)
     {
         Game.GameState.Players.RemoveAll(obj => obj.Token == token);
-    }
-
-    public void RemovePlayerScore(string username)
-    {
-        Game.GameState.PlayerScores.RemoveAll(obj => obj.Username == username);
     }
 
     public Player GetPlayerByToken(string token)
@@ -73,7 +62,7 @@ class GameManager
 
     public List<string> GetOnlinePlayersTokens()
     {
-        List<PlayerScore> onlinePlayers = Game.GameState.PlayerScores;
+        List<PlayerScore> onlinePlayers = GetPlayerObjectsWithoutToken();
         List<string> playerTokens = new List<string>();
 
         foreach(Player player in Game.GameState.Players)
@@ -99,17 +88,6 @@ class GameManager
         return Game.GameState.Players.Find(obj => obj.Username == username) != null;
     }
 
-    public bool CheckIfPlayerScoreExistByUsername(string username)
-    {
-        return Game.GameState.PlayerScores.Find(obj => obj.Username == username) != null;
-    }
-
-    public bool CheckIfHostIsOnline()
-    {
-        Player hostPlayer = GetPlayerByToken(Game.HostToken);
-        return Game.GameState.PlayerScores != null;
-    }
-
     public void AddChatMessage(ChatMessage message)
     {
         List<ChatMessage> messages = Game.ChatMessages;
@@ -129,14 +107,7 @@ class GameManager
         if (player != null)
         {
             player.Score += score;
-
-            PlayerScore playerScore = Game.GameState.PlayerScores.Find(playerScore => playerScore.Username == player.Username);
-            
-            if (playerScore != null)
-            {
-                playerScore.Score = score;
-                Game.GameState.PlayerScores.Sort((score1, score2) => score2.Score.CompareTo(score1.Score));
-            }
+            Game.GameState.Players.Sort((player1, player2) => player2.Score.CompareTo(player1.Score));
         }
     }
 }

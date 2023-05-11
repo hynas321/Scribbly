@@ -36,7 +36,7 @@ public partial class LongRunningHubConnection : Hub
                 return;
             }
 
-            if (game.GameState.PlayerScores.Count < 2)
+            if (game.GameState.Players.Count < 2)
             {
                 logger.LogError($"StartGame: Too few players to start the game");
                 return;
@@ -120,12 +120,13 @@ public partial class LongRunningHubConnection : Hub
                     game.GameState.DrawingPlayersTokens.RemoveAt(randomTokenIndex);
                     game.GameState.ActualSecretWord = actualSecretWord;
                     game.GameState.HiddenSecretWord = $"Secret word length: {hiddenSecretWord}";
-                    game.GameState.DrawingToken = drawingToken;
                     game.GameState.IsTimerVisible = true;
 
                     await hubContext.Clients.All.SendAsync(HubEvents.OnUpdateDrawingPlayer, drawingPlayerUsername);
                     await SetCanvasText($"{drawingPlayerUsername} is going to draw in 5s", BootstrapColors.Green);
                     await Task.Delay(5000);
+
+                    game.GameState.DrawingToken = drawingToken;
 
                     await hubContext.Clients.All.SendAsync(HubEvents.OnRequestSecretWord);
                     await hubContext.Clients.All.SendAsync(HubEvents.OnUpdateTimerVisibility, true);
@@ -211,7 +212,7 @@ public partial class LongRunningHubConnection : Hub
                     return false;
                 }
 
-                if (game.GameState.CorrectAnswerCount == game.GameState.PlayerScores.Count - 1)
+                if (game.GameState.CorrectAnswerCount == game.GameState.Players.Count - 1)
                 {
                     cancellationToken.Cancel();
                     return true;

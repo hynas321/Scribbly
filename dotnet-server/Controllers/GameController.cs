@@ -193,10 +193,4 @@ public class GameController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
-
-    [HttpGet("GetPlayers")]
-    public IActionResult GetPlayerScores()
-    {
-        return StatusCode(StatusCodes.Status200OK, gameManager.GetGame().GameState.PlayerScores);
-    }
 }

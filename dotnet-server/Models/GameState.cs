@@ -12,7 +12,6 @@ public class GameState
     public bool IsTimerVisible { get; set; } = false;
 
     //Server-side only
-    public List<PlayerScore> PlayerScores = new List<PlayerScore>();
     public List<Player> Players = new List<Player>();
     public List<DrawnLine> DrawnLines { get; set; } = new List<DrawnLine>();
     public string DrawingToken { get; set; } = "";

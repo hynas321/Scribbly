@@ -80,8 +80,6 @@ public partial class HubConnection : Hub
                 Score = player.Score
             };
 
-            gameManager.AddPlayerScore(playerScore);
-
             List<PlayerScore> playerScores = gameManager.GetPlayerObjectsWithoutToken();
 
             GameSettings settingsClient = new GameSettings()
@@ -114,7 +112,7 @@ public partial class HubConnection : Hub
             await SendAnnouncement($"{player.Username} has joined the game", BootstrapColors.Green);
 
             logger.LogInformation($"JoinGame: {player.Username} joined the game.");
-            logger.LogInformation($"Online players: {game.GameState.PlayerScores.Count}. Total players: {game.GameState.Players.Count}");
+            logger.LogInformation($"Online players: {game.GameState.Players.Count}. Total players: {game.GameState.Players.Count}");
         }
         catch (Exception ex)
         {
@@ -142,9 +140,8 @@ public partial class HubConnection : Hub
             }
 
             gameManager.RemovePlayer(token);
-            gameManager.RemovePlayerScore(player.Username);
 
-            if (game.GameState.PlayerScores.Count == 0)
+            if (game.GameState.Players.Count == 0)
             {
                 gameManager.SetGame(null);
                 logger.LogInformation($"LeaveGame: Game removed - no online players");
@@ -167,7 +164,7 @@ public partial class HubConnection : Hub
                 return;
             }
 
-            if (game.GameState.IsGameStarted && game.GameState.PlayerScores.Count < 2)
+            if (game.GameState.IsGameStarted && game.GameState.Players.Count < 2)
             {
                 gameManager.SetGame(null);
 
@@ -180,11 +177,11 @@ public partial class HubConnection : Hub
                 await Clients.AllExcept(Context.ConnectionId).SendAsync(HubEvents.OnGameProblem, JsonHelper.Serialize(message));
             }
 
-            List<PlayerScore> playerScores = game.GameState.PlayerScores;
+            List<PlayerScore> playerScores = gameManager.GetPlayerObjectsWithoutToken();
             string playerListSerialized = JsonHelper.Serialize(playerScores);
 
             logger.LogInformation($"JoinGame: {player.Username} left the game");
-            logger.LogInformation($"Online players: {game.GameState.PlayerScores.Count}. Total players: {game.GameState.Players.Count}");
+            logger.LogInformation($"Online players: {game.GameState.Players.Count}. Total players: {game.GameState.Players.Count}");
 
             await Clients.AllExcept(Context.ConnectionId).SendAsync(HubEvents.OnUpdatePlayerScores, playerListSerialized);
 
