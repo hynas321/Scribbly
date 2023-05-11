@@ -54,8 +54,11 @@ public partial class HubConnection : Hub
             if (message.Text.ToLower().Trim() == game.GameState.ActualSecretWord && game.GameState.DrawingToken != "")
             {
                 await AddPlayerScoreAndAnnouncement(player.Token);
+
+                List<PlayerScore> playerScores = gameManager.GetPlayerObjectsWithoutToken();
                 game.GameState.NoChatPermissionTokens.Add(token);
-                await Clients.All.SendAsync(HubEvents.OnUpdatePlayerScores, JsonHelper.Serialize(game.GameState.PlayerScores));
+                
+                await Clients.All.SendAsync(HubEvents.OnUpdatePlayerScores, JsonHelper.Serialize(playerScores));
                 return;
             }
 

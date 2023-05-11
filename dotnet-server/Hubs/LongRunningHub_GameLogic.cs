@@ -143,14 +143,16 @@ public partial class LongRunningHubConnection : Hub
 
                         gameManager.UpdatePlayerScore(drawingToken, pointsForDrawing);
 
-                        await SendAnnouncement($"{drawingPlayerUsername} received the drawing award (+{pointsForDrawing} points)", BootstrapColors.Green);
+                        await SendAnnouncement($"{drawingPlayerUsername} received the drawing bonus (+{pointsForDrawing} points)", BootstrapColors.Green);
                     }
                     else
                     {
-                        await SendAnnouncement($"{drawingPlayerUsername} received no drawing award", BootstrapColors.Red);
+                        await SendAnnouncement($"{drawingPlayerUsername} received no drawing bonus", BootstrapColors.Red);
                     }
 
-                    await hubContext.Clients.All.SendAsync(HubEvents.OnUpdatePlayerScores, JsonHelper.Serialize(game.GameState.PlayerScores));
+                    List<PlayerScore> playerScores = gameManager.GetPlayerObjectsWithoutToken();
+
+                    await hubContext.Clients.All.SendAsync(HubEvents.OnUpdatePlayerScores, JsonHelper.Serialize(playerScores));
 
                     game.GameState.DrawingToken = "";
                     game.GameState.IsTimerVisible = false;
@@ -168,6 +170,7 @@ public partial class LongRunningHubConnection : Hub
                     await SetCanvasText($"Thank you for playing! Automatic disconnection in 15s", BootstrapColors.Green);
                     await Task.Delay(15000);
                     await hubContext.Clients.All.SendAsync(HubEvents.OnEndGame);
+
                     gameManager.RemoveGame();
                     break;
                 }

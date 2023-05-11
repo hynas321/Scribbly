@@ -59,8 +59,6 @@ public partial class HubConnection : Hub
 
             Player player = gameManager.GetPlayerByToken(token);
 
-            logger.LogInformation(Convert.ToString(player.Score));
-
             if (player == null)
             {
                 logger.LogError($"AddPlayerScoreAndAnnouncement: Player with the token {token} does not exist");
@@ -71,8 +69,6 @@ public partial class HubConnection : Hub
                 ((double)game.GameState.CurrentDrawingTimeSeconds / game.GameSettings.DrawingTimeSeconds) * 100;
 
             int score = 0;
-
-            logger.LogInformation(Convert.ToString(timeLeftPercentage));
 
             if (timeLeftPercentage > 80)
             {

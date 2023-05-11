@@ -45,7 +45,7 @@ function GameView() {
 
   const handleStartGameButtonClick = async () => {
     await longRunningHub.start();
-    await longRunningHub.invoke(HubEvents.startGame, token, gameSettings);
+    await longRunningHub.send(HubEvents.startGame, token, gameSettings);
   }
 
   const handleLeaveGameButtonClick = async () => {
