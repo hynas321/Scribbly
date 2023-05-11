@@ -6,7 +6,7 @@ import PageNotFound from './views/PageNotFound';
 import Logo from './Logo';
 import { Provider } from 'react-redux';
 import { store } from '../redux/store';
-import { ConnectionHubContext, connectionHub } from "../context/ConnectionHubContext";
+import { ConnectionHubContext, LongRunningConnectionHubContext, connectionHub, longRunningConnectionHub } from "../context/ConnectionHubContext";
 import GameView from './views/GameView';
 
 function App() {
@@ -27,10 +27,12 @@ function App() {
 
 return (
   <ConnectionHubContext.Provider value={connectionHub}>
-    <Provider store={store}>
-      <Logo />
-      <RouterProvider router={router}/>
-    </Provider>
+    <LongRunningConnectionHubContext.Provider value={longRunningConnectionHub}>
+      <Provider store={store}>
+        <Logo />
+        <RouterProvider router={router}/>
+      </Provider>
+    </LongRunningConnectionHubContext.Provider>
   </ConnectionHubContext.Provider>
   )
 }

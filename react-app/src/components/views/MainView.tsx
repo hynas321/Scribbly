@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from '../Button';
 import InputForm from '../InputForm';
 import { useAppDispatch } from '../../redux/hooks';
@@ -6,26 +6,24 @@ import config from '../../../config.json';
 import Alert from '../Alert';
 import { useNavigate } from 'react-router-dom';
 import { PlayerScore, updatedUsername, } from '../../redux/slices/player-score-slice';
-import PlayerList from '../PlayerList';
 import HttpRequestHandler from '../../http/HttpRequestHandler';
 import { updatedAlert, updatedVisible } from '../../redux/slices/alert-slice';
 import useLocalStorageState from 'use-local-storage-state';
-import { ConnectionHubContext } from '../../context/ConnectionHubContext';
-import * as signalR from '@microsoft/signalr'
 import tableLoading from './../../assets/table-loading.gif'
+import Scoreboard from '../Scoreboard';
 
 function MainView() {
-  const hub = useContext(ConnectionHubContext);
   const httpRequestHandler = new HttpRequestHandler();
   const minUsernameLength: number = 1;
+  const maxUsernameLength: number = 18;
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const [createGameActiveButton, setCreateGameActiveButton] = useState(false);
-  const [joinGameActiveButton, setJoinGameActiveButton] = useState(false);
-  const [isTableDisplayed, setIsTableDisplayed] = useState(false);
   const [playerScores, setPlayerScores] = useState<PlayerScore[]>([]);
+  const [isCreateGameButtonActive, setIsCreateGameButtonActive] = useState<boolean>(false);
+  const [isJoinGameButtonActive, setIsJoinGameButtonActive] = useState<boolean>(false);
+  const [isTableDisplayed, setIsTableDisplayed] = useState<boolean>(false);
 
   const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
   const [username, setUsername] = useLocalStorageState("username", { defaultValue: ""});
@@ -35,7 +33,8 @@ function MainView() {
   }
 
   const handleCreateGameButtonClick = async () => {
-    if (username.length < minUsernameLength) {
+    if (username.length < minUsernameLength ||
+        username.length > maxUsernameLength) {
       return;
     }
   
@@ -114,13 +113,14 @@ function MainView() {
 
   
   useEffect(() => {
-    if (username.length < minUsernameLength) {
-      setJoinGameActiveButton(false);
-      setCreateGameActiveButton(false);
+    if (username.length < minUsernameLength ||
+        username.length > maxUsernameLength) {
+      setIsJoinGameButtonActive(false);
+      setIsCreateGameButtonActive(false);
     } 
     else {
-      setJoinGameActiveButton(true);
-      setCreateGameActiveButton(true);
+      setIsJoinGameButtonActive(true);
+      setIsCreateGameButtonActive(true);
     }
   }, [username]);
 
@@ -143,24 +143,24 @@ function MainView() {
         <InputForm
           defaultValue={username}
           placeholderValue="Enter username"
-          smallTextValue={`Minimum username length ${minUsernameLength}`}
+          smallTextValue={`Allowed username length ${minUsernameLength}-${maxUsernameLength}`}
           onChange={handleInputFormChange}
         />
         <Button
           text={"Create the game"}
           type="success"
-          active={createGameActiveButton}
+          active={isCreateGameButtonActive}
           onClick={handleCreateGameButtonClick}
         />
         <Button
           text="Join the game"
-          active={joinGameActiveButton}
+          active={isJoinGameButtonActive}
           onClick={handleJoinGameButtonClick}
         />
       </div>
       <div className="col-lg-3 col-sm-6 col-xs-6 mt-5 text-center mx-auto">
         { isTableDisplayed ?
-          <PlayerList
+          <Scoreboard
             title="Top 5 players"
             playerScores={playerScores}
             displayPoints={true}

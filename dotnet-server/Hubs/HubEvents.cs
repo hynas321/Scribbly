@@ -2,7 +2,6 @@ namespace Dotnet.Server.Hubs;
 
 public static class HubEvents
 {
-    
     //GameSettings
     public const string LoadGameSettings = "LoadGameSettings";
     public const string SetAbstractNouns = "SetAbstractNouns";
@@ -26,19 +25,26 @@ public static class HubEvents
     public const string JoinGame = "JoinGame";
     public const string LeaveGame = "LeaveGame";
     public const string FindPlayerHost = "FindPlayerHost";
-    public const string OnPlayerJoinedGame = "OnPlayerJoinedGame";
-    public const string OnPlayerLeftGame = "OnPlayerLeftGame";
     public const string OnJoinGame = "OnJoinGame";
     public const string OnJoinGameError = "OnJoinGameError";
     public const string OnGameProblem = "OnGameProblem";
     public const string OnFindPlayerHost = "OnFindPlayerHost";
+    public const string OnEndGame = "OnEndGame";
 
     //GameState
     public const string StartGame = "StartGame";
+    public const string GetSecretWord = "GetSecretWord";
     public const string OnStartGame = "OnStartGame";
+    public const string OnGetSecretWord = "OnGetSecretWord";
+    public const string OnRequestSecretWord = "OnRequestSecretWord";
+    public const string OnUpdatePlayerScores = "OnUpdatePlayerScores";
+    public const string OnUpdateTimer = "OnUpdateTimer";
+    public const string OnUpdateTimerVisibility = "OnUpdateTimerVisibility";
     public const string OnGameFinished = "OnGameFinished";
+    public const string OnUpdateDrawingPlayer = "OnUpdateDrawingPlayer";
+    public const string OnUpdateCurrentRound = "OnUpdateCurrentRound";
+    public const string onUpdateCorrectGuessPlayerUsernames = "OnUpdateCorrectGuessPlayerUsernames";
     
-
     // Canvas
     public const string LoadCanvas = "LoadCanvas";
     public const string DrawOnCanvas = "DrawOnCanvas";
@@ -46,4 +52,5 @@ public static class HubEvents
     public const string OnLoadCanvas = "OnLoadCanvas";
     public const string OnDrawOnCanvas = "OnDrawOnCanvas";
     public const string OnClearCanvas = "OnClearCanvas";
+    public const string OnSetCanvasText = "OnSetCanvasText";
 }

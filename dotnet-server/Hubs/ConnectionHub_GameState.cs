@@ -1,4 +1,3 @@
-using Dotnet.Server.JsonConfig;
 using Dotnet.Server.Models;
 using Microsoft.AspNetCore.SignalR;
 
@@ -6,8 +5,8 @@ namespace Dotnet.Server.Hubs;
 
 public partial class HubConnection : Hub
 {
-    [HubMethodName(HubEvents.StartGame)]
-    public async Task StartGame(string token, GameSettings settings)
+    [HubMethodName(HubEvents.GetSecretWord)]
+    public async Task GetSecretWord(string token)
     {
         try
         {
@@ -15,56 +14,30 @@ public partial class HubConnection : Hub
 
             if (game == null)
             {
-                logger.LogError($"StartGame: Game does not exist");
+                logger.LogError($"GetSecretWord: Game does not exist");
                 return;
             }
 
-            if (token != game.HostToken)
+            Player player = gameManager.GetPlayerByToken(token);
+
+            if (player == null)
             {
-                logger.LogError($"StartGame: Token is not a host token");
+                //logger.LogError($"GetSecretWord: Player with the token {token} does not exist");
                 return;
             }
 
-            if (game.GameState.PlayerScores.Count < 2)
+            string secretWordMessage = "";
+
+            if (player.Token == game.GameState.DrawingToken)
             {
-                string errorMessage = "Too few players to start the game";
-
-                ChatMessage message = new ChatMessage()
-                {
-                    Username = null,
-                    Text = errorMessage,
-                    BootstrapBackgroundColor = BootstrapColors.Red
-                };
-
-                await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnSendAnnouncement, JsonHelper.Serialize(message));
-                logger.LogError($"StartGame: {errorMessage}");
-                return;
+                secretWordMessage = $"Secret word: {game.GameState.ActualSecretWord}";
             }
-
-            if (settings.DrawingTimeSeconds < 25 ||
-                settings.DrawingTimeSeconds > 120 ||
-                settings.RoundsCount < 1 ||
-                settings.RoundsCount < 6
-            )
+            else
             {
-                logger.LogError($"StartGame: Incorrect settings data");
-                return;
+                secretWordMessage = game.GameState.HiddenSecretWord;
             }
 
-            gameManager.RemoveChatMessages();
-            game.GameState.IsStarted = true;
-
-            game.GameSettings.NonAbstractNounsOnly = settings.NonAbstractNounsOnly;
-            game.GameSettings.DrawingTimeSeconds = settings.DrawingTimeSeconds;
-            game.GameSettings.RoundsCount = settings.RoundsCount;
-            game.GameSettings.WordLanguage = settings.WordLanguage;
-            
-            await Clients.All.SendAsync(HubEvents.OnStartGame);
-            await SendAnnouncement("Game has started", BootstrapColors.Yellow);
-            logger.LogInformation($"StartGame: Game started");
-
-            ManageGameFlow();
-
+            await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnGetSecretWord, secretWordMessage);
         }
         catch (Exception ex)
         {
@@ -72,67 +45,76 @@ public partial class HubConnection : Hub
         }
     }
 
-    public async Task ManageGameFlow()
+    public async Task AddPlayerScoreAndAnnouncement(string token)
     {
-        await Task.Run(async () =>
+        try 
         {
-            Game game = gameManager.GetGame();
-
-            while (true)
-            {
-
-            }
-        });
-    }
-
-    public async Task SetTimerValues(string token)
-    {
-        try
-        {  
             Game game = gameManager.GetGame();
 
             if (game == null)
             {
+                logger.LogError($"AddPlayerScoreAndAnnouncement: Game does not exist");
                 return;
             }
 
-            int initialTime = game.GameState.CurrentDrawingTimeSeconds;
-            int currentTime = initialTime;
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            Player player = gameManager.GetPlayerByToken(token);
 
-            await Task.Run(async () =>
+            if (player == null)
             {
-                 for (int i = 0; i < initialTime; i++)
-                 {   
-                    //await Clients.All.SendAsync(HubEvents.OnStartTimer, currentTime);
+                logger.LogError($"AddPlayerScoreAndAnnouncement: Player with the token {token} does not exist");
+                return;
+            }
 
-                    currentTime--;
+            double timeLeftPercentage =
+                ((double)game.GameState.CurrentDrawingTimeSeconds / game.GameSettings.DrawingTimeSeconds) * 100;
 
-                    await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken.Token);
+            int score = 0;
 
-                    if (currentTime <= 0 || game == null)
-                    {
-                        cancellationToken.Cancel();
-                        break;
-                    }
-                 }
-             });
+            if (timeLeftPercentage > 80)
+            {
+                score = 10;
+            }
+            else if (timeLeftPercentage > 70)
+            {
+                score = 9;
+            }
+            else if (timeLeftPercentage > 60)
+            {
+                score = 8;
+            }
+            else if (timeLeftPercentage > 50)
+            {
+                score = 7;
+            }
+            else if (timeLeftPercentage > 40)
+            {
+                score = 6;
+            }
+            else if (timeLeftPercentage > 30)
+            {
+                score = 5;
+            }
+            else if (timeLeftPercentage > 20)
+            {
+                score = 4;
+            }
+            else if (timeLeftPercentage > 10)
+            {
+                score = 3;
+            }
+            else
+            {
+                score = 2;
+            }
+
+            gameManager.UpdatePlayerScore(player.Token, score);
+            game.GameState.CorrectAnswerCount++;
+
+            await SendAnnouncement($"{player.Username} guessed the word (+{score} points)", BootstrapColors.Green);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             logger.LogError(Convert.ToString(ex));
         }
-    }
-
-    public string FetchWord()
-    {
-        List<string> words = new List<string>()
-        {
-            "application", "server", "project"
-        };
-
-        Random random = new Random();
-
-        return words[random.Next(words.Count)];
     }
 }

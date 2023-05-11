@@ -149,7 +149,7 @@ public class GameController : ControllerBase
 
             logger.LogInformation("IsStarted - Status: 200. OK.");
 
-            return StatusCode(StatusCodes.Status200OK, game.GameState.IsStarted);
+            return StatusCode(StatusCodes.Status200OK, game.GameState.IsGameStarted);
 
         }
         catch (Exception ex)
@@ -192,11 +192,5 @@ public class GameController : ControllerBase
 
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
-    }
-
-    [HttpGet("GetPlayers")]
-    public IActionResult GetPlayerScores()
-    {
-        return StatusCode(StatusCodes.Status200OK, gameManager.GetGame().GameState.PlayerScores);
     }
 }

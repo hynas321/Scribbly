@@ -1,4 +1,4 @@
 export interface JoinGameResponse {
-    gameHash: string;
-    playerScores: PlayerScore[];
+  gameHash: string;
+  playerScores: PlayerScore[];
 }

@@ -37,5 +37,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 app.UseCors("AllowReactApp");
-app.MapHub<HubConnection>($"/hub/connection");
+app.MapHub<HubConnection>("/hub/connection");
+app.MapHub<LongRunningHubConnection>("/longrunninghub/connection");
 app.Run(config?.HttpServerUrl);
