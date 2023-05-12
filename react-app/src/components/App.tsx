@@ -3,7 +3,7 @@ import MainView from './views/MainView';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import config from '../../config.json'
 import PageNotFound from './views/PageNotFound';
-import Logo from './Logo';
+import LogoAndAccountBar from './bars/LogoAndAccountBar';
 import { Provider } from 'react-redux';
 import { store } from '../redux/store';
 import { ConnectionHubContext, LongRunningConnectionHubContext, connectionHub, longRunningConnectionHub } from "../context/ConnectionHubContext";
@@ -29,7 +29,7 @@ return (
   <ConnectionHubContext.Provider value={connectionHub}>
     <LongRunningConnectionHubContext.Provider value={longRunningConnectionHub}>
       <Provider store={store}>
-        <Logo />
+        <LogoAndAccountBar />
         <RouterProvider router={router}/>
       </Provider>
     </LongRunningConnectionHubContext.Provider>
