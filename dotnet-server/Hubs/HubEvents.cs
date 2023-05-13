@@ -51,4 +51,7 @@ public static class HubEvents
     public const string OnDrawOnCanvas = "OnDrawOnCanvas";
     public const string OnClearCanvas = "OnClearCanvas";
     public const string OnSetCanvasText = "OnSetCanvasText";
+
+    //Account
+    public const string OnUpdateAccountScore = "OnUpdateAccountScore";
 }

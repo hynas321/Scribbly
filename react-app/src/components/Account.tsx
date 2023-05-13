@@ -1,17 +1,23 @@
 import { gapi } from "gapi-script";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import GoogleLogin, { GoogleLogout } from "react-google-login";
 import HttpRequestHandler from "../http/HttpRequestHandler";
 import useLocalStorageState from "use-local-storage-state";
+import { ConnectionHubContext } from "../context/ConnectionHubContext";
+import HubEvents from "../hub/HubEvents";
+import * as signalR from '@microsoft/signalr';
 
 function Account() {
   const httpRequestHandler = new HttpRequestHandler();
   const clientId = "468363525055-d5ul5o6le0298njn348po0td776it110.apps.googleusercontent.com";
 
+  const hub = useContext(ConnectionHubContext);
+
   const [givenName, setGivenName] = useState<string>("");
   const [score, setScore] = useState<number>(-1);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(false);
 
+  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
   const [oAuthToken, setOAuthToken] = useLocalStorageState("oAuthToken", { defaultValue: ""});
 
   useEffect(() => {
@@ -25,12 +31,28 @@ function Account() {
     gapi.load("client:auth2", start);
   }, []);
 
+  useEffect(() => {
+    if (hub.getState() !== signalR.HubConnectionState.Connected) {
+      return;
+    }
+
+    hub.on(HubEvents.onUpdateAccountScore, async () => {
+      const updatedScore = await httpRequestHandler.updateAccountScore(token, oAuthToken);
+      console.log(updatedScore);
+      if (typeof updatedScore == "number") {
+        setScore(updatedScore);
+      }
+
+    });
+
+  }, [hub.getState()]);
+
   const onSuccess = async (res: any) => {
     await httpRequestHandler.addAccountIfNotExists(res.profileObj, res.accessToken);
 
     const setScoreState = async () => {
       let score = await httpRequestHandler.fetchAccountScore(res.profileObj.googleId);
-      console.log(score);
+
       if (typeof score != "number") {
         return;
       }

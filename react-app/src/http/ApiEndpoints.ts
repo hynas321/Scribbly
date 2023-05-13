@@ -10,7 +10,7 @@ class ApiEndpoints {
   static playerExists: string = "/api/Player/Exists";
   static playerUsernameExists: string = "/api/Player/UsernameExists/";
   static accountAddIfNotExists: string = "/api/Account/Add";
-  static accountIncrementScore: string = "api/Account/IncrementScore/";
+  static accountIncrementScore: string = "/api/Account/IncrementScore";
   static accountGetScore: string = "/api/Account/GetScore";
   static scoreboardGet: string = "/api/Account/GetTop";
 }

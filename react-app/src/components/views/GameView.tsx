@@ -41,6 +41,7 @@ function GameView() {
   const [isStartGameButtonActive, setIsStartGameButtonActive] = useState<boolean>(false);
 
   const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
+  const [oAuthToken, setOAuthToken] = useLocalStorageState("oAuthToken", { defaultValue: ""});
   const [username, setUsername] = useLocalStorageState("username", { defaultValue: ""});
 
   const handleStartGameButtonClick = async () => {
@@ -98,6 +99,7 @@ function GameView() {
       });
 
       hub.on(HubEvents.onEndGame, () => {
+        displayAlert("Game has been finished", "success");
         navigate(config.mainClientEndpoint);
       });
 

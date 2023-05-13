@@ -55,7 +55,7 @@ public class AccountController : ControllerBase
         }
     }
 
-    [HttpPut("IncrementScore")]
+    [HttpPost("IncrementScore")]
     public IActionResult IncrementAccountScore([FromHeader] string token, [FromHeader] string accessToken)
     {
         try
@@ -83,7 +83,7 @@ public class AccountController : ControllerBase
 
             logger.LogInformation("IncrementAccountScore Status: 200. OK");
 
-            return StatusCode(StatusCodes.Status200OK);
+            return StatusCode(StatusCodes.Status200OK, accountRepository.GetAccountScore(accessToken));
         }
         catch (Exception ex)
         {

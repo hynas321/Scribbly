@@ -52,11 +52,23 @@ public class AccountRepository
     {
         using (SqliteConnection db = new SqliteConnection(connectionString))
         {
-            string query = "UPDATE Account SET Score = Score + @Score WHERE AccessToken = @AccessToken";
-            object parameters = new { AccessToken = accessToken, Score = number };
+            string query = "UPDATE Account SET Score = Score + @Number WHERE AccessToken = @AccessToken";
+            object parameters = new { AccessToken = accessToken, Number = number };
 
             db.Open();
             db.Execute(query, parameters);
+        }
+    }
+
+    public int GetAccountScore(string accessToken)
+    {
+        using (SqliteConnection db = new SqliteConnection(connectionString))
+        {
+            string query = "SELECT Score From Account Where AccessToken = @AccessToken";
+            object parameters = new { AccessToken = accessToken };
+
+            db.Open();
+            return db.QueryFirstOrDefault<int>(query, parameters);
         }
     }
 

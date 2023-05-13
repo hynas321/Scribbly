@@ -223,6 +223,27 @@ class HttpRequestHandler {
       return error;
     }
   }
+
+  async updateAccountScore(token: string, accessToken: string): Promise<any> {
+    try {
+      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.accountIncrementScore}`, {
+        method: 'POST',
+        headers: {
+          'Token': token,
+          'AccessToken': accessToken
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("Error");
+      }
+
+      return await response.json() as number;
+    }
+    catch (error) {
+      return error;
+    }
+  }
 }
 
 export default HttpRequestHandler;
