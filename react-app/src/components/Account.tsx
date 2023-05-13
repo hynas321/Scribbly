@@ -37,12 +37,15 @@ function Account() {
     }
 
     hub.on(HubEvents.onUpdateAccountScore, async () => {
+      if (!isUserLoggedIn) {
+        return
+      }
+
       const updatedScore = await httpRequestHandler.updateAccountScore(token, oAuthToken);
-      console.log(updatedScore);
+
       if (typeof updatedScore == "number") {
         setScore(updatedScore);
       }
-
     });
 
   }, [hub.getState()]);

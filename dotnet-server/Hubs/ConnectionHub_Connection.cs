@@ -6,7 +6,7 @@ namespace Dotnet.Server.Hubs;
 public partial class HubConnection : Hub
 {
     private readonly GameManager gameManager = new GameManager();
-    private readonly HubConnectionManager hubManager = new HubConnectionManager();
+    private readonly AccountManager hubManager = new AccountManager();
     private readonly ILogger<HubConnection> logger;
 
     public HubConnection(ILogger<HubConnection> logger)
