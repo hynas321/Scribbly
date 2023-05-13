@@ -28,7 +28,6 @@ public static class HubEvents
     public const string OnJoinGame = "OnJoinGame";
     public const string OnJoinGameError = "OnJoinGameError";
     public const string OnGameProblem = "OnGameProblem";
-    public const string OnFindPlayerHost = "OnFindPlayerHost";
     public const string OnEndGame = "OnEndGame";
 
     //GameState
@@ -40,7 +39,6 @@ public static class HubEvents
     public const string OnUpdatePlayerScores = "OnUpdatePlayerScores";
     public const string OnUpdateTimer = "OnUpdateTimer";
     public const string OnUpdateTimerVisibility = "OnUpdateTimerVisibility";
-    public const string OnGameFinished = "OnGameFinished";
     public const string OnUpdateDrawingPlayer = "OnUpdateDrawingPlayer";
     public const string OnUpdateCurrentRound = "OnUpdateCurrentRound";
     public const string onUpdateCorrectGuessPlayerUsernames = "OnUpdateCorrectGuessPlayerUsernames";

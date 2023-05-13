@@ -10,7 +10,7 @@ import HttpRequestHandler from '../../http/HttpRequestHandler';
 import { updatedAlert, updatedVisible } from '../../redux/slices/alert-slice';
 import useLocalStorageState from 'use-local-storage-state';
 import tableLoading from './../../assets/table-loading.gif'
-import Scoreboard from '../Scoreboard';
+import MainScoreboard from '../MainScoreboard';
 
 function MainView() {
   const httpRequestHandler = new HttpRequestHandler();
@@ -20,7 +20,7 @@ function MainView() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const [playerScores, setPlayerScores] = useState<PlayerScore[]>([]);
+  const [scoreboardScores, setScoreboardScores] = useState<MainScoreboardScore[]>([]);
   const [isCreateGameButtonActive, setIsCreateGameButtonActive] = useState<boolean>(false);
   const [isJoinGameButtonActive, setIsJoinGameButtonActive] = useState<boolean>(false);
   const [isTableDisplayed, setIsTableDisplayed] = useState<boolean>(false);
@@ -97,7 +97,7 @@ function MainView() {
           return;
         }
       
-        setPlayerScores(data);
+        setScoreboardScores(data);
         setTimeout(() => {
           setIsTableDisplayed(true);
         }, 1000);
@@ -160,9 +160,9 @@ function MainView() {
       </div>
       <div className="col-lg-3 col-sm-6 col-xs-6 mt-5 text-center mx-auto">
         { isTableDisplayed ?
-          <Scoreboard
+          <MainScoreboard
             title="Top 5 players"
-            playerScores={playerScores}
+            scoreboardScores={scoreboardScores}
             displayPoints={true}
             displayIndex={true}
           /> 

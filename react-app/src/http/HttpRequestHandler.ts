@@ -1,5 +1,5 @@
 import config from '../../config.json';
-import ApiEndpoints from '../hub/ApiEndpoints';
+import ApiEndpoints from './ApiEndpoints';
 import { CreateGameBody, JoinGameBody, PlayerIsHostResponse, UsernameExistsBody } from './HttpInterfaces';
 
 class HttpRequestHandler {
@@ -146,7 +146,7 @@ class HttpRequestHandler {
 
   async checkIfUsernameExists(username: string): Promise<any> {
     try {
-      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.playerUsernameExists}${username}`)
+      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.playerUsernameExists}${username}`);
 
       if (!response.ok) {
         throw new Error("Error");
@@ -167,7 +167,57 @@ class HttpRequestHandler {
         throw new Error("Error");
       }
 
-      return await response.json() as PlayerScore[];
+      return await response.json() as MainScoreboardScore[];
+    }
+    catch (error) {
+      return error;
+    }
+  }
+
+  async addAccountIfNotExists(profileObj: any, accessToken: string): Promise<any> {
+    try {
+      const account: Account = {
+        id: profileObj.googleId,
+        accessToken: accessToken,
+        email: profileObj.email,
+        name: profileObj.name,
+        givenName: profileObj.givenName,
+        familyName: profileObj.familyName,
+        score: 0
+      };
+
+      const requestBody = {
+        account: account
+      };
+
+      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.accountAddIfNotExists}`, {
+        method: 'POST',
+        body: JSON.stringify(requestBody),
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("Error");
+      }
+
+      return await response.json();
+    }
+    catch (error) {
+      return error;
+    }
+  }
+
+  async fetchAccountScore(id: string): Promise<any> {
+    try {
+      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.accountGetScore}/${id}`);
+
+      if (!response.ok) {
+        throw new Error("Error");
+      }
+
+      return await response.json() as number;
     }
     catch (error) {
       return error;

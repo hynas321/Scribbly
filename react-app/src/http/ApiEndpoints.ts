@@ -9,7 +9,10 @@ class ApiEndpoints {
   static playerHost: string = "/api/Player/IsHost";
   static playerExists: string = "/api/Player/Exists";
   static playerUsernameExists: string = "/api/Player/UsernameExists/";
-  static scoreboardGet: string = "/api/Scoreboard/Get";
+  static accountAddIfNotExists: string = "/api/Account/Add";
+  static accountIncrementScore: string = "api/Account/IncrementScore/";
+  static accountGetScore: string = "/api/Account/GetScore";
+  static scoreboardGet: string = "/api/Account/GetTop";
 }
 
 export default ApiEndpoints;

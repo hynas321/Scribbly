@@ -99,6 +99,7 @@ public partial class HubConnection : Hub
                 HostPlayerUsername = game.GameState.HostPlayerUsername,
                 IsGameStarted = game.GameState.IsGameStarted,
                 IsTimerVisible = game.GameState.IsTimerVisible,
+                CorrectGuessPlayerUsernames = game.GameState.CorrectGuessPlayerUsernames
             };
 
             await Clients.All.SendAsync(HubEvents.OnUpdatePlayerScores, JsonHelper.Serialize(playerScores));

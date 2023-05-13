@@ -7,7 +7,7 @@ namespace Dotnet.Server.Hubs;
 
 public partial class LongRunningHubConnection : Hub
 {
-    private readonly GameManager gameManager = new GameManager(25);
+    private readonly GameManager gameManager = new GameManager();
     private readonly ILogger<HubConnection> logger;
     private readonly IHubContext<HubConnection> hubContext;
 
