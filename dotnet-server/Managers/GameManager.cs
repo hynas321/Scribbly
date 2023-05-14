@@ -7,6 +7,10 @@ class GameManager
     private int maxChatMessageCount = 25;
     private static Game Game = null;
 
+    public GameManager()
+    {
+    }
+
     public void SetGame(Game game)
     {
         GameManager.Game = game;

@@ -1,3 +1,4 @@
+using Dotnet.Server.Http.Requests;
 using Dotnet.Server.JsonConfig;
 using Dotnet.Server.Managers;
 using Dotnet.Server.Models;
@@ -55,7 +56,7 @@ public partial class LongRunningHubConnection : Hub
             game.ChatMessages.Clear();
             game.GameState.IsGameStarted = true;
 
-            game.GameSettings.NonAbstractNounsOnly = settings.NonAbstractNounsOnly;
+            game.GameSettings.NounsOnly = settings.NounsOnly;
             game.GameSettings.DrawingTimeSeconds = settings.DrawingTimeSeconds;
             game.GameSettings.RoundsCount = settings.RoundsCount;
             game.GameSettings.WordLanguage = settings.WordLanguage;
@@ -113,8 +114,7 @@ public partial class LongRunningHubConnection : Hub
                     int randomTokenIndex = random.Next(game.GameState.DrawingPlayersTokens.Count);
                     string drawingToken = game.GameState.DrawingPlayersTokens[randomTokenIndex];
                     string drawingPlayerUsername = gameManager.GetPlayerByToken(drawingToken).Username;
-
-                    string actualSecretWord = FetchWord();
+                    string actualSecretWord = await RandomWordFetcher.FetchWordAsync() ?? throw new NullReferenceException();
                     string hiddenSecretWord = Convert.ToString(actualSecretWord.Length);
 
                     game.GameState.DrawingPlayerUsername = drawingPlayerUsername;
@@ -274,18 +274,6 @@ public partial class LongRunningHubConnection : Hub
         {
             logger.LogError(Convert.ToString(ex));
         }
-    }
-
-    public string FetchWord()
-    {
-        List<string> words = new List<string>()
-        {
-            "application", "server", "project"
-        };
-
-        Random random = new Random();
-
-        return words[random.Next(words.Count)];
     }
 
     public async Task SendAnnouncement(string text, string backgroundColor)
