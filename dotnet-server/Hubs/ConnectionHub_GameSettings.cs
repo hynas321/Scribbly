@@ -27,7 +27,7 @@ public partial class HubConnection : Hub
 
             GameSettings settings = game.GameSettings;
 
-            settings.NonAbstractNounsOnly = setting;
+            settings.NounsOnly = setting;
             game.GameSettings = settings;
 
             await Clients.All.SendAsync(HubEvents.OnSetAbstractNouns, setting);

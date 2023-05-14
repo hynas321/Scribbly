@@ -2,7 +2,7 @@ import Range from '../Range';
 import CheckForm from '../CheckForm';
 import CheckBox from '../CheckBox';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { GameSettings, updatedDrawingTimeSeconds, updatedNonAbstractNounsOnly, updatedRoundsCount, updatedWordLanguage } from '../../redux/slices/game-settings-slice';
+import { GameSettings, updatedDrawingTimeSeconds, updatedNounsOnly, updatedRoundsCount, updatedWordLanguage } from '../../redux/slices/game-settings-slice';
 import { BsGearFill } from 'react-icons/bs';
 import InputSelect from '../InputSelect';
 import { useContext, useEffect } from "react";
@@ -24,7 +24,7 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
 
   let gameSettingsLoaded = false;
 
-  const nonAbstractNounsOnlyText = "Allow only non-abstract nouns";
+  const nounsOnly = "Allow only nouns as random words";
   const drawingTimeText = "Drawing time";
   const numberOfRoundsText = "Number of rounds";
   const chooseLanguageText = "Language of random words";
@@ -37,14 +37,14 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
     hub.on(HubEvents.onLoadGameSettings, (gameSettingsSerialized: any) => {
       const gameSettings = JSON.parse(gameSettingsSerialized) as GameSettings;
 
-      dispatch(updatedNonAbstractNounsOnly(gameSettings.nonAbstractNounsOnly));
+      dispatch(updatedNounsOnly(gameSettings.nounsOnly));
       dispatch(updatedDrawingTimeSeconds(gameSettings.drawingTimeSeconds));
       dispatch(updatedRoundsCount(gameSettings.roundsCount));
       dispatch(updatedWordLanguage(gameSettings.wordLanguage));
     });
 
     hub.on(HubEvents.onSetAbstractNouns, (checked: boolean) => {
-      dispatch(updatedNonAbstractNounsOnly(checked));
+      dispatch(updatedNounsOnly(checked));
     });
 
     hub.on(HubEvents.onSetDrawingTimeSeconds, (value: number) => {
@@ -99,12 +99,12 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
       <div className="mt-4">
         { isPlayerHost ?
           <CheckBox
-            text={nonAbstractNounsOnlyText}
-            defaultValue={settings.nonAbstractNounsOnly}
+            text={nounsOnly}
+            defaultValue={settings.nounsOnly}
             onChange={handleCheckBoxChange}
           /> :
           <label className="form-check-label">
-            {nonAbstractNounsOnlyText}: <b>{settings.nonAbstractNounsOnly.valueOf().toString()}</b>
+            {nounsOnly}: <b>{settings.nounsOnly.valueOf().toString()}</b>
           </label>
         }
       </div>

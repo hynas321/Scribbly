@@ -12,6 +12,10 @@ class GameManager
         this.maxChatMessageCount = maxChatMessageCount;
     }
 
+    public GameManager()
+    {
+    }
+
     public void SetGame(Game game)
     {
         GameManager.Game = game;

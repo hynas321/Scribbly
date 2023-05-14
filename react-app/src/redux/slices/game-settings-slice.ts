@@ -1,14 +1,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface GameSettings {
-  nonAbstractNounsOnly: boolean;
+  nounsOnly: boolean;
   drawingTimeSeconds: number;
   roundsCount: number;
   wordLanguage: string;
 };
 
 const initialState: GameSettings = {
-  nonAbstractNounsOnly: true,
+  nounsOnly: true,
   drawingTimeSeconds: 75,
   roundsCount: 6,
   wordLanguage: "en"
@@ -18,8 +18,8 @@ const gameSettingsSlice = createSlice({
   name: "gameSettings",
   initialState,
   reducers: {
-    updatedNonAbstractNounsOnly(state, action: PayloadAction<boolean>) {
-      state.nonAbstractNounsOnly = action.payload;
+    updatedNounsOnly(state, action: PayloadAction<boolean>) {
+      state.nounsOnly = action.payload;
     },
     updatedDrawingTimeSeconds(state, action: PayloadAction<number>) {
       state.drawingTimeSeconds = action.payload;
@@ -31,7 +31,7 @@ const gameSettingsSlice = createSlice({
       state.wordLanguage = action.payload;
     },
     updatedGameSettings(state, action: PayloadAction<GameSettings>) {
-      state.nonAbstractNounsOnly = action.payload.nonAbstractNounsOnly,
+      state.nounsOnly = action.payload.nounsOnly,
       state.drawingTimeSeconds = action.payload.drawingTimeSeconds,
       state.roundsCount = action.payload.roundsCount,
       state.wordLanguage = action.payload.wordLanguage
@@ -39,5 +39,5 @@ const gameSettingsSlice = createSlice({
   }
 })
 
-export const { updatedNonAbstractNounsOnly, updatedDrawingTimeSeconds, updatedRoundsCount, updatedWordLanguage, updatedGameSettings } = gameSettingsSlice.actions;
+export const { updatedNounsOnly, updatedDrawingTimeSeconds, updatedRoundsCount, updatedWordLanguage, updatedGameSettings } = gameSettingsSlice.actions;
 export default gameSettingsSlice.reducer;
