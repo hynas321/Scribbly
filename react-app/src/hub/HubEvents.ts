@@ -51,6 +51,9 @@ class HubEvents {
   static OnSetCanvasText: string = "OnSetCanvasText";
 
   //Account
+  static createSession = "CreateSession";
+  static endSession = "EndSession";  
+  static onSessionEnded = "OnSessionEnded";
   static onUpdateAccountScore: string = "OnUpdateAccountScore";
 
 }

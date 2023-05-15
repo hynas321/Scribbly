@@ -53,5 +53,8 @@ public static class HubEvents
     public const string OnSetCanvasText = "OnSetCanvasText";
 
     //Account
+    public const string CreateSession = "CreateSession";
+    public const string EndSession = "EndSession";  
+    public const string OnSessionEnded = "OnSessionEnded";
     public const string OnUpdateAccountScore = "OnUpdateAccountScore";
 }

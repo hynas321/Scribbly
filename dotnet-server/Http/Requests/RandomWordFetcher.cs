@@ -48,9 +48,9 @@ class RandomWordFetcher
                 if (response.IsSuccessStatusCode)
                 {
                     string json = await response.Content.ReadAsStringAsync();
-                    RandomWordApiResponse wordnikResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<RandomWordApiResponse>(json);
+                    RandomWordApiResponse randomWordResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<RandomWordApiResponse>(json);
 
-                    return wordnikResponse.Word;
+                    return randomWordResponse.Word.ToLower();
                 }
                 else
                 {
@@ -97,9 +97,9 @@ class RandomWordFetcher
                 if (response.IsSuccessStatusCode)
                 {
                     string json = await response.Content.ReadAsStringAsync();
-                    RandomWordApiResponse wordnikResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<RandomWordApiResponse>(json);
+                    RandomWordApiResponse randomWordResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<RandomWordApiResponse>(json);
 
-                    return wordnikResponse.Word;
+                    return randomWordResponse.Word.ToLower();
                 }
                 else
                 {

@@ -11,11 +11,17 @@ public partial class LongRunningHubConnection : Hub
     private readonly GameManager gameManager = new GameManager();
     private readonly ILogger<HubConnection> logger;
     private readonly IHubContext<HubConnection> hubContext;
+    private readonly IHubContext<AccountHubConnection> accountHubContext;
 
-    public LongRunningHubConnection(ILogger<HubConnection> logger, IHubContext<HubConnection> hubContext)
+    public LongRunningHubConnection(
+        ILogger<HubConnection> logger,
+        IHubContext<HubConnection> hubContext,
+        IHubContext<AccountHubConnection> accountHubContext
+    )
     {
         this.logger = logger;
         this.hubContext = hubContext;
+        this.accountHubContext = accountHubContext;
     }
 
     [HubMethodName(HubEvents.StartGame)]
@@ -179,7 +185,10 @@ public partial class LongRunningHubConnection : Hub
 
                 if (game.GameState.CurrentRound > game.GameSettings.RoundsCount)
                 {   
-                    await hubContext.Clients.All.SendAsync(HubEvents.OnUpdateAccountScore);
+                    if (accountHubContext != null) {
+                        await accountHubContext.Clients.All.SendAsync(HubEvents.OnUpdateAccountScore);
+                    }
+
                     await SetCanvasText($"Thank you for playing! Automatic disconnection in 15s", BootstrapColors.Green);
                     await Task.Delay(15000);
                     await hubContext.Clients.All.SendAsync(HubEvents.OnEndGame);
