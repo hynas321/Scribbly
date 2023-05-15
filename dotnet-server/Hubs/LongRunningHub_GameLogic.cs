@@ -1,3 +1,4 @@
+using Dotnet.Server.Http.Requests;
 using Dotnet.Server.JsonConfig;
 using Dotnet.Server.Managers;
 using Dotnet.Server.Models;
@@ -7,14 +8,20 @@ namespace Dotnet.Server.Hubs;
 
 public partial class LongRunningHubConnection : Hub
 {
-    private readonly GameManager gameManager = new GameManager(25);
+    private readonly GameManager gameManager = new GameManager();
     private readonly ILogger<HubConnection> logger;
     private readonly IHubContext<HubConnection> hubContext;
+    private readonly IHubContext<AccountHubConnection> accountHubContext;
 
-    public LongRunningHubConnection(ILogger<HubConnection> logger, IHubContext<HubConnection> hubContext)
+    public LongRunningHubConnection(
+        ILogger<HubConnection> logger,
+        IHubContext<HubConnection> hubContext,
+        IHubContext<AccountHubConnection> accountHubContext
+    )
     {
         this.logger = logger;
         this.hubContext = hubContext;
+        this.accountHubContext = accountHubContext;
     }
 
     [HubMethodName(HubEvents.StartGame)]
@@ -55,7 +62,7 @@ public partial class LongRunningHubConnection : Hub
             game.ChatMessages.Clear();
             game.GameState.IsGameStarted = true;
 
-            game.GameSettings.NonAbstractNounsOnly = settings.NonAbstractNounsOnly;
+            game.GameSettings.NounsOnly = settings.NounsOnly;
             game.GameSettings.DrawingTimeSeconds = settings.DrawingTimeSeconds;
             game.GameSettings.RoundsCount = settings.RoundsCount;
             game.GameSettings.WordLanguage = settings.WordLanguage;
@@ -113,20 +120,22 @@ public partial class LongRunningHubConnection : Hub
                     int randomTokenIndex = random.Next(game.GameState.DrawingPlayersTokens.Count);
                     string drawingToken = game.GameState.DrawingPlayersTokens[randomTokenIndex];
                     string drawingPlayerUsername = gameManager.GetPlayerByToken(drawingToken).Username;
-
-                    string actualSecretWord = FetchWord();
+                    string actualSecretWord = await RandomWordFetcher.FetchWordAsync() ?? throw new NullReferenceException();
                     string hiddenSecretWord = Convert.ToString(actualSecretWord.Length);
 
                     game.GameState.DrawingPlayerUsername = drawingPlayerUsername;
                     game.GameState.DrawingPlayersTokens.RemoveAt(randomTokenIndex);
-                    game.GameState.ActualSecretWord = actualSecretWord;
-                    game.GameState.HiddenSecretWord = $"Secret word length: {hiddenSecretWord}";
                     game.GameState.IsTimerVisible = true;
+                    game.GameState.HiddenSecretWord = "? ? ?";
 
                     await hubContext.Clients.All.SendAsync(HubEvents.onUpdateCorrectGuessPlayerUsernames, JsonHelper.Serialize(game.GameState.CorrectGuessPlayerUsernames));
                     await hubContext.Clients.All.SendAsync(HubEvents.OnUpdateDrawingPlayer, drawingPlayerUsername);
+                    await hubContext.Clients.All.SendAsync(HubEvents.OnRequestSecretWord);
                     await SetCanvasText($"{drawingPlayerUsername} is going to draw in 5s", BootstrapColors.Green);
                     await Task.Delay(5000);
+
+                    game.GameState.ActualSecretWord = actualSecretWord;
+                    game.GameState.HiddenSecretWord = $"Secret word length: {hiddenSecretWord}";
 
                     game.GameState.DrawingToken = drawingToken;
 
@@ -140,9 +149,20 @@ public partial class LongRunningHubConnection : Hub
                         return;
                     }
 
-                    if (game.GameState.CorrectAnswerCount > 0)
+                    int correctAnswers = game.GameState.CorrectAnswerCount;
+                    int playersCount = game.GameState.Players.Count;
+
+                    if (correctAnswers == playersCount - 1)
                     {
                         int pointsForDrawing = 10;
+
+                        gameManager.UpdatePlayerScore(drawingToken, pointsForDrawing);
+
+                        await SendAnnouncement($"{drawingPlayerUsername} received the drawing bonus (+{pointsForDrawing} points)", BootstrapColors.Green);
+                    }
+                    else if (correctAnswers < playersCount - 1 && correctAnswers > 0)
+                    {
+                        int pointsForDrawing = 5;
 
                         gameManager.UpdatePlayerScore(drawingToken, pointsForDrawing);
 
@@ -163,18 +183,25 @@ public partial class LongRunningHubConnection : Hub
                     await hubContext.Clients.All.SendAsync(HubEvents.OnUpdateTimerVisibility, false);
                     await SetCanvasText($"The drawing phase has ended", BootstrapColors.Green);
                     await SendAnnouncement($"The answer was: {actualSecretWord}", BootstrapColors.Yellow);
+
+                    game.GameState.HiddenSecretWord = actualSecretWord;
+                    await hubContext.Clients.All.SendAsync(HubEvents.OnRequestSecretWord);
                     await Task.Delay(8000);
+
+                    game.GameState.HiddenSecretWord = "? ? ?";
+                    await hubContext.Clients.All.SendAsync(HubEvents.OnRequestSecretWord);
                 }
 
                 game.GameState.CurrentRound++;
 
                 if (game.GameState.CurrentRound > game.GameSettings.RoundsCount)
                 {   
-                    await SetCanvasText($"Thank you for playing! Automatic disconnection in 15s", BootstrapColors.Green);
-                    await Task.Delay(15000);
-                    await hubContext.Clients.All.SendAsync(HubEvents.OnEndGame);
-
+                    await accountHubContext.Clients.All.SendAsync(HubEvents.OnUpdateAccountScore);
+                    await SetCanvasText($"Thank you for playing! Automatic disconnection in 10s", BootstrapColors.Green);
+                    await Task.Delay(5000);
                     gameManager.RemoveGame();
+                    await Task.Delay(5000);
+                    await hubContext.Clients.All.SendAsync(HubEvents.OnEndGame);
                     break;
                 }
 
@@ -187,7 +214,6 @@ public partial class LongRunningHubConnection : Hub
             await hubContext.Clients.All.SendAsync(HubEvents.OnEndGame);
             gameManager.RemoveGame();
         }
-        
     }
 
     public async Task<bool> UpdateTimer()
@@ -265,18 +291,6 @@ public partial class LongRunningHubConnection : Hub
         {
             logger.LogError(Convert.ToString(ex));
         }
-    }
-
-    public string FetchWord()
-    {
-        List<string> words = new List<string>()
-        {
-            "application", "server", "project"
-        };
-
-        Random random = new Random();
-
-        return words[random.Next(words.Count)];
     }
 
     public async Task SendAnnouncement(string text, string backgroundColor)

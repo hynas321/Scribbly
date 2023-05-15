@@ -15,4 +15,10 @@ public class Config
 
     [JsonPropertyName("databaseConnectionString")]
     public string DatabaseConnectionString { get; set; }
+
+    [JsonPropertyName("englishWordsApiKey")]
+    public string EnglishWordsApiKey { get; set; }
+
+    [JsonPropertyName("polishWordsApiKey")]
+    public string PolishWordsApiKey { get; set; }
 }

@@ -10,14 +10,14 @@ public class GameState
     public string HostPlayerUsername { get; set; } = "";
     public bool IsGameStarted { get; set; } = false;
     public bool IsTimerVisible { get; set; } = false;
-    public List<string> CorrectGuessPlayerUsernames = new List<string>();
+    public List<string> CorrectGuessPlayerUsernames { get; set; } = new List<string>();
 
     //Server-side only
     public List<Player> Players = new List<Player>();
     public List<DrawnLine> DrawnLines { get; set; } = new List<DrawnLine>();
     public string DrawingToken { get; set; } = "";
     public string ActualSecretWord { get; set; } = "";
-    public List<string> DrawingPlayersTokens = new List<string>();
-    public List<string> NoChatPermissionTokens = new List<string>();
-    public int CorrectAnswerCount = 0;
+    public List<string> DrawingPlayersTokens { get; set; } = new List<string>();
+    public List<string> NoChatPermissionTokens { get; set; }= new List<string>();
+    public int CorrectAnswerCount { get; set; } = 0;
 }

@@ -84,7 +84,7 @@ public partial class HubConnection : Hub
 
             GameSettings settingsClient = new GameSettings()
             {
-                NonAbstractNounsOnly = game.GameSettings.NonAbstractNounsOnly,
+                NounsOnly = game.GameSettings.NounsOnly,
                 DrawingTimeSeconds = game.GameSettings.DrawingTimeSeconds,
                 RoundsCount = game.GameSettings.RoundsCount,
                 WordLanguage = game.GameSettings.WordLanguage
@@ -99,6 +99,7 @@ public partial class HubConnection : Hub
                 HostPlayerUsername = game.GameState.HostPlayerUsername,
                 IsGameStarted = game.GameState.IsGameStarted,
                 IsTimerVisible = game.GameState.IsTimerVisible,
+                CorrectGuessPlayerUsernames = game.GameState.CorrectGuessPlayerUsernames
             };
 
             await Clients.All.SendAsync(HubEvents.OnUpdatePlayerScores, JsonHelper.Serialize(playerScores));
@@ -126,10 +127,11 @@ public partial class HubConnection : Hub
         try
         {
             Game game = gameManager.GetGame();
-
+            
             if (game == null)
             {
                 logger.LogError($"LeaveGame: Game does not exist");
+                return;
             }
 
             Player player = gameManager.GetPlayerByToken(token);
@@ -137,6 +139,7 @@ public partial class HubConnection : Hub
             if (player == null)
             {
                 logger.LogError($"LeaveGame: Player with the token {token} does not exist");
+                return;
             }
 
             gameManager.RemovePlayer(token);

@@ -4,12 +4,11 @@ namespace Dotnet.Server.Managers;
 
 class GameManager
 {
-    private int maxChatMessageCount;
-    public static Game Game = null;
-    
-    public GameManager(int maxChatMessageCount)
+    private int maxChatMessageCount = 25;
+    private static Game Game = null;
+
+    public GameManager()
     {
-        this.maxChatMessageCount = maxChatMessageCount;
     }
 
     public void SetGame(Game game)

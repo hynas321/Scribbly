@@ -7,7 +7,7 @@ import { ConnectionHubContext } from "../../context/ConnectionHubContext";
 import { useAppSelector } from "../../redux/hooks";
 import * as signalR from '@microsoft/signalr';
 
-interface PlayerListProps {
+interface PlayerScoresProps {
   title: string,
   playerScores: PlayerScore[],
   displayPoints: boolean,
@@ -15,7 +15,7 @@ interface PlayerListProps {
   displayRound: boolean
 }
 
-function PlayerList({title, playerScores, displayPoints, displayIndex, displayRound}: PlayerListProps) {
+function PlayerScores({title, playerScores, displayPoints, displayIndex, displayRound}: PlayerScoresProps) {
   const hub = useContext(ConnectionHubContext);
   const dispatch = useDispatch();
   const player = useAppSelector((state) => state.player);
@@ -58,7 +58,7 @@ function PlayerList({title, playerScores, displayPoints, displayIndex, displayRo
             key={index}
             className={`list-group-item d-flex justify-content-between align-items-center
             ${gameState.correctGuessPlayerUsernames != undefined &&
-              gameState.correctGuessPlayerUsernames.includes(playerScore.username) ? "bg-success" :
+              gameState.correctGuessPlayerUsernames.includes(playerScore.username) ? "bg-custom-lime" :
               gameState.drawingPlayerUsername == playerScore.username ? "bg-light" : "bg-white"}`}
             style={{overflowWrap: "break-word"}}
           >
@@ -83,4 +83,4 @@ function PlayerList({title, playerScores, displayPoints, displayIndex, displayRo
   )
 }
 
-export default PlayerList;
+export default PlayerScores;

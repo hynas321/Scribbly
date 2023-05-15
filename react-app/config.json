@@ -3,5 +3,5 @@
     "mainClientEndpoint": "/",
     "lobbyClientEndpoint": "/lobby",
     "gameClientEndpoint": "/game/",
-    "pageNotFoundEndpoint": "/notfound/"
+    "pageNotFoundEndpoint": "/notfound"
 }

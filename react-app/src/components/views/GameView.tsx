@@ -4,7 +4,7 @@ import GameSettingsBoard from '../game-view-components/GameSettingsBoard';
 import { useAppSelector } from '../../redux/hooks';
 import config from '../../../config.json';
 import { useNavigate } from 'react-router-dom';
-import PlayerList from '../game-view-components/PlayerList';
+import PlayerScores from '../game-view-components/PlayerScores';
 import Chat from '../game-view-components/Chat';
 import { BsPlayCircle, BsDoorOpen } from 'react-icons/bs';
 import { PlayerScore, updatedPlayerScore } from '../../redux/slices/player-score-slice';
@@ -38,9 +38,11 @@ function GameView() {
   const [playerScores, setPlayerScores] = useState<PlayerScore[]>([]);
   const [isPlayerHost, setIsPlayerHost] = useState<boolean>(false);
   const [isGameDisplayed, setIsGameDisplayed] = useState<boolean>(false);
+  const [isGameFinished, setIsGameFinished] = useState<boolean>(false);
   const [isStartGameButtonActive, setIsStartGameButtonActive] = useState<boolean>(false);
 
   const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
+  const [oAuthToken, setOAuthToken] = useLocalStorageState("oAuthToken", { defaultValue: ""});
   const [username, setUsername] = useLocalStorageState("username", { defaultValue: ""});
 
   const handleStartGameButtonClick = async () => {
@@ -73,7 +75,8 @@ function GameView() {
         const player = JSON.parse(playerSerialized) as Player;
         const settings = JSON.parse(gameSettingsSerialized) as GameSettings;
         const state = JSON.parse(gameStateSerialized) as GameState;
-
+        
+        console.log(state);
         dispatch(updatedPlayerScore({username: player.username, score: player.score}));
         dispatch(updatedGameSettings(settings));
         dispatch(updatedGameState(state));
@@ -97,7 +100,8 @@ function GameView() {
       });
 
       hub.on(HubEvents.onEndGame, () => {
-        displayAlert("Game has ended", "success");
+        setIsGameFinished(true);
+        displayAlert("Game has been finished", "success");
         navigate(config.mainClientEndpoint);
       });
 
@@ -114,7 +118,11 @@ function GameView() {
       hub.off(HubEvents.onJoinGame);
       hub.off(HubEvents.onJoinGameError);
       hub.off(HubEvents.onGameProblem);
-      await hub.invoke(HubEvents.leaveGame, token);
+
+      if (!isGameFinished) {
+        await hub.invoke(HubEvents.leaveGame, token);
+      }
+
       dispatch(clearedGameState());
     }
 
@@ -179,8 +187,8 @@ function GameView() {
             <div className="container text-center">
               <div className="row">
                 <div className="col-lg-2 col-md-6 col-12 order-lg-1 order-md-2 order-3 mb-3">
-                  <PlayerList
-                    title={"Players"}
+                  <PlayerScores
+                    title={"Scoreboard"}
                     playerScores={playerScores}
                     displayPoints={true}
                     displayIndex={true}
@@ -206,7 +214,7 @@ function GameView() {
             <div className="row">
               <div className="col-lg-4 col-sm-5 col-12 mx-auto mt-2 text-center order-lg-1 order-2 mb-3">
                 <div className="col-lg-6">
-                  <PlayerList
+                  <PlayerScores
                     title={"Players in the lobby"}
                     playerScores={playerScores}
                     displayPoints={false}

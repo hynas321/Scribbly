@@ -11,7 +11,7 @@ namespace Dotnet.Server.Controllers;
 [Route("api/[controller]")]
 public class PlayerController : ControllerBase
 {
-    private readonly GameManager gamesManager = new GameManager(25);
+    private readonly GameManager gamesManager = new GameManager();
     private readonly ILogger<PlayerController> logger;
 
     public PlayerController(ILogger<PlayerController> logger)
@@ -26,7 +26,7 @@ public class PlayerController : ControllerBase
         {
             if (!ModelState.IsValid)
             {   
-                logger.LogError("IsHost Status: 400. Invalid received request body.");
+                logger.LogError("IsHost Status: 400. Bad request");
 
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
@@ -66,7 +66,7 @@ public class PlayerController : ControllerBase
         {
             if (!ModelState.IsValid)
             {   
-                logger.LogError("Exists Status: 400. Invalid received request body.");
+                logger.LogError("Exists Status: 400. Bad request");
 
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
@@ -75,20 +75,20 @@ public class PlayerController : ControllerBase
 
             if (game == null)
             {
-                logger.LogError("Exists Status: 404. Game not found.");
+                logger.LogError("Exists Status: 404. Game not found");
 
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
             bool playerExists = gamesManager.GetPlayerByToken(token) != null;
 
-            logger.LogInformation("Exists Status: 200. OK.");
+            logger.LogInformation("Exists Status: 200. OK");
 
             return StatusCode(StatusCodes.Status200OK, playerExists);
         }
         catch (Exception ex)
         {
-            logger.LogError($"Exists Status: 500. Internal server error. {ex}");
+            logger.LogError($"Exists Status: 500. Internal server error {ex}");
 
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
@@ -101,7 +101,7 @@ public class PlayerController : ControllerBase
         {
             if (!ModelState.IsValid)
             {   
-                logger.LogError("Exists Status: 400. Invalid received request body.");
+                logger.LogError("UsernameExists Status: 400. Bad request");
 
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
@@ -110,20 +110,20 @@ public class PlayerController : ControllerBase
 
             if (game == null)
             {
-                logger.LogError("Exists Status: 404. Game not found.");
+                logger.LogError("UsernameExists Status: 404. Game not found");
 
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
             bool usernameExists = gamesManager.CheckIfPlayerExistsByUsername(username);
 
-            logger.LogInformation("Exists Status: 200. OK.");
+            logger.LogInformation("UsernameExists Status: 200. OK");
 
             return StatusCode(StatusCodes.Status200OK, usernameExists);
         }
         catch (Exception ex)
         {
-            logger.LogError($"Exists Status: 500. Internal server error. {ex}");
+            logger.LogError($"UsernameExists Status: 500. Internal server error {ex}");
 
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
