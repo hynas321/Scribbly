@@ -10,7 +10,7 @@ public class GameState
     public string HostPlayerUsername { get; set; } = "";
     public bool IsGameStarted { get; set; } = false;
     public bool IsTimerVisible { get; set; } = false;
-    public List<string> CorrectGuessPlayerUsernames = new List<string>();
+    public List<string> CorrectGuessPlayerUsernames { get; set; } = new List<string>();
 
     //Server-side only
     public List<Player> Players = new List<Player>();

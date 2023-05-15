@@ -30,10 +30,10 @@ function Canvas() {
 
   const circlePickerColors = [material.black, material.red['500'],
     material.pink['500'], material.purple['500'], material.deepPurple['500'],
-    material.indigo['500'], material.blue['500'], material.lightBlue['500'],
-    material.green['500'], material.lightGreen['500'], material.yellow['500'],
-    material.amber['500'], material.orange['500'], material.deepOrange['500'],
-    material.brown['500'], material.blueGrey['500'], material.white
+    material.indigo['500'], material.blue['500'], material.green['500'],
+    material.lightGreen['500'], material.yellow['500'], material.amber['500'],
+    material.orange['500'], material.deepOrange['500'], material.brown['500'],
+    material.blueGrey['500'], material.white
   ]
 
   function draw(canvasContext: CanvasRenderingContext2D, drawnLine: DrawnLine) {
@@ -120,7 +120,7 @@ function Canvas() {
       {
         player.username == gameState.drawingPlayerUsername &&
         <>
-          <div className="d-flex justify-content-center rounded py-2" style={{backgroundColor: "#90EE90"}}>
+          <div className="bg-info d-flex justify-content-center rounded py-2">
             <CirclePicker
               color={color}
               width="100"

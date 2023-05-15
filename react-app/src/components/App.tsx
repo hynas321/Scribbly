@@ -8,6 +8,7 @@ import { Provider } from 'react-redux';
 import { store } from '../redux/store';
 import { AccountHubContext, ConnectionHubContext, LongRunningConnectionHubContext, connectionHub, longRunningConnectionHub, accountConnectionHub } from "../context/ConnectionHubContext";
 import GameView from './views/GameView';
+import './App.css';
 
 function App() {
   const router = createBrowserRouter([

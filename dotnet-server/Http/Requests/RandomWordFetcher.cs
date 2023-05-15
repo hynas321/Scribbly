@@ -6,6 +6,9 @@ namespace Dotnet.Server.Http.Requests;
 
 class RandomWordFetcher
 {
+    private static string[] spareEnglishWords = new string[] { "greetings", "traveller", "spare", "words", "server", "project", "application"};
+    private static string[] sparePolishWords = new string[] { "przywitanie", "podróżnik", "zapasowy", "słowa", "serwer", "projekt", "aplikacja"};
+
     public static async Task<string> FetchWordAsync()
     {
         GameManager gameManager = new GameManager();
@@ -54,7 +57,7 @@ class RandomWordFetcher
                 }
                 else
                 {
-                    return null;
+                    return GetSpareEnglishWord();
                 }
             }
             catch
@@ -103,7 +106,7 @@ class RandomWordFetcher
                 }
                 else
                 {
-                    return null;
+                    return GetSparePolishWord();
                 }
             }
             catch
@@ -111,5 +114,19 @@ class RandomWordFetcher
                 return null;
             }
         }
+    }
+
+    private static string GetSpareEnglishWord()
+    {
+        Random random = new Random();
+
+        return spareEnglishWords[random.Next(spareEnglishWords.Length)];
+    }
+
+    private static string GetSparePolishWord()
+    {
+        Random random = new Random();
+
+        return sparePolishWords[random.Next(spareEnglishWords.Length)];
     }
 }
