@@ -149,9 +149,20 @@ public partial class LongRunningHubConnection : Hub
                         return;
                     }
 
-                    if (game.GameState.CorrectAnswerCount > 0)
+                    int correctAnswers = game.GameState.CorrectAnswerCount;
+                    int playersCount = game.GameState.Players.Count;
+
+                    if (correctAnswers == playersCount - 1)
                     {
                         int pointsForDrawing = 10;
+
+                        gameManager.UpdatePlayerScore(drawingToken, pointsForDrawing);
+
+                        await SendAnnouncement($"{drawingPlayerUsername} received the drawing bonus (+{pointsForDrawing} points)", BootstrapColors.Green);
+                    }
+                    else if (correctAnswers < playersCount - 1 && correctAnswers > 0)
+                    {
+                        int pointsForDrawing = 5;
 
                         gameManager.UpdatePlayerScore(drawingToken, pointsForDrawing);
 
@@ -185,15 +196,12 @@ public partial class LongRunningHubConnection : Hub
 
                 if (game.GameState.CurrentRound > game.GameSettings.RoundsCount)
                 {   
-                    if (accountHubContext != null) {
-                        await accountHubContext.Clients.All.SendAsync(HubEvents.OnUpdateAccountScore);
-                    }
-
-                    await SetCanvasText($"Thank you for playing! Automatic disconnection in 15s", BootstrapColors.Green);
-                    await Task.Delay(15000);
-                    await hubContext.Clients.All.SendAsync(HubEvents.OnEndGame);
-
+                    await accountHubContext.Clients.All.SendAsync(HubEvents.OnUpdateAccountScore);
+                    await SetCanvasText($"Thank you for playing! Automatic disconnection in 10s", BootstrapColors.Green);
+                    await Task.Delay(5000);
                     gameManager.RemoveGame();
+                    await Task.Delay(5000);
+                    await hubContext.Clients.All.SendAsync(HubEvents.OnEndGame);
                     break;
                 }
 

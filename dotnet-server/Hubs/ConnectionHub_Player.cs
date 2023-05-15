@@ -127,10 +127,11 @@ public partial class HubConnection : Hub
         try
         {
             Game game = gameManager.GetGame();
-
+            
             if (game == null)
             {
                 logger.LogError($"LeaveGame: Game does not exist");
+                return;
             }
 
             Player player = gameManager.GetPlayerByToken(token);
@@ -138,6 +139,7 @@ public partial class HubConnection : Hub
             if (player == null)
             {
                 logger.LogError($"LeaveGame: Player with the token {token} does not exist");
+                return;
             }
 
             gameManager.RemovePlayer(token);

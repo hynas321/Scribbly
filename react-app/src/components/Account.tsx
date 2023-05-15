@@ -17,6 +17,7 @@ function Account() {
   const [givenName, setGivenName] = useState<string>("");
   const [score, setScore] = useState<number>(-1);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(false);
+  const [isScoreToBeUpdated, setIsScoreToBeUpdated] = useState<boolean>(false);
 
   const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
   const [oAuthToken, setOAuthToken] = useLocalStorageState("oAuthToken", { defaultValue: ""});
@@ -47,11 +48,7 @@ function Account() {
         return
       }
 
-      const updatedScore = await httpRequestHandler.updateAccountScore(token, oAuthToken);
-
-      if (typeof updatedScore == "number") {
-        setScore(updatedScore);
-      }
+      setIsScoreToBeUpdated(true);
     });
 
     accountHub.on(HubEvents.onSessionEnded, async () => {
@@ -67,6 +64,22 @@ function Account() {
     });
 
   }, [accountHub.getState()]);
+
+  useEffect(() => {
+    const updateScore = async () => {
+      if (isScoreToBeUpdated) {
+        const updatedScore = await httpRequestHandler.updateAccountScore(token, oAuthToken);
+  
+        if (typeof updatedScore == "number") {
+          setScore(updatedScore);
+        }
+
+        setIsScoreToBeUpdated(false);
+      }
+    }
+
+    updateScore();
+  }, [isScoreToBeUpdated]);
 
   const onSuccess = async (res: any) => {
     await httpRequestHandler.addAccountIfNotExists(res.profileObj, res.accessToken);

@@ -17,7 +17,7 @@ public class GameState
     public List<DrawnLine> DrawnLines { get; set; } = new List<DrawnLine>();
     public string DrawingToken { get; set; } = "";
     public string ActualSecretWord { get; set; } = "";
-    public List<string> DrawingPlayersTokens = new List<string>();
-    public List<string> NoChatPermissionTokens = new List<string>();
-    public int CorrectAnswerCount = 0;
+    public List<string> DrawingPlayersTokens { get; set; } = new List<string>();
+    public List<string> NoChatPermissionTokens { get; set; }= new List<string>();
+    public int CorrectAnswerCount { get; set; } = 0;
 }

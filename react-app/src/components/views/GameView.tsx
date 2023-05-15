@@ -38,6 +38,7 @@ function GameView() {
   const [playerScores, setPlayerScores] = useState<PlayerScore[]>([]);
   const [isPlayerHost, setIsPlayerHost] = useState<boolean>(false);
   const [isGameDisplayed, setIsGameDisplayed] = useState<boolean>(false);
+  const [isGameFinished, setIsGameFinished] = useState<boolean>(false);
   const [isStartGameButtonActive, setIsStartGameButtonActive] = useState<boolean>(false);
 
   const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
@@ -99,6 +100,7 @@ function GameView() {
       });
 
       hub.on(HubEvents.onEndGame, () => {
+        setIsGameFinished(true);
         displayAlert("Game has been finished", "success");
         navigate(config.mainClientEndpoint);
       });
@@ -116,7 +118,11 @@ function GameView() {
       hub.off(HubEvents.onJoinGame);
       hub.off(HubEvents.onJoinGameError);
       hub.off(HubEvents.onGameProblem);
-      await hub.invoke(HubEvents.leaveGame, token);
+
+      if (!isGameFinished) {
+        await hub.invoke(HubEvents.leaveGame, token);
+      }
+
       dispatch(clearedGameState());
     }
 
