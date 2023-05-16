@@ -18,8 +18,8 @@ class RandomWordFetcher
         {
             case "en":
                 return await FetchEnglishWord(game);
-            //case "pl":
-                //return await FetchPolishWord(game);
+            case "pl":
+                return await FetchPolishWord(game);
             default:
                 return await FetchEnglishWord(game);
         }

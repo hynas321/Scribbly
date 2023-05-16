@@ -7,18 +7,25 @@ export const useDraw = (onDraw: (
     canvasContext: CanvasRenderingContext2D,
     line: DrawnLine) => void,
   hub: Hub,
-  color: string) => {
+  color: string,
+  thickness: number) => {
   const [mouseDown, setMouseDown] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previousRelativePoint = useRef<Point | null>(null);
   const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
+  const [currentLineNumber, setCurrentLineNumber] = useState<number>(0);
 
   const onMouseDown = () => {
+    setCurrentLineNumber(currentLineNumber + 1);
     setMouseDown(true);
   }
 
-  const clearCanvas = () => {
-    hub.invoke(HubEvents.clearCanvas, token);
+  const clearCanvas = async () => {
+    await hub.invoke(HubEvents.clearCanvas, token);
+  }
+
+  const undoLine = async () => {
+    await hub.invoke(HubEvents.undoLine, token);
   }
 
   useEffect(() => {
@@ -41,7 +48,7 @@ export const useDraw = (onDraw: (
 
     hub.on(HubEvents.onLoadCanvas, (drawnLinesSerialized) => {
       const drawnLines = JSON.parse(drawnLinesSerialized) as DrawnLine[];
-
+      console.log(drawnLinesSerialized);
       for (let i = 0; i < drawnLines.length; i++) {
         onDraw(canvasContext, drawnLines[i]);
       }
@@ -70,6 +77,7 @@ export const useDraw = (onDraw: (
   useEffect(() => {
     const handler = (event: MouseEvent) => {
       if (!mouseDown) {
+        console.log(currentLineNumber);
         return;
       }
 
@@ -83,10 +91,11 @@ export const useDraw = (onDraw: (
       const drawnLine: DrawnLine = {
         currentPoint: currentRelativePoint,
         previousPoint: previousRelativePoint.current!,
-        color: color
+        color: color,
+        thickness: thickness,
+        currentLine: currentLineNumber
       }
 
-      //onDraw(canvasContext, drawnLine);
       previousRelativePoint.current = drawnLine.currentPoint;
       
       hub.invoke(HubEvents.drawOnCanvas, token, JSON.stringify(drawnLine));
@@ -120,5 +129,5 @@ export const useDraw = (onDraw: (
     }
   }, [onDraw])
 
-  return { canvasRef, onMouseDown, clearCanvas }
+  return { canvasRef, onMouseDown, clearCanvas, undoLine }
 }

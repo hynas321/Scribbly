@@ -45,6 +45,7 @@ class HubEvents {
   static loadCanvas: string = "LoadCanvas";
   static drawOnCanvas: string = "DrawOnCanvas";
   static clearCanvas: string = "ClearCanvas";
+  static undoLine: string = "UndoLine";
   static onLoadCanvas: string = "OnLoadCanvas";
   static onDrawOnCanvas: string = "OnDrawOnCanvas";
   static onClearCanvas: string = "OnClearCanvas";

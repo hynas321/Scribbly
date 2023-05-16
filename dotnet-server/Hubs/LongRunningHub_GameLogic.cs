@@ -198,9 +198,8 @@ public partial class LongRunningHubConnection : Hub
                 {   
                     await accountHubContext.Clients.All.SendAsync(HubEvents.OnUpdateAccountScore);
                     await SetCanvasText($"Thank you for playing! Automatic disconnection in 10s", BootstrapColors.Green);
-                    await Task.Delay(5000);
+                    await Task.Delay(10000);
                     gameManager.RemoveGame();
-                    await Task.Delay(5000);
                     await hubContext.Clients.All.SendAsync(HubEvents.OnEndGame);
                     break;
                 }

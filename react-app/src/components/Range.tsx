@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 interface RangeProps {
   title: string;
+  suffix: string;
   minValue: number;
   maxValue: number;
   step: number;
@@ -9,7 +10,7 @@ interface RangeProps {
   onChange: (value: number) => void;
 }
 
-function Range({title, minValue, maxValue, step, defaultValue, onChange}: RangeProps) {
+function Range({title, suffix, minValue, maxValue, step, defaultValue, onChange}: RangeProps) {
   const [value, setValue] = useState(defaultValue);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,7 +23,7 @@ function Range({title, minValue, maxValue, step, defaultValue, onChange}: RangeP
   
   return (
     <>
-      <label className="form-label">{`${title}: ${value} seconds`}</label>
+      <label className="form-label">{`${title}: ${value} ${suffix}`}</label>
       <input 
         className="form-range"
         type="range"

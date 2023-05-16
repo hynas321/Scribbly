@@ -22,6 +22,7 @@ function InputSelect({title, defaultValue, onChange}: InputSelectProps) {
         <label className="form-label">{title}</label>
         <select className="form-select" value={selectedValue} onChange={handleChange}>
           <option value="en">English</option>
+          <option value="pl">Polish</option>
         </select>
       </>
   )

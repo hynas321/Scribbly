@@ -89,7 +89,46 @@ public partial class HubConnection : Hub
                 return;
             }
 
+            game.GameState.DrawnLines.Clear();
+
             await Clients.All.SendAsync(HubEvents.OnClearCanvas);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(Convert.ToString(ex));
+        }
+    }
+
+    [HubMethodName(HubEvents.UndoLine)]
+    public async Task UndoLine(string token)
+    {
+        try 
+        {
+            Game game = gameManager.GetGame();
+
+            if (game == null)
+            {
+                logger.LogError($"UndoLine: Game does not exist");
+                return;
+            }
+
+            if (token != game.GameState.DrawingToken)
+            {
+                logger.LogError($"UndoLine: Player with the token {token} cannot undo line the canvas");
+                return;
+            }
+
+            List<DrawnLine> drawnLines = game.GameState.DrawnLines;
+
+            if (drawnLines.Count > 0)
+            {
+                int lastNumber = drawnLines.Last().CurrentLine;
+
+                drawnLines.RemoveAll(line => line.CurrentLine == lastNumber);
+
+                await Clients.All.SendAsync(HubEvents.OnClearCanvas);
+                await Clients.All.SendAsync(HubEvents.OnLoadCanvas, JsonHelper.Serialize(drawnLines));
+            }
         }
         catch (Exception ex)
         {
