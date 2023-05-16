@@ -11,6 +11,8 @@ import { useAppSelector } from "../../redux/hooks";
 import { useDispatch } from "react-redux";
 import { updatedCurrentDrawingTimeSeconds, updatedIsTimerVisible } from "../../redux/slices/game-state-slice";
 import useLocalStorageState from "use-local-storage-state";
+import { BsEraserFill } from "react-icons/bs";
+import Range from '../Range';
 
 function Canvas() {
   const hub = useContext(ConnectionHubContext);
@@ -21,12 +23,13 @@ function Canvas() {
   const gameSettings = useAppSelector((state) => state.gameSettings);
 
   const [color, setColor] = useState<string>("#000000");
+  const [thickness, setThickness] = useState<number>(5);
   const [canvasTitle, setCanvasTitle] = useState<AnnouncementMessage | null>(null);
   const [isPlayerDrawing, setIsPlayerDrawing] = useState<boolean>(false);
 
   const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
 
-  const { canvasRef, onMouseDown, clearCanvas } = useDraw(draw, hub, color);
+  const { canvasRef, onMouseDown, clearCanvas } = useDraw(draw, hub, color, thickness);
 
   const circlePickerColors = [material.black, material.red['500'],
     material.pink['500'], material.purple['500'], material.deepPurple['500'],
@@ -38,21 +41,21 @@ function Canvas() {
 
   function draw(canvasContext: CanvasRenderingContext2D, drawnLine: DrawnLine) {
     const {x: currentRelativeX, y: currentRelativeY} = drawnLine.currentPoint;
-    const lineWidth = 5;
 
     let relativeStartPoint = drawnLine.previousPoint ?? drawnLine.currentPoint;
       
     canvasContext.beginPath();
-    canvasContext.lineWidth = lineWidth;
+    canvasContext.lineWidth = drawnLine.thickness;
+    canvasContext.lineCap = "round";
     canvasContext.strokeStyle = drawnLine.color;
     canvasContext.moveTo(relativeStartPoint.x, relativeStartPoint.y);
     canvasContext.lineTo(currentRelativeX, currentRelativeY);
     canvasContext.stroke();
-    canvasContext.fillStyle = drawnLine.color;
-    canvasContext.beginPath();
-    canvasContext.arc(relativeStartPoint.x, relativeStartPoint.y, 2, 0, 2 * Math.PI);
-    canvasContext.fill();
   }
+
+  const handleThicknessRangeChange = (thickness: number) => {
+    setThickness(thickness);
+  };
 
   useEffect(() => {
     if (hub.getState() !== signalR.HubConnectionState.Connected) {
@@ -128,12 +131,24 @@ function Canvas() {
               colors={circlePickerColors}
             />
           </div>
-          <div>
+          <div className="d-flex justify-content-center">
             <Button 
               text={"Clear canvas"}
               active={true}
+              icon={<BsEraserFill/>}
               onClick={clearCanvas}
             />
+            <div className="mx-3">
+              <Range
+                title={"Thickness"}
+                suffix={""}
+                minValue={5}
+                maxValue={30}
+                step={5}
+                defaultValue={5}
+                onChange={handleThicknessRangeChange} 
+              />
+            </div>
           </div>
         </>
       }

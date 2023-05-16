@@ -112,6 +112,7 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
         { isPlayerHost ?
           <Range
             title={drawingTimeText}
+            suffix={"seconds"}
             minValue={30}
             maxValue={120}
             step={15}

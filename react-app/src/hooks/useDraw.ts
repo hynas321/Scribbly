@@ -7,7 +7,8 @@ export const useDraw = (onDraw: (
     canvasContext: CanvasRenderingContext2D,
     line: DrawnLine) => void,
   hub: Hub,
-  color: string) => {
+  color: string,
+  thickness: number) => {
   const [mouseDown, setMouseDown] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previousRelativePoint = useRef<Point | null>(null);
@@ -83,10 +84,10 @@ export const useDraw = (onDraw: (
       const drawnLine: DrawnLine = {
         currentPoint: currentRelativePoint,
         previousPoint: previousRelativePoint.current!,
-        color: color
+        color: color,
+        thickness: thickness
       }
 
-      //onDraw(canvasContext, drawnLine);
       previousRelativePoint.current = drawnLine.currentPoint;
       
       hub.invoke(HubEvents.drawOnCanvas, token, JSON.stringify(drawnLine));
