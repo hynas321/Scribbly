@@ -47,6 +47,7 @@ public static class HubEvents
     public const string LoadCanvas = "LoadCanvas";
     public const string DrawOnCanvas = "DrawOnCanvas";
     public const string ClearCanvas = "ClearCanvas";
+    public const string UndoLine = "UndoLine";
     public const string OnLoadCanvas = "OnLoadCanvas";
     public const string OnDrawOnCanvas = "OnDrawOnCanvas";
     public const string OnClearCanvas = "OnClearCanvas";

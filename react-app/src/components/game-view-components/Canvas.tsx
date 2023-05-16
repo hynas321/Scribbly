@@ -11,7 +11,7 @@ import { useAppSelector } from "../../redux/hooks";
 import { useDispatch } from "react-redux";
 import { updatedCurrentDrawingTimeSeconds, updatedIsTimerVisible } from "../../redux/slices/game-state-slice";
 import useLocalStorageState from "use-local-storage-state";
-import { BsEraserFill } from "react-icons/bs";
+import { BsArrowReturnLeft, BsEraserFill } from "react-icons/bs";
 import Range from '../Range';
 
 function Canvas() {
@@ -29,7 +29,7 @@ function Canvas() {
 
   const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
 
-  const { canvasRef, onMouseDown, clearCanvas } = useDraw(draw, hub, color, thickness);
+  const { canvasRef, onMouseDown, clearCanvas, undoLine } = useDraw(draw, hub, color, thickness);
 
   const circlePickerColors = [material.black, material.red['500'],
     material.pink['500'], material.purple['500'], material.deepPurple['500'],
@@ -132,6 +132,12 @@ function Canvas() {
             />
           </div>
           <div className="d-flex justify-content-center">
+            <Button 
+              text={"Undo"}
+              active={true}
+              icon={<BsArrowReturnLeft/>}
+              onClick={undoLine}
+            />
             <Button 
               text={"Clear canvas"}
               active={true}

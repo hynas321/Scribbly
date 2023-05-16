@@ -13,13 +13,19 @@ export const useDraw = (onDraw: (
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previousRelativePoint = useRef<Point | null>(null);
   const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
+  const [currentLineNumber, setCurrentLineNumber] = useState<number>(0);
 
   const onMouseDown = () => {
+    setCurrentLineNumber(currentLineNumber + 1);
     setMouseDown(true);
   }
 
-  const clearCanvas = () => {
-    hub.invoke(HubEvents.clearCanvas, token);
+  const clearCanvas = async () => {
+    await hub.invoke(HubEvents.clearCanvas, token);
+  }
+
+  const undoLine = async () => {
+    await hub.invoke(HubEvents.undoLine, token);
   }
 
   useEffect(() => {
@@ -42,7 +48,7 @@ export const useDraw = (onDraw: (
 
     hub.on(HubEvents.onLoadCanvas, (drawnLinesSerialized) => {
       const drawnLines = JSON.parse(drawnLinesSerialized) as DrawnLine[];
-
+      console.log(drawnLinesSerialized);
       for (let i = 0; i < drawnLines.length; i++) {
         onDraw(canvasContext, drawnLines[i]);
       }
@@ -71,6 +77,7 @@ export const useDraw = (onDraw: (
   useEffect(() => {
     const handler = (event: MouseEvent) => {
       if (!mouseDown) {
+        console.log(currentLineNumber);
         return;
       }
 
@@ -85,7 +92,8 @@ export const useDraw = (onDraw: (
         currentPoint: currentRelativePoint,
         previousPoint: previousRelativePoint.current!,
         color: color,
-        thickness: thickness
+        thickness: thickness,
+        currentLine: currentLineNumber
       }
 
       previousRelativePoint.current = drawnLine.currentPoint;
@@ -121,5 +129,5 @@ export const useDraw = (onDraw: (
     }
   }, [onDraw])
 
-  return { canvasRef, onMouseDown, clearCanvas }
+  return { canvasRef, onMouseDown, clearCanvas, undoLine }
 }
