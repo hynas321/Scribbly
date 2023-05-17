@@ -30,24 +30,21 @@ public class GameController : ControllerBase
 
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
-
-            if (gameManager.GetGame() != null)
-            {
-                logger.LogError("Create Status: 409. Conflict");
-
-                return StatusCode(StatusCodes.Status409Conflict);
-            }
             
             Game game = new Game();
+            string gameHash = Guid.NewGuid().ToString().Replace("-", "");
 
-            gameManager.SetGame(game);
+            game.GameState.HostPlayerUsername = body.Username;
+            gameManager.CreateGame(game, gameHash);
 
             CreateGameResponse response = new CreateGameResponse()
             {
+                GameHash = gameHash,
                 HostToken = game.HostToken
             };
 
-            logger.LogInformation($"Create Status: 201. Game has been created. Host token: {response.HostToken}");
+            logger.LogInformation($"Create Status: 201. Game has been created with gameHash: {response.GameHash}. " +
+                $"Host token: {response.HostToken}");
             
             return StatusCode(StatusCodes.Status201Created, JsonHelper.Serialize(response));
         }
@@ -59,8 +56,8 @@ public class GameController : ControllerBase
         }
     }
 
-    [HttpDelete("Remove")]
-    public IActionResult Remove([FromHeader(Name = Headers.Token)] string token)
+    [HttpDelete("Remove/{gameHash}")]
+    public IActionResult Remove([FromRoute] string gameHash, [FromHeader(Name = Headers.Token)] string token)
     {
         try 
         {
@@ -71,7 +68,7 @@ public class GameController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             if (game == null)
             {
@@ -86,7 +83,7 @@ public class GameController : ControllerBase
                 return StatusCode(StatusCodes.Status401Unauthorized);
             }
 
-            gameManager.RemoveGame();
+            gameManager.RemoveGame(gameHash);
 
             logger.LogInformation("Remove Status: 200. OK");
 
@@ -100,8 +97,8 @@ public class GameController : ControllerBase
         }
     }
 
-    [HttpGet("Exists")]
-    public IActionResult Exists()
+    [HttpGet("Exists/{gameHash}")]
+    public IActionResult Exists([FromRoute] string gameHash)
     {
         try 
         {
@@ -112,7 +109,7 @@ public class GameController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            bool gameExists = gameManager.GetGame() != null;
+            bool gameExists = gameManager.GetGame(gameHash) != null;
 
             logger.LogInformation("Exists Status: 200. OK");
 
@@ -126,8 +123,8 @@ public class GameController : ControllerBase
         }
     }
 
-    [HttpGet("IsStarted")]
-    public IActionResult IsStarted()
+    [HttpGet("IsStarted/{gameHash}")]
+    public IActionResult IsStarted([FromRoute] string gameHash)
     {
         try 
         {
@@ -138,7 +135,7 @@ public class GameController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             if (game == null)
             {
@@ -160,8 +157,8 @@ public class GameController : ControllerBase
         }
     }
 
-    [HttpGet("Get")]
-    public IActionResult Get()
+    [HttpGet("Get/{gameHash}")]
+    public IActionResult Get([FromRoute] string gameHash)
     {
         try 
         {
@@ -172,7 +169,7 @@ public class GameController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             if (game == null)
             {

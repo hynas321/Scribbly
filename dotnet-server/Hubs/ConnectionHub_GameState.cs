@@ -6,19 +6,19 @@ namespace Dotnet.Server.Hubs;
 public partial class HubConnection : Hub
 {
     [HubMethodName(HubEvents.GetSecretWord)]
-    public async Task GetSecretWord(string token)
+    public async Task GetSecretWord(string gameHash, string token)
     {
         try
         {
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             if (game == null)
             {
-                logger.LogError($"GetSecretWord: Game does not exist");
+                //logger.LogError($"GetSecretWord: Game does not exist");
                 return;
             }
 
-            Player player = gameManager.GetPlayerByToken(token);
+            Player player = gameManager.GetPlayerByToken(gameHash, token);
 
             if (player == null)
             {
@@ -45,11 +45,11 @@ public partial class HubConnection : Hub
         }
     }
 
-    public async Task AddPlayerScoreAndAnnouncement(string token)
+    public async Task AddPlayerScoreAndAnnouncement(string gameHash, string token)
     {
         try 
         {
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             if (game == null)
             {
@@ -57,7 +57,7 @@ public partial class HubConnection : Hub
                 return;
             }
 
-            Player player = gameManager.GetPlayerByToken(token);
+            Player player = gameManager.GetPlayerByToken(gameHash, token);
 
             if (player == null)
             {
@@ -107,7 +107,7 @@ public partial class HubConnection : Hub
                 score = 2;
             }
 
-            gameManager.UpdatePlayerScore(player.Token, score);
+            gameManager.UpdatePlayerScore(gameHash, player.Token, score);
             game.GameState.CorrectAnswerCount++;
 
             await SendAnnouncement($"{player.Username} guessed the word (+{score} points)", BootstrapColors.Green);

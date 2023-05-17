@@ -1,19 +1,23 @@
 class ApiEndpoints {
+  //Hub connections
   static hubConnectionEndpoint: string = "/hub/connection";
   static longRunningHubConnectionEndpoint: string = "/long-running-hub/connection";
   static accountHubConnectionEndpoint: string = "/account-hub/connection";
+
+  //GameController
   static gameCreate: string = "/api/Game/Create";
   static gameIsStarted: string = "/api/Game/IsStarted";
   static gameExists: string = "/api/Game/Exists";
-  static gameGetHash: string = "/api/Game/GetHash";
+
+  //PlayerController
   static playerJoinGame: string = "/api/Player/JoinGame";
-  static playerHost: string = "/api/Player/IsHost";
   static playerExists: string = "/api/Player/Exists";
-  static playerUsernameExists: string = "/api/Player/UsernameExists/";
+
+  //AccountController
   static accountAddIfNotExists: string = "/api/Account/Add";
   static accountIncrementScore: string = "/api/Account/IncrementScore";
   static accountGetScore: string = "/api/Account/GetScore";
-  static scoreboardGet: string = "/api/Account/GetTop";
+  static accountGetTopScores: string = "/api/Account/GetTop";
 }
 
 export default ApiEndpoints;

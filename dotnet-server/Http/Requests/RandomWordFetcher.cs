@@ -9,10 +9,10 @@ class RandomWordFetcher
     private static string[] spareEnglishWords = new string[] { "greetings", "traveller", "spare", "words", "server", "project", "application"};
     private static string[] sparePolishWords = new string[] { "przywitanie", "podróżnik", "zapasowy", "słowa", "serwer", "projekt", "aplikacja"};
 
-    public static async Task<string> FetchWordAsync()
+    public static async Task<string> FetchWordAsync(string gameHash)
     {
         GameManager gameManager = new GameManager();
-        Game game = gameManager.GetGame();
+        Game game = gameManager.GetGame(gameHash);
 
         switch (game.GameSettings.WordLanguage)
         {

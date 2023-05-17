@@ -7,7 +7,7 @@ namespace Dotnet.Server.Hubs;
 public partial class HubConnection : Hub
 {
     [HubMethodName(HubEvents.SendChatMessage)]
-    public async Task SendChatMessage(string token, string text)
+    public async Task SendChatMessage(string gameHash, string token, string text)
     {
         try 
         {
@@ -17,7 +17,7 @@ public partial class HubConnection : Hub
                 return;
             }
 
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             if (game == null)
             {
@@ -25,7 +25,7 @@ public partial class HubConnection : Hub
                 return;
             }
 
-            Player player = gameManager.GetPlayerByToken(token);
+            Player player = gameManager.GetPlayerByToken(gameHash, token);
 
             if (player == null)
             {
@@ -53,9 +53,9 @@ public partial class HubConnection : Hub
 
             if (message.Text.ToLower().Trim() == game.GameState.ActualSecretWord && game.GameState.DrawingToken != "")
             {
-                await AddPlayerScoreAndAnnouncement(player.Token);
+                await AddPlayerScoreAndAnnouncement(gameHash, player.Token);
 
-                List<PlayerScore> playerScores = gameManager.GetPlayerObjectsWithoutToken();
+                List<PlayerScore> playerScores = gameManager.GetPlayerObjectsWithoutToken(gameHash);
                 List<string> correctguessPlayerUsernames = game.GameState.CorrectGuessPlayerUsernames;
 
                 game.GameState.NoChatPermissionTokens.Add(token);
@@ -66,7 +66,7 @@ public partial class HubConnection : Hub
                 return;
             }
 
-            gameManager.AddChatMessage(message);
+            gameManager.AddChatMessage(gameHash, message);
 
             await Clients.All.SendAsync(HubEvents.OnSendChatMessage, JsonHelper.Serialize(message));
 
@@ -79,11 +79,11 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.LoadChatMessages)]
-    public async Task LoadChatMessages(string token)
+    public async Task LoadChatMessages(string gameHash, string token)
     {
         try 
         {
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             if (game == null)
             {
@@ -91,7 +91,7 @@ public partial class HubConnection : Hub
                 return;
             }
 
-            Player player = gameManager.GetPlayerByToken(token);
+            Player player = gameManager.GetPlayerByToken(gameHash, token);
 
             if (player == null)
             {

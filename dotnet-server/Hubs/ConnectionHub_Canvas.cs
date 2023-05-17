@@ -8,11 +8,11 @@ namespace Dotnet.Server.Hubs;
 public partial class HubConnection : Hub
 {
     [HubMethodName(HubEvents.DrawOnCanvas)]
-    public async Task DrawOnCanvas(string token, string drawnLineSerialized)
+    public async Task DrawOnCanvas(string gameHash, string token, string drawnLineSerialized)
     {   
         try 
         {
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             if (game == null)
             {
@@ -45,11 +45,11 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.LoadCanvas)]
-    public async Task LoadCanvas(string token)
+    public async Task LoadCanvas(string gameHash, string token)
     {
         try 
         {
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             if (game == null)
             {
@@ -71,11 +71,11 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.ClearCanvas)]
-    public async Task ClearCanvas(string token)
+    public async Task ClearCanvas(string gameHash, string token)
     {   
         try 
         {
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             if (game == null)
             {
@@ -100,11 +100,11 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.UndoLine)]
-    public async Task UndoLine(string token)
+    public async Task UndoLine(string gameHash, string token)
     {
         try 
         {
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             if (game == null)
             {

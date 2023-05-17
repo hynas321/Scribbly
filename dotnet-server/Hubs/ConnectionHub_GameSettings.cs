@@ -7,11 +7,11 @@ namespace Dotnet.Server.Hubs;
 public partial class HubConnection : Hub
 {
     [HubMethodName(HubEvents.SetAbstractNouns)]
-    public async Task SetAbstractNouns(string token, bool setting)
+    public async Task SetAbstractNouns(string gameHash, string token, bool setting)
     {
         try
         {
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             if (game == null)
             {
@@ -41,11 +41,11 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.SetDrawingTimeSeconds)]
-    public async Task SetDrawingTimeSeconds(string token, int setting)
+    public async Task SetDrawingTimeSeconds(string gameHash, string token, int setting)
     {
         try
         {
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             if (game == null)
             {
@@ -75,11 +75,11 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.SetRoundsCount)]
-    public async Task SetRoundsCount(string token, int setting)
+    public async Task SetRoundsCount(string gameHash, string token, int setting)
     {
         try
         {
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             if (game == null)
             {
@@ -109,11 +109,11 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.SetWordLanguage)]
-    public async Task SetWordLanguageSetting(string token, string setting)
+    public async Task SetWordLanguageSetting(string gameHash, string token, string setting)
     {
         try
         {
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             if (game == null)
             {
@@ -143,11 +143,11 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.LoadGameSettings)]
-    public async Task LoadGameSettings(string token)
+    public async Task LoadGameSettings(string gameHash, string token)
     {
         try
         {
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             if (game == null)
             {
@@ -155,7 +155,7 @@ public partial class HubConnection : Hub
                 return;
             }
 
-            bool playerExists = gameManager.CheckIfPlayerExistsByToken(token);
+            bool playerExists = gameManager.CheckIfPlayerExistsByToken(gameHash, token);
 
             if (!playerExists)
             {

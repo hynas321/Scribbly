@@ -20,17 +20,13 @@ function ClipboardBar({invitationUrl}: ClipboardBarProps) {
   
   return (
     <>
-      <div className="d-flex align-items-center">
-        <h3><BsPersonAdd/></h3>
-        <span className="mx-2"><b>{"Invitation hash - share it to invite your friends!"}</b></span>
-      </div>
       <CopyToClipboard 
         text={invitationUrl}
         onCopy={handleCopy}
       >
         <div className="d-flex align-items-center">
           <Button
-            text={"Copy to clipboard"}
+            text={"Copy invitation URL"}
             active={true}
             icon={<BsClipboard />}
           />

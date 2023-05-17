@@ -8,7 +8,7 @@ public partial class HubConnection : Hub
 {
 
     [HubMethodName(HubEvents.JoinGame)]
-    public async Task JoinGame(string token, string username)
+    public async Task JoinGame(string gameHash, string token, string username)
     {
         try 
         {
@@ -21,7 +21,7 @@ public partial class HubConnection : Hub
                 return;
             }
 
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             if (game == null)
             {
@@ -44,9 +44,9 @@ public partial class HubConnection : Hub
                 };
 
                 game.GameState.HostPlayerUsername = player.Username;
-                gameManager.AddPlayer(player);
+                gameManager.AddPlayer(gameHash, player);
             }
-            else if (!gameManager.CheckIfPlayerExistsByUsername(username))
+            else if (!gameManager.CheckIfPlayerExistsByUsername(gameHash, username))
             {
                 player = new Player()
                 {
@@ -55,9 +55,9 @@ public partial class HubConnection : Hub
                     Token = Guid.NewGuid().ToString().Replace("-", ""),
                 };
 
-                gameManager.AddPlayer(player);
+                gameManager.AddPlayer(gameHash, player);
             }
-            else if (gameManager.CheckIfPlayerExistsByUsername(username))
+            else if (gameManager.CheckIfPlayerExistsByUsername(gameHash, username))
             {
                 string errorMessage = "User with your username already exists";
 
@@ -80,7 +80,7 @@ public partial class HubConnection : Hub
                 Score = player.Score
             };
 
-            List<PlayerScore> playerScores = gameManager.GetPlayerObjectsWithoutToken();
+            List<PlayerScore> playerScores = gameManager.GetPlayerObjectsWithoutToken(gameHash);
 
             GameSettings settingsClient = new GameSettings()
             {
@@ -122,11 +122,11 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.LeaveGame)]
-    public async Task LeaveGame(string token)
+    public async Task LeaveGame(string gameHash, string token)
     {
         try
         {
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
             
             if (game == null)
             {
@@ -134,7 +134,7 @@ public partial class HubConnection : Hub
                 return;
             }
 
-            Player player = gameManager.GetPlayerByToken(token);
+            Player player = gameManager.GetPlayerByToken(gameHash, token);
 
             if (player == null)
             {
@@ -142,18 +142,18 @@ public partial class HubConnection : Hub
                 return;
             }
 
-            gameManager.RemovePlayer(token);
+            gameManager.RemovePlayer(gameHash, token);
 
             if (game.GameState.Players.Count == 0)
             {
-                gameManager.SetGame(null);
+                gameManager.RemoveGame(gameHash);
                 logger.LogInformation($"LeaveGame: Game removed - no online players");
                 return;
             }
 
             if (!game.GameState.IsGameStarted && token == game.HostToken)
             {
-                gameManager.SetGame(null);
+                gameManager.RemoveGame(gameHash);
 
                 AnnouncementMessage message = new AnnouncementMessage()
                 {
@@ -169,7 +169,7 @@ public partial class HubConnection : Hub
 
             if (game.GameState.IsGameStarted && game.GameState.Players.Count < 2)
             {
-                gameManager.SetGame(null);
+                gameManager.RemoveGame(gameHash);
 
                 AnnouncementMessage message = new AnnouncementMessage()
                 {
@@ -180,7 +180,7 @@ public partial class HubConnection : Hub
                 await Clients.AllExcept(Context.ConnectionId).SendAsync(HubEvents.OnGameProblem, JsonHelper.Serialize(message));
             }
 
-            List<PlayerScore> playerScores = gameManager.GetPlayerObjectsWithoutToken();
+            List<PlayerScore> playerScores = gameManager.GetPlayerObjectsWithoutToken(gameHash);
             string playerListSerialized = JsonHelper.Serialize(playerScores);
 
             logger.LogInformation($"JoinGame: {player.Username} left the game");

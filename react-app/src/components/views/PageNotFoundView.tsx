@@ -3,7 +3,7 @@ import Button from '../Button';
 import config from '../../../config.json';
 import { Link } from 'react-router-dom';
 
-function PageNotFound() {
+function PageNotFoundView() {
   return (
     <div className="container text-center mt-3">
       <h3 className="mt-3">Page not found</h3>
@@ -21,4 +21,4 @@ function PageNotFound() {
   )
 }
 
-export default PageNotFound;
+export default PageNotFoundView;

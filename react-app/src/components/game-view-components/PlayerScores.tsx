@@ -57,9 +57,11 @@ function PlayerScores({title, playerScores, displayPoints, displayIndex, display
           <li
             key={index}
             className={`list-group-item d-flex justify-content-between align-items-center
-            ${gameState.correctGuessPlayerUsernames != undefined &&
+            ${
+              gameState.correctGuessPlayerUsernames != undefined &&
               gameState.correctGuessPlayerUsernames.includes(playerScore.username) ? "bg-custom-lime" :
-              gameState.drawingPlayerUsername == playerScore.username ? "bg-light" : "bg-white"}`}
+              gameState.drawingPlayerUsername == playerScore.username ? "bg-light" : "bg-white"}`
+            }
             style={{overflowWrap: "break-word"}}
           >
             { displayIndex && "#" + (index + 1)}

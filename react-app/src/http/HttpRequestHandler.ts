@@ -30,13 +30,13 @@ class HttpRequestHandler {
     }
   }
 
-  async joinGame(token: string, username: string): Promise<any> {
+  async joinGame(gameHash: string, token: string, username: string): Promise<any> {
     const requestBody: JoinGameBody = {
       username: username
     };
 
     try {
-      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.playerJoinGame}`, {
+      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.playerJoinGame}/${gameHash}`, {
         method: 'POST',
         body: JSON.stringify(requestBody),
         headers: {
@@ -56,9 +56,9 @@ class HttpRequestHandler {
     }
   }
 
-  async checkIfGameIsStarted(): Promise<any> {
+  async checkIfGameIsStarted(gameHash: string): Promise<any> {
     try {
-      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.gameIsStarted}`);
+      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.gameIsStarted}/${gameHash}`);
 
       if (!response.ok) {
         throw new Error("Error");
@@ -71,9 +71,9 @@ class HttpRequestHandler {
     }
   }
 
-  async checkIfGameExists(): Promise<any> {
+  async checkIfGameExists(gameHash: string): Promise<any> {
     try {
-      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.gameExists}`);
+      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.gameExists}/${gameHash}`);
 
       if (!response.ok) {
         throw new Error("Error");
@@ -86,29 +86,9 @@ class HttpRequestHandler {
     }
   }
   
-  async fetchGameHash(token: string): Promise<any> {
+  async checkIfPlayerExists(gameHash: string, token: string): Promise<any> {
     try {
-      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.gameGetHash}`, {
-        headers: {
-          'Token': token
-        }
-      });
-  
-      if (!response.ok) {
-        throw new Error("Error");
-      }
-
-      return await response.text();
-
-    }
-    catch (error) {
-      return error;
-    }
-  }
-  
-  async checkIfPlayerExists(token: string): Promise<any> {
-    try {
-      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.playerExists}`, {
+      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.playerExists}/${gameHash}`, {
         headers: {
           'Token': token
         }
@@ -124,44 +104,10 @@ class HttpRequestHandler {
       return error;
     }
   }
-  
-  async checkIfPlayerIsHost(token: string): Promise<any> {
+
+  async fetchTopAccountScores(): Promise<any> {
     try {
-      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.playerHost}`, {
-        headers: {
-          'Token': token
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error("Error");
-      }
-
-      return await response.json() as PlayerIsHostResponse;
-    }
-    catch (error) {
-      return error;
-    }
-  }
-
-  async checkIfUsernameExists(username: string): Promise<any> {
-    try {
-      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.playerUsernameExists}${username}`);
-
-      if (!response.ok) {
-        throw new Error("Error");
-      }
-
-      return await response.json() as boolean;
-    }
-    catch (error) {
-      return error;
-    }
-  }
-
-  async fetchPlayerScores(): Promise<any> {
-    try {
-      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.scoreboardGet}`);
+      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.accountGetTopScores}`);
 
       if (!response.ok) {
         throw new Error("Error");
@@ -224,9 +170,9 @@ class HttpRequestHandler {
     }
   }
 
-  async updateAccountScore(token: string, accessToken: string): Promise<any> {
+  async updateAccountScore(gameHash: string, token: string, accessToken: string): Promise<any> {
     try {
-      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.accountIncrementScore}`, {
+      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.accountIncrementScore}/${gameHash}`, {
         method: 'POST',
         headers: {
           'Token': token,
