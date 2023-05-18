@@ -15,13 +15,13 @@ public partial class HubConnection : Hub
 
             if (game == null)
             {
-                logger.LogError($"SetAbstractNouns: Game does not exist");
+                logger.LogError($"Game #{gameHash} SetAbstractNouns: Game does not exist");
                 return;
             }
 
             if (token != game.HostToken)
             {
-                logger.LogError($"SetAbstractNouns: Player with the token {token} is not a host");
+                logger.LogError($"Game #{gameHash} SetAbstractNouns: Player with the token {token} is not a host");
                 return;
             }
 
@@ -30,9 +30,9 @@ public partial class HubConnection : Hub
             settings.NounsOnly = setting;
             game.GameSettings = settings;
 
-            await Clients.All.SendAsync(HubEvents.OnSetAbstractNouns, setting);
+            await Clients.Group(gameHash).SendAsync(HubEvents.OnSetAbstractNouns, setting);
 
-            logger.LogInformation($"SetAbstractNouns: Setting set to {setting}");
+            logger.LogInformation($"Game #{gameHash} SetAbstractNouns: Setting set to {setting}");
         }
         catch (Exception ex)
         {
@@ -49,13 +49,13 @@ public partial class HubConnection : Hub
 
             if (game == null)
             {
-                logger.LogError($"SetDrawingTimeSeconds: Game does not exist");
+                logger.LogError($"Game #{gameHash} SetDrawingTimeSeconds: Game does not exist");
                 return;
             }
 
             if (token != game.HostToken)
             {
-                logger.LogError($"SetDrawingTimeSeconds: Player with the token {token} is not a host");
+                logger.LogError($"Game #{gameHash} SetDrawingTimeSeconds: Player with the token {token} is not a host");
                 return;
             }
 
@@ -64,9 +64,9 @@ public partial class HubConnection : Hub
             settings.DrawingTimeSeconds = setting;
             game.GameSettings = settings;
 
-            await Clients.All.SendAsync(HubEvents.OnSetDrawingTimeSeconds, setting);
+            await Clients.Group(gameHash).SendAsync(HubEvents.OnSetDrawingTimeSeconds, setting);
 
-            logger.LogInformation($"SetDrawingTimeSeconds: Setting set to {setting}");
+            logger.LogInformation($"Game #{gameHash} SetDrawingTimeSeconds: Setting set to {setting}");
         }
         catch (Exception ex)
         {
@@ -83,13 +83,13 @@ public partial class HubConnection : Hub
 
             if (game == null)
             {
-                logger.LogError($"SetRoundsCount: Game does not exist");
+                logger.LogError($"Game #{gameHash} SetRoundsCount: Game does not exist");
                 return;
             }
 
             if (token != game.HostToken)
             {
-                logger.LogError($"SetRoundsCount: Player with the token {token} is not a host");
+                logger.LogError($"Game #{gameHash} SetRoundsCount: Player with the token {token} is not a host");
                 return;
             }
 
@@ -98,9 +98,9 @@ public partial class HubConnection : Hub
             settings.RoundsCount = setting;
             game.GameSettings = settings;
 
-            await Clients.All.SendAsync(HubEvents.OnSetRoundsCount, setting);
+            await Clients.Group(gameHash).SendAsync(HubEvents.OnSetRoundsCount, setting);
 
-            logger.LogInformation($"SetRoundsCount: Setting set to {setting}");
+            logger.LogInformation($"Game #{gameHash} SetRoundsCount: Setting set to {setting}");
         }
         catch (Exception ex)
         {
@@ -117,13 +117,13 @@ public partial class HubConnection : Hub
 
             if (game == null)
             {
-                logger.LogError($"SetWordLanguageSetting: Game does not exist");
+                logger.LogError($"Game #{gameHash} SetWordLanguageSetting: Game does not exist");
                 return;
             }
 
             if (token != game.HostToken)
             {
-                logger.LogError($"SetWordLanguageSetting: Player with the token {token} is not a host");
+                logger.LogError($"Game #{gameHash} SetWordLanguageSetting: Player with the token {token} is not a host");
                 return;
             }
 
@@ -132,9 +132,9 @@ public partial class HubConnection : Hub
             settings.WordLanguage = setting;
             game.GameSettings = settings;
 
-            await Clients.All.SendAsync(HubEvents.OnSetWordLanguage, setting);
+            await Clients.Group(gameHash).SendAsync(HubEvents.OnSetWordLanguage, setting);
 
-            logger.LogInformation($"SetWordLanguageSetting: Setting set to {setting}");
+            logger.LogInformation($"Game #{gameHash} SetWordLanguageSetting: Setting set to {setting}");
         }
         catch (Exception ex)
         {
@@ -151,7 +151,7 @@ public partial class HubConnection : Hub
 
             if (game == null)
             {
-                logger.LogError($"LoadGameSettings: Game does not exist");
+                logger.LogError($"Game #{gameHash} LoadGameSettings: Game does not exist");
                 return;
             }
 
@@ -159,7 +159,7 @@ public partial class HubConnection : Hub
 
             if (!playerExists)
             {
-                logger.LogError($"LoadGameSettings: Player with the token {token} does not exist");
+                logger.LogError($"Game #{gameHash} LoadGameSettings: Player with the token {token} does not exist");
                 return;
             }
 
@@ -169,7 +169,7 @@ public partial class HubConnection : Hub
                 .Client(Context.ConnectionId)
                 .SendAsync(HubEvents.OnLoadGameSettings, JsonHelper.Serialize(settings));
 
-            logger.LogInformation($"LoadGameSettings: Settings loaded");
+            logger.LogInformation($"Game #{gameHash} LoadGameSettings: Settings loaded");
         }
         catch (Exception ex)
         {

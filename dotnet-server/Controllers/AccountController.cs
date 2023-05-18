@@ -55,7 +55,7 @@ public class AccountController : ControllerBase
         }
     }
 
-    [HttpPost("IncrementScore/{gameHash}")]
+    [HttpPut("IncrementScore/{gameHash}")]
     public IActionResult IncrementAccountScore([FromRoute] string gameHash, [FromHeader] string token, [FromHeader] string accessToken)
     {
         try

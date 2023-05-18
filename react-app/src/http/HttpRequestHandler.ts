@@ -56,21 +56,6 @@ class HttpRequestHandler {
     }
   }
 
-  async checkIfGameIsStarted(gameHash: string): Promise<any> {
-    try {
-      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.gameIsStarted}/${gameHash}`);
-
-      if (!response.ok) {
-        throw new Error("Error");
-      }
-
-      return await response.json() as boolean;
-    } 
-    catch (error) {
-      return error;
-    }
-  }
-
   async checkIfGameExists(gameHash: string): Promise<any> {
     try {
       const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.gameExists}/${gameHash}`);
@@ -173,7 +158,7 @@ class HttpRequestHandler {
   async updateAccountScore(gameHash: string, token: string, accessToken: string): Promise<any> {
     try {
       const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.accountIncrementScore}/${gameHash}`, {
-        method: 'POST',
+        method: 'PUT',
         headers: {
           'Token': token,
           'AccessToken': accessToken

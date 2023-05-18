@@ -57,7 +57,7 @@ export const useDraw = (onDraw: (
 
     hub.on(HubEvents.onLoadCanvas, (drawnLinesSerialized) => {
       const drawnLines = JSON.parse(drawnLinesSerialized) as DrawnLine[];
-      console.log(drawnLinesSerialized);
+
       for (let i = 0; i < drawnLines.length; i++) {
         onDraw(canvasContext, drawnLines[i]);
       }
@@ -86,7 +86,6 @@ export const useDraw = (onDraw: (
   useEffect(() => {
     const handler = (event: MouseEvent) => {
       if (!isMouseDown) {
-        console.log(currentLineNumber);
         return;
       }
 

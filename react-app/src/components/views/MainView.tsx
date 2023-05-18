@@ -9,7 +9,7 @@ import { updatedUsername, } from '../../redux/slices/player-score-slice';
 import HttpRequestHandler from '../../http/HttpRequestHandler';
 import { updatedAlert, updatedVisible } from '../../redux/slices/alert-slice';
 import useLocalStorageState from 'use-local-storage-state';
-import tableLoading from './../../assets/table-loading.gif'
+import tableLoading from './../../assets/table-loading.gif';
 import MainScoreboard from '../MainScoreboard';
 import UrlHelper from '../../utils/VerificationHelper';
 import Popup from '../Popup';
@@ -52,7 +52,7 @@ function MainView() {
 
       setToken(data.hostToken);
       dispatch(updatedUsername(username));
-      navigate(`${config.gameClientEndpoint}/${data.gameHash}`);
+      navigate(`${config.gameClientEndpoint}/${data.gameHash}`, { state: { fromViewNavigation: true } });
 
     }
     catch (error) {
@@ -80,20 +80,23 @@ function MainView() {
         const data = await httpRequestHandler.checkIfGameExists(gameHash);
     
         if (typeof data != "boolean") {
+          setIsPopupVisible(false);
           displayAlert("Unexpected error, try again", "danger");
           return;
         }
     
         if (data === true) {
           dispatch(updatedUsername(username));
-          navigate(`${config.gameClientEndpoint}/${gameHash}`);
+          navigate(`${config.gameClientEndpoint}/${gameHash}`, { state: { fromViewNavigation: true } });
         }
         else {
+          setIsPopupVisible(false);
           displayAlert("Game does not exist", "danger");
         }
       
       }
       catch (error) {
+        setIsPopupVisible(false);
         displayAlert("Unexpected error, try again", "danger");
       }
     };
@@ -127,7 +130,6 @@ function MainView() {
     fetchPlayerScores();
   }, []);
 
-  
   useEffect(() => {
     if (username.length < minUsernameLength ||
         username.length > maxUsernameLength) {

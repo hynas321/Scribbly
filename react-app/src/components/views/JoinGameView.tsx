@@ -9,6 +9,9 @@ import { updatedAlert, updatedVisible } from "../../redux/slices/alert-slice";
 import { updatedUsername } from "../../redux/slices/player-score-slice";
 import UrlHelper from "../../utils/VerificationHelper";
 import config from '../../../config.json';
+import MainScoreboard from "../MainScoreboard";
+import tableLoading from './../../assets/table-loading.gif'
+import Alert from "../Alert";
 
 function JoinGameView() { 
   const httpRequestHandler = new HttpRequestHandler();
@@ -20,6 +23,8 @@ function JoinGameView() {
 
   const [gameHash, setGameHash] = useState<string>("");
   const [isJoinGameButtonActive, setIsJoinGameButtonActive] = useState<boolean>(false);
+  const [isTableDisplayed, setIsTableDisplayed] = useState<boolean>(false);
+  const [scoreboardScores, setScoreboardScores] = useState<MainScoreboardScore[]>([]);
 
   const [username, setUsername] = useLocalStorageState("username", { defaultValue: ""});
 
@@ -37,29 +42,56 @@ function JoinGameView() {
         const data = await httpRequestHandler.checkIfGameExists(gameHash);
     
         if (typeof data != "boolean") {
-          displayAlert("Unexpected error, try again", "danger");
+          displayAlert("Unexpected error", "danger");
+          navigate(`${config.mainClientEndpoint}`);
           return;
         }
     
         if (data === true) {
           dispatch(updatedUsername(username));
-          navigate(`${config.gameClientEndpoint}/${gameHash}`);
+          navigate(`${config.gameClientEndpoint}/${gameHash}`, { state: { fromViewNavigation: true } });
         }
         else {
           displayAlert("Game does not exist", "danger");
+          navigate(`${config.mainClientEndpoint}`);
         }
       
       }
       catch (error) {
-        displayAlert("Unexpected error, try again", "danger");
+        displayAlert("Unexpected error", "danger");
+        navigate(`${config.mainClientEndpoint}`);
       }
     };
 
-    await checkIfGameExists();
+    checkIfGameExists();
   }
 
   useEffect(() => {
     setGameHash(UrlHelper.getGameHash(window.location.href));
+
+    const fetchPlayerScores = async () => {
+      setGameHash(UrlHelper.getGameHash(window.location.href));
+
+      try {
+        const data = await httpRequestHandler.fetchTopAccountScores();
+        
+        if (!Array.isArray(data)) {
+          setIsTableDisplayed(false);
+          return;
+        }
+      
+        setScoreboardScores(data);
+        setTimeout(() => {
+          setIsTableDisplayed(true);
+        }, 1000);
+
+      }
+      catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchPlayerScores();
   }, []);
 
   useEffect(() => {
@@ -87,6 +119,7 @@ function JoinGameView() {
   return (
     <div className="container">
       <div className="col-lg-4 col-sm-7 col-xs-6 mx-auto text-center">
+        <Alert />
         <InputForm
           defaultValue={username}
           placeholderValue="Enter username"
@@ -94,10 +127,22 @@ function JoinGameView() {
           onChange={handleInputFormChange}
         />
         <Button
-          text="Join the game"
+          text={"Join the game"}
           active={isJoinGameButtonActive}
           onClick={handleJoinGameButtonClick}
         />
+      </div>
+      <div className="col-lg-3 col-sm-6 col-xs-6 mt-5 text-center mx-auto">
+        { isTableDisplayed ?
+          <MainScoreboard
+            title="Top 5 players"
+            scoreboardScores={scoreboardScores}
+            displayPoints={true}
+            displayIndex={true}
+          /> 
+          :
+          <img src={tableLoading} alt="Table loading" className="img-fluid" />
+        }
       </div>
     </div>
   )

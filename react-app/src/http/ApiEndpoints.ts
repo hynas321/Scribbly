@@ -6,7 +6,6 @@ class ApiEndpoints {
 
   //GameController
   static gameCreate: string = "/api/Game/Create";
-  static gameIsStarted: string = "/api/Game/IsStarted";
   static gameExists: string = "/api/Game/Exists";
 
   //PlayerController

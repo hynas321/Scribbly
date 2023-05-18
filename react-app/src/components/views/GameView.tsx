@@ -3,7 +3,7 @@ import Button from '../Button';
 import GameSettingsBoard from '../game-view-components/GameSettingsBoard';
 import { useAppSelector } from '../../redux/hooks';
 import config from '../../../config.json';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import PlayerScores from '../game-view-components/PlayerScores';
 import Chat from '../game-view-components/Chat';
 import { BsPlayCircle, BsDoorOpen } from 'react-icons/bs';
@@ -16,7 +16,6 @@ import ControlPanel from '../ControlPanel';
 import { useDispatch } from 'react-redux';
 import HttpRequestHandler from '../../http/HttpRequestHandler';
 import { updatedAlert, updatedVisible } from '../../redux/slices/alert-slice';
-import { PlayerIsHostResponse } from '../../http/HttpInterfaces';
 import useLocalStorageState from 'use-local-storage-state';
 import { GameSettings, updatedGameSettings } from '../../redux/slices/game-settings-slice';
 import loading from './../../assets/loading.gif'
@@ -25,8 +24,6 @@ import UrlHelper from '../../utils/VerificationHelper';
 import ClipboardBar from '../bars/ClipboardBar';
 
 function GameView() {
-  const httpRequestHandler = new HttpRequestHandler();
-
   const hub = useContext(ConnectionHubContext);
   const longRunningHub = useContext(LongRunningConnectionHubContext);
 
@@ -36,6 +33,9 @@ function GameView() {
   const player = useAppSelector((state) => state.player);
   const gameState = useAppSelector((state) => state.gameState);
   const gameSettings = useAppSelector((state) => state.gameSettings);
+
+  const location = useLocation();
+  const { fromViewNavigation } = location.state ?? false;
 
   const [playerScores, setPlayerScores] = useState<PlayerScore[]>([]);
   const [gameHash, setGameHash] = useState<string>("");
@@ -68,8 +68,9 @@ function GameView() {
       return;
     }
 
-    if (!username || username.length == 0) {
+    if (!fromViewNavigation) {
       navigate(`${config.joinGameClientEndpoint}/${gameHash}`)
+      return;
     }
 
     const startHubAndJoinGame = async () => {

@@ -14,7 +14,7 @@ public partial class HubConnection : Hub
 
             if (game == null)
             {
-                //logger.LogError($"GetSecretWord: Game does not exist");
+                //logger.LogError($"Game #{gameHash} GetSecretWord: Game does not exist");
                 return;
             }
 
@@ -22,7 +22,7 @@ public partial class HubConnection : Hub
 
             if (player == null)
             {
-                //logger.LogError($"GetSecretWord: Player with the token {token} does not exist");
+                //logger.LogError($"Game #{gameHash} GetSecretWord: Player with the token {token} does not exist");
                 return;
             }
 
@@ -53,7 +53,7 @@ public partial class HubConnection : Hub
 
             if (game == null)
             {
-                logger.LogError($"AddPlayerScoreAndAnnouncement: Game does not exist");
+                logger.LogError($"Game #{gameHash} AddPlayerScoreAndAnnouncement: Game does not exist");
                 return;
             }
 
@@ -61,7 +61,7 @@ public partial class HubConnection : Hub
 
             if (player == null)
             {
-                logger.LogError($"AddPlayerScoreAndAnnouncement: Player with the token {token} does not exist");
+                logger.LogError($"Game #{gameHash} AddPlayerScoreAndAnnouncement: Player with the token {token} does not exist");
                 return;
             }
 
@@ -110,7 +110,7 @@ public partial class HubConnection : Hub
             gameManager.UpdatePlayerScore(gameHash, player.Token, score);
             game.GameState.CorrectAnswerCount++;
 
-            await SendAnnouncement($"{player.Username} guessed the word (+{score} points)", BootstrapColors.Green);
+            await SendAnnouncement(gameHash, $"{player.Username} guessed the word (+{score} points)", BootstrapColors.Green);
         }
         catch (Exception ex)
         {

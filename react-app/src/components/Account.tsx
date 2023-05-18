@@ -73,7 +73,7 @@ function Account() {
     const updateScore = async () => {
       if (isScoreToBeUpdated) {
         const updatedScore = await httpRequestHandler.updateAccountScore(gameHash, token, oAuthToken);
-  
+        console.log(updateScore);
         if (typeof updatedScore == "number") {
           setScore(updatedScore);
         }
@@ -112,7 +112,6 @@ function Account() {
     await accountHub.send(HubEvents.endSession, accountId);
     await accountHub.stop();
 
-    console.log("session ended");
     setIsUserLoggedIn(false);
     setOAuthToken("");
     setGivenName("");

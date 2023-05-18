@@ -13,7 +13,7 @@ public partial class HubConnection : Hub
         {
             if (text.Length < 1)
             {
-                logger.LogError($"SendChatMessage: Text is too short {text}");
+                logger.LogError($"Game #{gameHash} SendChatMessage: Text is too short {text}");
                 return;
             }
 
@@ -21,7 +21,7 @@ public partial class HubConnection : Hub
 
             if (game == null)
             {
-                logger.LogError($"SendChatMessage: Game does not exist");
+                logger.LogError($"Game #{gameHash} SendChatMessage: Game does not exist");
                 return;
             }
 
@@ -29,19 +29,19 @@ public partial class HubConnection : Hub
 
             if (player == null)
             {
-                logger.LogError($"SendChatMessage: Player with the token {token} does not exist");
+                logger.LogError($"Game #{gameHash} SendChatMessage: Player with the token {token} does not exist");
                 return;
             }
 
             if (token == game.GameState.DrawingToken)
             {
-                logger.LogError($"SendChatMessage: Player with the drawing token {token} cannot send a message");
+                logger.LogError($"Game #{gameHash} SendChatMessage: Player with the drawing token {token} cannot send a message");
                 return;
             }
 
             if (game.GameState.NoChatPermissionTokens.Contains(token))
             {
-                logger.LogError($"SendChatMessage: Player with the token {token} cannot send a message");
+                logger.LogError($"Game #{gameHash} SendChatMessage: Player with the token {token} cannot send a message");
                 return;
             }
 
@@ -61,16 +61,16 @@ public partial class HubConnection : Hub
                 game.GameState.NoChatPermissionTokens.Add(token);
                 game.GameState.CorrectGuessPlayerUsernames.Add(player.Username);
                 
-                await Clients.All.SendAsync(HubEvents.OnUpdatePlayerScores, JsonHelper.Serialize(playerScores));
-                await Clients.All.SendAsync(HubEvents.onUpdateCorrectGuessPlayerUsernames, JsonHelper.Serialize(correctguessPlayerUsernames));
+                await Clients.Group(gameHash).SendAsync(HubEvents.OnUpdatePlayerScores, JsonHelper.Serialize(playerScores));
+                await Clients.Group(gameHash).SendAsync(HubEvents.onUpdateCorrectGuessPlayerUsernames, JsonHelper.Serialize(correctguessPlayerUsernames));
                 return;
             }
 
             gameManager.AddChatMessage(gameHash, message);
 
-            await Clients.All.SendAsync(HubEvents.OnSendChatMessage, JsonHelper.Serialize(message));
+            await Clients.Group(gameHash).SendAsync(HubEvents.OnSendChatMessage, JsonHelper.Serialize(message));
 
-            logger.LogInformation($"SendChatMessage: Message {text} sent by player {player.Username}");
+            logger.LogInformation($"Game #{gameHash} SendChatMessage: Message {text} sent by player {player.Username}");
         }
         catch (Exception ex)
         {
@@ -87,7 +87,7 @@ public partial class HubConnection : Hub
 
             if (game == null)
             {
-                logger.LogError($"LoadChatMessages: Game does not exist");
+                logger.LogError($"Game #{gameHash} LoadChatMessages: Game does not exist");
                 return;
             }
 
@@ -95,7 +95,7 @@ public partial class HubConnection : Hub
 
             if (player == null)
             {
-                logger.LogError($"LoadChatMessages: Player with the token {token} does not exist");
+                logger.LogError($"Game #{gameHash} LoadChatMessages: Player with the token {token} does not exist");
                 return;
             }
 
@@ -109,7 +109,7 @@ public partial class HubConnection : Hub
         }
     }
 
-    public async Task SendAnnouncement(string text, string backgroundColor)
+    public async Task SendAnnouncement(string gameHash, string text, string backgroundColor)
     {
         try 
         {
@@ -117,7 +117,7 @@ public partial class HubConnection : Hub
 
             if (game == null)
             {
-                logger.LogError($"SendAnnouncement: Game does not exist");
+                logger.LogError($"Game #{gameHash} SendAnnouncement: Game does not exist");
                 return;
             }
 
@@ -129,7 +129,7 @@ public partial class HubConnection : Hub
 
             //gameManager.AddChatMessage(message);
 
-            await Clients.All.SendAsync(HubEvents.OnSendAnnouncement, JsonHelper.Serialize(message));
+            await Clients.Group(gameHash).SendAsync(HubEvents.OnSendAnnouncement, JsonHelper.Serialize(message));
         }
         catch (Exception ex)
         {
