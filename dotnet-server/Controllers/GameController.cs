@@ -12,6 +12,7 @@ namespace Dotnet.Server.Controllers;
 public class GameController : ControllerBase
 {
     private readonly GameManager gameManager = new GameManager();
+    private readonly HashManager hashManager = new HashManager();
     private readonly ILogger<GameController> logger;
 
     public GameController(ILogger<GameController> logger)
@@ -30,24 +31,21 @@ public class GameController : ControllerBase
 
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
-
-            if (gameManager.GetGame() != null)
-            {
-                logger.LogError("Create Status: 409. Conflict");
-
-                return StatusCode(StatusCodes.Status409Conflict);
-            }
             
             Game game = new Game();
+            string gameHash = hashManager.GenerateGameHash();
 
-            gameManager.SetGame(game);
+            game.GameState.HostPlayerUsername = body.Username;
+            gameManager.CreateGame(game, gameHash);
 
             CreateGameResponse response = new CreateGameResponse()
             {
+                GameHash = gameHash,
                 HostToken = game.HostToken
             };
 
-            logger.LogInformation($"Create Status: 201. Game has been created. Host token: {response.HostToken}");
+            logger.LogInformation($"Create Status: 201. Game has been created with gameHash: {response.GameHash}. " +
+                $"Host token: {response.HostToken}");
             
             return StatusCode(StatusCodes.Status201Created, JsonHelper.Serialize(response));
         }
@@ -59,49 +57,8 @@ public class GameController : ControllerBase
         }
     }
 
-    [HttpDelete("Remove")]
-    public IActionResult Remove([FromHeader(Name = Headers.Token)] string token)
-    {
-        try 
-        {
-            if (!ModelState.IsValid)
-            {   
-                logger.LogError("Remove Status: 400. Bad request");
-
-                return StatusCode(StatusCodes.Status400BadRequest);
-            }
-
-            Game game = gameManager.GetGame();
-
-            if (game == null)
-            {
-                logger.LogError("Remove Status: 404. Not found");
-
-                return StatusCode(StatusCodes.Status404NotFound);
-            }
-
-            if (token != game.HostToken)
-            {
-                logger.LogError("Remove Status: 401. Unauthorized");
-                return StatusCode(StatusCodes.Status401Unauthorized);
-            }
-
-            gameManager.RemoveGame();
-
-            logger.LogInformation("Remove Status: 200. OK");
-
-            return StatusCode(StatusCodes.Status200OK);
-        }
-        catch (Exception ex)
-        {   
-            logger.LogError($"Remove Status: 500. Internal server error {ex}");
-
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }
-    }
-
-    [HttpGet("Exists")]
-    public IActionResult Exists()
+    [HttpGet("Exists/{gameHash}")]
+    public IActionResult Exists([FromRoute] string gameHash)
     {
         try 
         {
@@ -112,7 +69,7 @@ public class GameController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            bool gameExists = gameManager.GetGame() != null;
+            bool gameExists = gameManager.GetGame(gameHash) != null;
 
             logger.LogInformation("Exists Status: 200. OK");
 
@@ -121,74 +78,6 @@ public class GameController : ControllerBase
         catch (Exception ex)
         {
             logger.LogError($"Exists Status: 500. Internal server error {ex}");
-
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }
-    }
-
-    [HttpGet("IsStarted")]
-    public IActionResult IsStarted()
-    {
-        try 
-        {
-            if (!ModelState.IsValid)
-            {   
-                logger.LogError("IsStarted Status: 400. Bad request");
-
-                return StatusCode(StatusCodes.Status400BadRequest);
-            }
-
-            Game game = gameManager.GetGame();
-
-            if (game == null)
-            {
-                logger.LogError("IsStarted Status: 404. Not found");
-
-                return StatusCode(StatusCodes.Status404NotFound);
-            }
-
-            logger.LogInformation("IsStarted - Status: 200. OK");
-
-            return StatusCode(StatusCodes.Status200OK, game.GameState.IsGameStarted);
-
-        }
-        catch (Exception ex)
-        {
-            logger.LogError($"IsStarted Status: 500. Internal server error {ex}");
-
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }
-    }
-
-    [HttpGet("Get")]
-    public IActionResult Get()
-    {
-        try 
-        {
-            if (!ModelState.IsValid)
-            {   
-                logger.LogError("Get Status: 400. Bad request");
-
-                return StatusCode(StatusCodes.Status400BadRequest);
-            }
-
-            Game game = gameManager.GetGame();
-
-            if (game == null)
-            {
-                logger.LogError("Get Status: 404. Not found");
-
-                return StatusCode(StatusCodes.Status404NotFound);
-            }
-
-            logger.LogInformation("Get Status: 200. OK");
-
-            return StatusCode(StatusCodes.Status200OK, game);
-
-        }
-        catch (Exception ex)
-        {
-            logger.LogError($"Get Status: 500. Internal server error {ex}");
 
             return StatusCode(StatusCodes.Status500InternalServerError);
         }

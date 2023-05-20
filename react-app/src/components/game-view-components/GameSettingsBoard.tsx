@@ -5,11 +5,12 @@ import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { GameSettings, updatedDrawingTimeSeconds, updatedNounsOnly, updatedRoundsCount, updatedWordLanguage } from '../../redux/slices/game-settings-slice';
 import { BsGearFill } from 'react-icons/bs';
 import InputSelect from '../InputSelect';
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ConnectionHubContext } from '../../context/ConnectionHubContext';
 import * as signalR from '@microsoft/signalr';
 import HubEvents from '../../hub/HubEvents';
 import useLocalStorageState from 'use-local-storage-state';
+import UrlHelper from '../../utils/UrlHelper';
 
 interface GameSettingsBoardProps {
   isPlayerHost: boolean;
@@ -20,14 +21,20 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
   const dispatch = useAppDispatch();
   const settings = useAppSelector((state) => state.gameSettings);
 
+  const [gameHash, setGameHash] = useState<string>("");
+
   const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
 
   let gameSettingsLoaded = false;
-
   const nounsOnly = "Allow only nouns as random words";
   const drawingTimeText = "Drawing time";
   const numberOfRoundsText = "Number of rounds";
   const chooseLanguageText = "Language of random words";
+
+  
+  useEffect(() => {
+    setGameHash(UrlHelper.getGameHash(window.location.href));
+  }, []);
 
   useEffect(() => {
     if (hub.getState() != signalR.HubConnectionState.Connected) {
@@ -61,7 +68,7 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
 
     if (!gameSettingsLoaded) {
       const loadGameSettings = async() => {
-        await hub.invoke(HubEvents.LoadGameSettings, token);
+        await hub.invoke(HubEvents.LoadGameSettings, gameHash, token);
 
         gameSettingsLoaded = true;
       }
@@ -75,22 +82,22 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
       hub.off(HubEvents.onSetRoundsCount);
       hub.off(HubEvents.onSetWordLanguage);
     }
-  }, [hub.getState()])
+  }, [hub.getState(), gameHash])
 
   const handleCheckBoxChange = async (checked: boolean) => {
-    await hub.invoke(HubEvents.setAbstractNouns, token, checked);
+    await hub.invoke(HubEvents.setAbstractNouns, gameHash, token, checked);
   }
 
   const handleRangeChange = async (value: number) => {
-    await hub.invoke(HubEvents.setDrawingTimeSeconds, token, value);
+    await hub.invoke(HubEvents.setDrawingTimeSeconds, gameHash, token, value);
   }
 
   const handleCheckFormChange = async (value: number) => {
-    await hub.invoke(HubEvents.setRoundsCount, token, Number(value));
+    await hub.invoke(HubEvents.setRoundsCount, gameHash, token, Number(value));
   }
 
   const handleInputSelectChange = async (value: string) => {
-    await hub.invoke(HubEvents.setWordLanguage, token, value);
+    await hub.invoke(HubEvents.setWordLanguage, gameHash, token, value);
   }
 
   return (
@@ -104,7 +111,7 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
             onChange={handleCheckBoxChange}
           /> :
           <label className="form-check-label">
-            {nounsOnly}: <b>{settings.nounsOnly.valueOf().toString()}</b>
+            {nounsOnly}: <b>{settings.nounsOnly.valueOf().toString() ? "Yes" : "No"}</b>
           </label>
         }
       </div>
@@ -145,7 +152,13 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
             onChange={handleInputSelectChange}
           /> :
           <label className="form-check-label">
-            {chooseLanguageText}: <b>{settings.wordLanguage.valueOf().toString()}</b>
+            {chooseLanguageText}: 
+            <b>
+              {
+                settings.wordLanguage.valueOf().toString() == "en" ? " English" :
+                settings.wordLanguage.valueOf().toString() == "pl" ? " Polish" : "?"
+              }
+            </b>
         </label>
         }
       </div>

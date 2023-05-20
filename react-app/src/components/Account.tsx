@@ -7,6 +7,7 @@ import { AccountHubContext } from "../context/ConnectionHubContext";
 import HubEvents from "../hub/HubEvents";
 import * as signalR from '@microsoft/signalr';
 import { useGoogleLogout } from "react-google-login";
+import UrlHelper from "../utils/UrlHelper";
 
 function Account() {
   const httpRequestHandler = new HttpRequestHandler();
@@ -14,6 +15,7 @@ function Account() {
 
   const accountHub = useContext(AccountHubContext);
 
+  const [gameHash, setGameHash] = useState<string>("");
   const [givenName, setGivenName] = useState<string>("");
   const [score, setScore] = useState<number>(-1);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(false);
@@ -24,6 +26,8 @@ function Account() {
   const [accountId, setAccountId] = useLocalStorageState("accountId", { defaultValue: ""});
 
   useEffect(() => {
+    setGameHash(UrlHelper.getGameHash(window.location.href));
+
     const start = () => {
       gapi.client.init({
         clientId: clientId,
@@ -42,12 +46,17 @@ function Account() {
     if (accountHub.getState() !== signalR.HubConnectionState.Connected) {
       return;
     }
-
-    accountHub.on(HubEvents.onUpdateAccountScore, async () => {
+    
+    accountHub.on(HubEvents.onUpdateAccountScore, async (gameHash: string) => {
       if (!isUserLoggedIn) {
-        return
+        return;
       }
 
+      if (gameHash !== UrlHelper.getGameHash(window.location.href)) {
+        return;
+      }
+
+      setGameHash(UrlHelper.getGameHash(window.location.href));
       setIsScoreToBeUpdated(true);
     });
 
@@ -68,8 +77,8 @@ function Account() {
   useEffect(() => {
     const updateScore = async () => {
       if (isScoreToBeUpdated) {
-        const updatedScore = await httpRequestHandler.updateAccountScore(token, oAuthToken);
-  
+        const updatedScore = await httpRequestHandler.updateAccountScore(gameHash, token, oAuthToken);
+
         if (typeof updatedScore == "number") {
           setScore(updatedScore);
         }
@@ -108,7 +117,6 @@ function Account() {
     await accountHub.send(HubEvents.endSession, accountId);
     await accountHub.stop();
 
-    console.log("session ended");
     setIsUserLoggedIn(false);
     setOAuthToken("");
     setGivenName("");

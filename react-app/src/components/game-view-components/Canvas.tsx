@@ -148,10 +148,10 @@ function Canvas() {
               <Range
                 title={"Thickness"}
                 suffix={""}
-                minValue={5}
+                minValue={3}
                 maxValue={30}
-                step={5}
-                defaultValue={5}
+                step={3}
+                defaultValue={3}
                 onChange={handleThicknessRangeChange} 
               />
             </div>

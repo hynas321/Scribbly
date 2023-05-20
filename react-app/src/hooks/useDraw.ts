@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react"
 import Hub from "../hub/Hub";
 import HubEvents from "../hub/HubEvents";
 import useLocalStorageState from "use-local-storage-state";
+import UrlHelper from "../utils/UrlHelper";
+import * as signalR from '@microsoft/signalr';
 
 export const useDraw = (onDraw: (
     canvasContext: CanvasRenderingContext2D,
@@ -9,30 +11,37 @@ export const useDraw = (onDraw: (
   hub: Hub,
   color: string,
   thickness: number) => {
-  const [mouseDown, setMouseDown] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previousRelativePoint = useRef<Point | null>(null);
-  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
+  
+  const [gameHash, setGameHash] = useState<string>("");
   const [currentLineNumber, setCurrentLineNumber] = useState<number>(0);
+  const [isMouseDown, setIsMouseDown] = useState<boolean>(false);
+
+  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
 
   const onMouseDown = () => {
     setCurrentLineNumber(currentLineNumber + 1);
-    setMouseDown(true);
+    setIsMouseDown(true);
   }
 
   const clearCanvas = async () => {
-    await hub.invoke(HubEvents.clearCanvas, token);
+    await hub.invoke(HubEvents.clearCanvas, gameHash, token);
   }
 
   const undoLine = async () => {
-    await hub.invoke(HubEvents.undoLine, token);
+    await hub.invoke(HubEvents.undoLine, gameHash, token);
   }
 
   useEffect(() => {
-    if (!hub.getState())
-    {
+    setGameHash(UrlHelper.getGameHash(window.location.href));
+  }, []);
+
+  useEffect(() => {
+    if (hub.getState() !== signalR.HubConnectionState.Connected || !gameHash) {
       return;
     }
+
 
     const getCanvasContext = (): (CanvasRenderingContext2D | null) => {
       const canvas = canvasRef.current;
@@ -48,7 +57,7 @@ export const useDraw = (onDraw: (
 
     hub.on(HubEvents.onLoadCanvas, (drawnLinesSerialized) => {
       const drawnLines = JSON.parse(drawnLinesSerialized) as DrawnLine[];
-      console.log(drawnLinesSerialized);
+
       for (let i = 0; i < drawnLines.length; i++) {
         onDraw(canvasContext, drawnLines[i]);
       }
@@ -65,19 +74,18 @@ export const useDraw = (onDraw: (
       canvasContext.clearRect(0, 0, canvas.width, canvas.height);
     });
 
-    hub.invoke(HubEvents.loadCanvas, token);
+    hub.invoke(HubEvents.loadCanvas, gameHash, token);
 
     return () => {
       hub.off(HubEvents.onLoadCanvas);
       hub.off(HubEvents.onDrawOnCanvas);
       hub.off(HubEvents.onClearCanvas);
     }
-  }, [hub.getState()]);
+  }, [hub.getState(), gameHash]);
 
   useEffect(() => {
     const handler = (event: MouseEvent) => {
-      if (!mouseDown) {
-        console.log(currentLineNumber);
+      if (!isMouseDown) {
         return;
       }
 
@@ -98,7 +106,7 @@ export const useDraw = (onDraw: (
 
       previousRelativePoint.current = drawnLine.currentPoint;
       
-      hub.invoke(HubEvents.drawOnCanvas, token, JSON.stringify(drawnLine));
+      hub.invoke(HubEvents.drawOnCanvas, gameHash, token, JSON.stringify(drawnLine));
     };
 
     const determinePointRelativeCoordinates = (event: MouseEvent) => {
@@ -116,7 +124,7 @@ export const useDraw = (onDraw: (
     }
 
     const mouseUpHandler = () => {
-      setMouseDown(false);
+      setIsMouseDown(false);
       previousRelativePoint.current = null;
     }
 

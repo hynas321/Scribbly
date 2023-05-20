@@ -1,3 +1,4 @@
+using Dotnet.Server.Http;
 using Dotnet.Server.Http.Requests;
 using Dotnet.Server.JsonConfig;
 using Dotnet.Server.Managers;
@@ -25,27 +26,27 @@ public partial class LongRunningHubConnection : Hub
     }
 
     [HubMethodName(HubEvents.StartGame)]
-    public async Task StartGame(string token, GameSettings settings)
+    public async Task StartGame(string gameHash, string token, GameSettings settings)
     {
         try
         {
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             if (game == null)
             {
-                logger.LogError($"StartGame: Game does not exist");
+                logger.LogError($"Game #{gameHash} StartGame: Game does not exist");
                 return;
             }
 
             if (token != game.HostToken)
             {
-                logger.LogError($"StartGame: Token is not a host token");
+                logger.LogError($"Game #{gameHash} StartGame: Token is not a host token");
                 return;
             }
 
             if (game.GameState.Players.Count < 2)
             {
-                logger.LogError($"StartGame: Too few players to start the game");
+                logger.LogError($"Game #{gameHash} StartGame: Too few players to start the game");
                 return;
             }
 
@@ -55,7 +56,7 @@ public partial class LongRunningHubConnection : Hub
                 settings.RoundsCount > 6
             )
             {
-                logger.LogError($"StartGame: Incorrect settings data");
+                logger.LogError($"Game #{gameHash} StartGame: Incorrect settings data");
                 return;
             }
 
@@ -67,12 +68,12 @@ public partial class LongRunningHubConnection : Hub
             game.GameSettings.RoundsCount = settings.RoundsCount;
             game.GameSettings.WordLanguage = settings.WordLanguage;
 
-            await hubContext.Clients.All.SendAsync(HubEvents.OnStartGame);
-            logger.LogInformation($"StartGame: Game started");
+            await hubContext.Clients.Group(gameHash).SendAsync(HubEvents.OnStartGame);
+            logger.LogInformation($"Game #{gameHash} StartGame: Game started");
 
             Context.Abort();
 
-            await Task.Run(() => ManageGameFlow());
+            await Task.Run(() => ManageGameFlow(gameHash));
         }
         catch (Exception ex)
         {
@@ -80,24 +81,24 @@ public partial class LongRunningHubConnection : Hub
         }
     }
 
-    public async Task ManageGameFlow()
+    public async Task ManageGameFlow(string gameHash)
     {
         try
         {
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             while (true)
             {
-                game.GameState.DrawingPlayersTokens = gameManager.GetOnlinePlayersTokens();
+                game.GameState.DrawingPlayersTokens = gameManager.GetOnlinePlayersTokens(gameHash);
 
-                await hubContext.Clients.All.SendAsync(HubEvents.OnClearCanvas);
-                await SetCanvasText($"Round {game.GameState.CurrentRound}", BootstrapColors.Green);
+                await hubContext.Clients.Group(gameHash).SendAsync(HubEvents.OnClearCanvas);
+                await SetCanvasText(gameHash, $"Round {game.GameState.CurrentRound}", BootstrapColors.Green);
                 await Task.Delay(5000);
 
                 while (game.GameState.DrawingPlayersTokens.Count != 0)
                 {
                     List<string> drawingPlayersTokens = game.GameState.DrawingPlayersTokens;
-                    List<string> onlinePlayerTokens = gameManager.GetOnlinePlayersTokens();
+                    List<string> onlinePlayerTokens = gameManager.GetOnlinePlayersTokens(gameHash);
 
                     if (drawingPlayersTokens.Count != onlinePlayerTokens.Count)
                     {
@@ -113,14 +114,14 @@ public partial class LongRunningHubConnection : Hub
                     game.GameState.CorrectAnswerCount = 0;
                     game.GameState.CorrectGuessPlayerUsernames.Clear();
 
-                    await hubContext.Clients.All.SendAsync(HubEvents.OnClearCanvas);
+                    await hubContext.Clients.Group(gameHash).SendAsync(HubEvents.OnClearCanvas);
 
                     Random random = new Random();
 
                     int randomTokenIndex = random.Next(game.GameState.DrawingPlayersTokens.Count);
                     string drawingToken = game.GameState.DrawingPlayersTokens[randomTokenIndex];
-                    string drawingPlayerUsername = gameManager.GetPlayerByToken(drawingToken).Username;
-                    string actualSecretWord = await RandomWordFetcher.FetchWordAsync() ?? throw new NullReferenceException();
+                    string drawingPlayerUsername = gameManager.GetPlayerByToken(gameHash, drawingToken).Username;
+                    string actualSecretWord = await RandomWordFetcher.FetchWordAsync(gameHash) ?? throw new NullReferenceException();
                     string hiddenSecretWord = Convert.ToString(actualSecretWord.Length);
 
                     game.GameState.DrawingPlayerUsername = drawingPlayerUsername;
@@ -128,10 +129,10 @@ public partial class LongRunningHubConnection : Hub
                     game.GameState.IsTimerVisible = true;
                     game.GameState.HiddenSecretWord = "? ? ?";
 
-                    await hubContext.Clients.All.SendAsync(HubEvents.onUpdateCorrectGuessPlayerUsernames, JsonHelper.Serialize(game.GameState.CorrectGuessPlayerUsernames));
-                    await hubContext.Clients.All.SendAsync(HubEvents.OnUpdateDrawingPlayer, drawingPlayerUsername);
-                    await hubContext.Clients.All.SendAsync(HubEvents.OnRequestSecretWord);
-                    await SetCanvasText($"{drawingPlayerUsername} is going to draw in 5s", BootstrapColors.Green);
+                    await hubContext.Clients.Group(gameHash).SendAsync(HubEvents.onUpdateCorrectGuessPlayerUsernames, JsonHelper.Serialize(game.GameState.CorrectGuessPlayerUsernames));
+                    await hubContext.Clients.Group(gameHash).SendAsync(HubEvents.OnUpdateDrawingPlayer, drawingPlayerUsername);
+                    await hubContext.Clients.Group(gameHash).SendAsync(HubEvents.OnRequestSecretWord);
+                    await SetCanvasText(gameHash, $"{drawingPlayerUsername} is going to draw in 5s", BootstrapColors.Green);
                     await Task.Delay(5000);
 
                     game.GameState.ActualSecretWord = actualSecretWord;
@@ -139,10 +140,10 @@ public partial class LongRunningHubConnection : Hub
 
                     game.GameState.DrawingToken = drawingToken;
 
-                    await hubContext.Clients.All.SendAsync(HubEvents.OnRequestSecretWord);
-                    await hubContext.Clients.All.SendAsync(HubEvents.OnUpdateTimerVisibility, true);
+                    await hubContext.Clients.Group(gameHash).SendAsync(HubEvents.OnRequestSecretWord);
+                    await hubContext.Clients.Group(gameHash).SendAsync(HubEvents.OnUpdateTimerVisibility, true);
 
-                    bool isTimerFinishedSuccessfuly = await Task.Run(() => UpdateTimer());
+                    bool isTimerFinishedSuccessfuly = await Task.Run(() => UpdateTimer(gameHash));
 
                     if (!isTimerFinishedSuccessfuly)
                     {
@@ -156,70 +157,70 @@ public partial class LongRunningHubConnection : Hub
                     {
                         int pointsForDrawing = 10;
 
-                        gameManager.UpdatePlayerScore(drawingToken, pointsForDrawing);
+                        gameManager.UpdatePlayerScore(gameHash, drawingToken, pointsForDrawing);
 
-                        await SendAnnouncement($"{drawingPlayerUsername} received the drawing bonus (+{pointsForDrawing} points)", BootstrapColors.Green);
+                        await SendAnnouncement(gameHash, $"{drawingPlayerUsername} received the drawing bonus (+{pointsForDrawing} points)", BootstrapColors.Green);
                     }
                     else if (correctAnswers < playersCount - 1 && correctAnswers > 0)
                     {
                         int pointsForDrawing = 5;
 
-                        gameManager.UpdatePlayerScore(drawingToken, pointsForDrawing);
+                        gameManager.UpdatePlayerScore(gameHash, drawingToken, pointsForDrawing);
 
-                        await SendAnnouncement($"{drawingPlayerUsername} received the drawing bonus (+{pointsForDrawing} points)", BootstrapColors.Green);
+                        await SendAnnouncement(gameHash, $"{drawingPlayerUsername} received the drawing bonus (+{pointsForDrawing} points)", BootstrapColors.Green);
                     }
                     else
                     {
-                        await SendAnnouncement($"{drawingPlayerUsername} received no drawing bonus", BootstrapColors.Red);
+                        await SendAnnouncement(gameHash, $"{drawingPlayerUsername} received no drawing bonus", BootstrapColors.Red);
                     }
 
-                    List<PlayerScore> playerScores = gameManager.GetPlayerObjectsWithoutToken();
+                    List<PlayerScore> playerScores = gameManager.GetPlayerObjectsWithoutToken(gameHash);
 
-                    await hubContext.Clients.All.SendAsync(HubEvents.OnUpdatePlayerScores, JsonHelper.Serialize(playerScores));
+                    await hubContext.Clients.Group(gameHash).SendAsync(HubEvents.OnUpdatePlayerScores, JsonHelper.Serialize(playerScores));
 
                     game.GameState.DrawingToken = "";
                     game.GameState.IsTimerVisible = false;
 
-                    await hubContext.Clients.All.SendAsync(HubEvents.OnUpdateTimerVisibility, false);
-                    await SetCanvasText($"The drawing phase has ended", BootstrapColors.Green);
-                    await SendAnnouncement($"The answer was: {actualSecretWord}", BootstrapColors.Yellow);
+                    await hubContext.Clients.Group(gameHash).SendAsync(HubEvents.OnUpdateTimerVisibility, false);
+                    await SetCanvasText(gameHash, $"The drawing phase has ended", BootstrapColors.Green);
+                    await SendAnnouncement(gameHash, $"The answer was: {actualSecretWord}", BootstrapColors.Yellow);
 
                     game.GameState.HiddenSecretWord = actualSecretWord;
-                    await hubContext.Clients.All.SendAsync(HubEvents.OnRequestSecretWord);
+                    await hubContext.Clients.Group(gameHash).SendAsync(HubEvents.OnRequestSecretWord);
                     await Task.Delay(8000);
 
                     game.GameState.HiddenSecretWord = "? ? ?";
-                    await hubContext.Clients.All.SendAsync(HubEvents.OnRequestSecretWord);
+                    await hubContext.Clients.Group(gameHash).SendAsync(HubEvents.OnRequestSecretWord);
                 }
 
                 game.GameState.CurrentRound++;
 
                 if (game.GameState.CurrentRound > game.GameSettings.RoundsCount)
                 {   
-                    await accountHubContext.Clients.All.SendAsync(HubEvents.OnUpdateAccountScore);
-                    await SetCanvasText($"Thank you for playing! Automatic disconnection in 10s", BootstrapColors.Green);
+                    await accountHubContext.Clients.All.SendAsync(HubEvents.OnUpdateAccountScore, gameHash);
+                    await SetCanvasText(gameHash, $"Thank you for playing! You may leave the game :)", BootstrapColors.Green);
                     await Task.Delay(10000);
-                    gameManager.RemoveGame();
-                    await hubContext.Clients.All.SendAsync(HubEvents.OnEndGame);
+                    gameManager.RemoveGame(gameHash);
+                    //await hubContext.Clients.Group(gameHash).SendAsync(HubEvents.OnEndGame);
                     break;
                 }
 
-                await hubContext.Clients.All.SendAsync(HubEvents.OnUpdateCurrentRound, game.GameState.CurrentRound);
+                await hubContext.Clients.Group(gameHash).SendAsync(HubEvents.OnUpdateCurrentRound, game.GameState.CurrentRound);
             }
         }
         catch (Exception ex)
         {
             logger.LogInformation(Convert.ToString(ex));
-            await hubContext.Clients.All.SendAsync(HubEvents.OnEndGame);
-            gameManager.RemoveGame();
+            await hubContext.Clients.Group(gameHash).SendAsync(HubEvents.OnEndGame);
+            gameManager.RemoveGame(gameHash);
         }
     }
 
-    public async Task<bool> UpdateTimer()
+    public async Task<bool> UpdateTimer(string gameHash)
     {
         try
         {
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             if (game == null)
             {
@@ -233,7 +234,7 @@ public partial class LongRunningHubConnection : Hub
 
             for (int i = 0; i < initialTime; i++)
             {   
-                if (gameManager.GetGame() == null)
+                if (gameManager.GetGame(gameHash) == null)
                 {
                     cancellationToken.Cancel();
                     return false;
@@ -251,7 +252,7 @@ public partial class LongRunningHubConnection : Hub
                     return true;
                 }
 
-                await hubContext.Clients.All.SendAsync(HubEvents.OnUpdateTimer, game.GameState.CurrentDrawingTimeSeconds);
+                await hubContext.Clients.Group(gameHash).SendAsync(HubEvents.OnUpdateTimer, game.GameState.CurrentDrawingTimeSeconds);
 
                 game.GameState.CurrentDrawingTimeSeconds--;
 
@@ -267,7 +268,7 @@ public partial class LongRunningHubConnection : Hub
         }
     }
 
-    public async Task SetCanvasText(string text, string color)
+    public async Task SetCanvasText(string gameHash, string text, string color)
     {
         try
         {
@@ -284,7 +285,7 @@ public partial class LongRunningHubConnection : Hub
                 BootstrapBackgroundColor = color
             };
 
-            await hubContext.Clients.All.SendAsync(HubEvents.OnSetCanvasText, JsonHelper.Serialize(message));
+            await hubContext.Clients.Group(gameHash).SendAsync(HubEvents.OnSetCanvasText, JsonHelper.Serialize(message));
         }
         catch (Exception ex)
         {
@@ -292,7 +293,7 @@ public partial class LongRunningHubConnection : Hub
         }
     }
 
-    public async Task SendAnnouncement(string text, string backgroundColor)
+    public async Task SendAnnouncement(string gameHash, string text, string backgroundColor)
     {
         try 
         {
@@ -300,7 +301,7 @@ public partial class LongRunningHubConnection : Hub
 
             if (game == null)
             {
-                logger.LogError($"SendAnnouncement: Game does not exist");
+                logger.LogError($"Game #{gameHash} SendAnnouncement: Game does not exist");
                 return;
             }
 
@@ -312,7 +313,7 @@ public partial class LongRunningHubConnection : Hub
 
             //gameManager.AddChatMessage(message);
 
-            await hubContext.Clients.All.SendAsync(HubEvents.OnSendAnnouncement, JsonHelper.Serialize(message));
+            await hubContext.Clients.Group(gameHash).SendAsync(HubEvents.OnSendAnnouncement, JsonHelper.Serialize(message));
         }
         catch (Exception ex)
         {

@@ -55,8 +55,8 @@ public class AccountController : ControllerBase
         }
     }
 
-    [HttpPost("IncrementScore")]
-    public IActionResult IncrementAccountScore([FromHeader] string token, [FromHeader] string accessToken)
+    [HttpPut("IncrementScore/{gameHash}")]
+    public IActionResult IncrementAccountScore([FromRoute] string gameHash, [FromHeader] string token, [FromHeader] string accessToken)
     {
         try
         {
@@ -70,7 +70,7 @@ public class AccountController : ControllerBase
             GameManager gameManager = new GameManager();
             AccountRepository accountRepository = new AccountRepository();
 
-            Player player = gameManager.GetPlayerByToken(token);
+            Player player = gameManager.GetPlayerByToken(gameHash, token);
 
             if (player == null)
             {

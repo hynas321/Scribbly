@@ -3,7 +3,7 @@ import Button from '../Button';
 import GameSettingsBoard from '../game-view-components/GameSettingsBoard';
 import { useAppSelector } from '../../redux/hooks';
 import config from '../../../config.json';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import PlayerScores from '../game-view-components/PlayerScores';
 import Chat from '../game-view-components/Chat';
 import { BsPlayCircle, BsDoorOpen } from 'react-icons/bs';
@@ -16,15 +16,14 @@ import ControlPanel from '../ControlPanel';
 import { useDispatch } from 'react-redux';
 import HttpRequestHandler from '../../http/HttpRequestHandler';
 import { updatedAlert, updatedVisible } from '../../redux/slices/alert-slice';
-import { PlayerIsHostResponse } from '../../http/HttpInterfaces';
 import useLocalStorageState from 'use-local-storage-state';
 import { GameSettings, updatedGameSettings } from '../../redux/slices/game-settings-slice';
 import loading from './../../assets/loading.gif'
 import { GameState, clearedGameState, updatedGameState, updatedIsGameStarted } from '../../redux/slices/game-state-slice';
+import UrlHelper from '../../utils/UrlHelper';
+import ClipboardBar from '../bars/ClipboardBar';
 
 function GameView() {
-  const httpRequestHandler = new HttpRequestHandler();
-
   const hub = useContext(ConnectionHubContext);
   const longRunningHub = useContext(LongRunningConnectionHubContext);
 
@@ -35,7 +34,11 @@ function GameView() {
   const gameState = useAppSelector((state) => state.gameState);
   const gameSettings = useAppSelector((state) => state.gameSettings);
 
+  const location = useLocation();
+  const { fromViewNavigation } = location.state ?? false;
+
   const [playerScores, setPlayerScores] = useState<PlayerScore[]>([]);
+  const [gameHash, setGameHash] = useState<string>("");
   const [isPlayerHost, setIsPlayerHost] = useState<boolean>(false);
   const [isGameDisplayed, setIsGameDisplayed] = useState<boolean>(false);
   const [isGameFinished, setIsGameFinished] = useState<boolean>(false);
@@ -47,16 +50,29 @@ function GameView() {
 
   const handleStartGameButtonClick = async () => {
     await longRunningHub.start();
-    await longRunningHub.send(HubEvents.startGame, token, gameSettings);
+    await longRunningHub.send(HubEvents.startGame, gameHash, token, gameSettings);
   }
 
   const handleLeaveGameButtonClick = async () => {
-    await hub.invoke(HubEvents.leaveGame, token);
+    await hub.send(HubEvents.leaveGame, gameHash, token);
     setToken("");
     navigate(config.mainClientEndpoint);
   }
 
   useEffect(() => {
+    setGameHash(UrlHelper.getGameHash(window.location.href));
+  }, []);
+
+  useEffect(() => {
+    if (!gameHash) {
+      return;
+    }
+
+    if (!fromViewNavigation) {
+      navigate(`${config.joinGameClientEndpoint}/${gameHash}`)
+      return;
+    }
+
     const startHubAndJoinGame = async () => {
       hub.on(HubEvents.onUpdatePlayerScores, (playerScoresSerialized: string) => {
         const playerScores = JSON.parse(playerScoresSerialized) as PlayerScore[];
@@ -75,12 +91,15 @@ function GameView() {
         const player = JSON.parse(playerSerialized) as Player;
         const settings = JSON.parse(gameSettingsSerialized) as GameSettings;
         const state = JSON.parse(gameStateSerialized) as GameState;
-        
-        console.log(state);
+
         dispatch(updatedPlayerScore({username: player.username, score: player.score}));
         dispatch(updatedGameSettings(settings));
         dispatch(updatedGameState(state));
         setToken(player.token);
+
+        if (username == state.hostPlayerUsername) {
+          setIsPlayerHost(true);
+        }
 
         setTimeout(() => {
           setIsGameDisplayed(true);
@@ -109,7 +128,7 @@ function GameView() {
       const playerUsername = regex ? username : player.username;
 
       await hub.start();
-      await hub.invoke(HubEvents.joinGame, token, playerUsername);
+      await hub.invoke(HubEvents.joinGame, gameHash, token, playerUsername);
     }
 
     const clearBeforeUnload = async () => {
@@ -120,7 +139,7 @@ function GameView() {
       hub.off(HubEvents.onGameProblem);
 
       if (!isGameFinished) {
-        await hub.invoke(HubEvents.leaveGame, token);
+        await hub.send(HubEvents.leaveGame, gameHash, token);
       }
 
       dispatch(clearedGameState());
@@ -136,21 +155,7 @@ function GameView() {
       window.removeEventListener("beforeunload", clearBeforeUnload);
       window.removeEventListener("unload", clearBeforeUnload);
     }
-  }, []);
-
-  useEffect(() => {
-      const checkIfPlayerIsHost = async () => {
-        await httpRequestHandler.checkIfPlayerIsHost(token)
-        .then((data: PlayerIsHostResponse) => {
-
-          if (data.isHost === true) {
-            setIsPlayerHost(true);
-          }
-        })
-      }
-      
-      checkIfPlayerIsHost();
-  }, [token]);
+  }, [gameHash]);
 
   useEffect(() => {
     if (playerScores.length > 1) {
@@ -253,6 +258,9 @@ function GameView() {
                     displaySecretWord={false}
                   />
                 </div>
+              </div>
+              <div className="order-lg-4 order-4">
+                <ClipboardBar invitationUrl={window.location.href} />
               </div>
             </div>
           </div>

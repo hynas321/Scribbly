@@ -1,87 +1,49 @@
-import { useEffect, useState } from 'react';
-import Button from '../Button';
-import InputForm from '../InputForm';
-import { useAppDispatch } from '../../redux/hooks';
+import useLocalStorageState from "use-local-storage-state";
+import InputForm from "../InputForm";
+import Button from "../Button";
+import { useEffect, useState } from "react";
+import HttpRequestHandler from "../../http/HttpRequestHandler";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { updatedAlert, updatedVisible } from "../../redux/slices/alert-slice";
+import { updatedUsername } from "../../redux/slices/player-score-slice";
+import UrlHelper from "../../utils/UrlHelper";
 import config from '../../../config.json';
-import Alert from '../Alert';
-import { useNavigate } from 'react-router-dom';
-import { updatedUsername, } from '../../redux/slices/player-score-slice';
-import HttpRequestHandler from '../../http/HttpRequestHandler';
-import { updatedAlert, updatedVisible } from '../../redux/slices/alert-slice';
-import useLocalStorageState from 'use-local-storage-state';
-import tableLoading from './../../assets/table-loading.gif';
-import MainScoreboard from '../MainScoreboard';
-import UrlHelper from '../../utils/UrlHelper';
-import Popup from '../Popup';
+import MainScoreboard from "../MainScoreboard";
+import tableLoading from './../../assets/table-loading.gif'
+import Alert from "../Alert";
 
-function MainView() {
+function JoinGameView() { 
   const httpRequestHandler = new HttpRequestHandler();
   const minUsernameLength: number = 1;
   const maxUsernameLength: number = 18;
 
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const [scoreboardScores, setScoreboardScores] = useState<MainScoreboardScore[]>([]);
   const [gameHash, setGameHash] = useState<string>("");
-  const [isCreateGameButtonActive, setIsCreateGameButtonActive] = useState<boolean>(false);
   const [isJoinGameButtonActive, setIsJoinGameButtonActive] = useState<boolean>(false);
   const [isTableDisplayed, setIsTableDisplayed] = useState<boolean>(false);
-  const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
+  const [scoreboardScores, setScoreboardScores] = useState<MainScoreboardScore[]>([]);
 
-  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
   const [username, setUsername] = useLocalStorageState("username", { defaultValue: ""});
 
   const handleInputFormChange = (value: string) => {
     setUsername(value.trim());
   }
 
-  const handleCreateGameButtonClick = async () => {
-    if (username.length < minUsernameLength ||
-        username.length > maxUsernameLength) {
-      return;
-    }
-  
-    try {
-      const data = await httpRequestHandler.createGame(username);
-
-      if (!("gameHash" || "hostToken" in data)) {
-        displayAlert("Could not create the game, try again.", "primary");
-        return;
-      }
-
-      setToken(data.hostToken);
-      dispatch(updatedUsername(username));
-      navigate(`${config.gameClientEndpoint}/${data.gameHash}`, { state: { fromViewNavigation: true } });
-
-    }
-    catch (error) {
-      displayAlert("Error", "danger");
-    }
-  }
-
-  const handleJoinLobbyButtonClick = () => {
+  const handleJoinGameButtonClick = async () => {
     if (username.length < minUsernameLength) {
       return;
     }
-
-    setIsPopupVisible(true);
-  }
-
-  const handleClosePopup = () => {
-    setIsPopupVisible(false);
-  }
-
-  const handleOnSubmitPopup = async (value: string) => {
-    const gameHash = UrlHelper.getGameHash(value);
 
     const checkIfGameExists = async () => {
       try {
         const data = await httpRequestHandler.checkIfGameExists(gameHash);
     
         if (typeof data != "boolean") {
-          setIsPopupVisible(false);
-          displayAlert("Unexpected error, try again", "danger");
+          displayAlert("Unexpected error", "danger");
+          navigate(`${config.mainClientEndpoint}`);
           return;
         }
     
@@ -90,21 +52,23 @@ function MainView() {
           navigate(`${config.gameClientEndpoint}/${gameHash}`, { state: { fromViewNavigation: true } });
         }
         else {
-          setIsPopupVisible(false);
           displayAlert("Game does not exist", "danger");
+          navigate(`${config.mainClientEndpoint}`);
         }
       
       }
       catch (error) {
-        setIsPopupVisible(false);
-        displayAlert("Unexpected error, try again", "danger");
+        displayAlert("Unexpected error", "danger");
+        navigate(`${config.mainClientEndpoint}`);
       }
     };
 
-    await checkIfGameExists();
+    checkIfGameExists();
   }
 
   useEffect(() => {
+    setGameHash(UrlHelper.getGameHash(window.location.href));
+
     const fetchPlayerScores = async () => {
       setGameHash(UrlHelper.getGameHash(window.location.href));
 
@@ -134,11 +98,9 @@ function MainView() {
     if (username.length < minUsernameLength ||
         username.length > maxUsernameLength) {
       setIsJoinGameButtonActive(false);
-      setIsCreateGameButtonActive(false);
     } 
     else {
       setIsJoinGameButtonActive(true);
-      setIsCreateGameButtonActive(true);
     }
   }, [username]);
 
@@ -153,17 +115,10 @@ function MainView() {
       dispatch(updatedVisible(false));
     }, 3000);
   }
-
+  
   return (
     <div className="container">
       <div className="col-lg-4 col-sm-7 col-xs-6 mx-auto text-center">
-        <Popup 
-            title={"Join the game"}
-            inputFormPlaceholderText={"Paste the invitation URL here"}
-            visible={isPopupVisible}
-            onSubmit={handleOnSubmitPopup}
-            onClose={handleClosePopup}
-          />
         <Alert />
         <InputForm
           defaultValue={username}
@@ -172,15 +127,9 @@ function MainView() {
           onChange={handleInputFormChange}
         />
         <Button
-          text={"Create the game"}
-          type="success"
-          active={isCreateGameButtonActive}
-          onClick={handleCreateGameButtonClick}
-        />
-        <Button
-          text="Join the game"
+          text={"Join the game"}
           active={isJoinGameButtonActive}
-          onClick={handleJoinLobbyButtonClick}
+          onClick={handleJoinGameButtonClick}
         />
       </div>
       <div className="col-lg-3 col-sm-6 col-xs-6 mt-5 text-center mx-auto">
@@ -196,7 +145,7 @@ function MainView() {
         }
       </div>
     </div>
-  );
+  )
 }
 
-export default MainView;
+export default JoinGameView;

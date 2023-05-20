@@ -1,4 +1,5 @@
 using Dotnet.Server.JsonConfig;
+using Dotnet.Server.Managers;
 using Dotnet.Server.Models;
 using Microsoft.AspNetCore.SignalR;
 
@@ -6,9 +7,10 @@ namespace Dotnet.Server.Hubs;
 
 public partial class HubConnection : Hub
 {
+    private readonly HashManager hashManager = new HashManager();
 
     [HubMethodName(HubEvents.JoinGame)]
-    public async Task JoinGame(string token, string username)
+    public async Task JoinGame(string gameHash, string token, string username)
     {
         try 
         {
@@ -16,18 +18,18 @@ public partial class HubConnection : Hub
             {
                 string errorMessage = "Username is too short";
 
-                logger.LogError($"JoinGame: {errorMessage}");
+                logger.LogError($"Game #{gameHash} JoinGame: {errorMessage}");
                 await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnJoinGameError, errorMessage);
                 return;
             }
 
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             if (game == null)
             {
                 string errorMessage = "Game does not exist";
 
-                logger.LogError($"JoinGame: {errorMessage}");
+                logger.LogError($"Game #{gameHash} JoinGame: {errorMessage}");
                 await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnJoinGameError, errorMessage);
                 return;
             }
@@ -44,24 +46,24 @@ public partial class HubConnection : Hub
                 };
 
                 game.GameState.HostPlayerUsername = player.Username;
-                gameManager.AddPlayer(player);
+                gameManager.AddPlayer(gameHash, player);
             }
-            else if (!gameManager.CheckIfPlayerExistsByUsername(username))
+            else if (!gameManager.CheckIfPlayerExistsByUsername(gameHash, username))
             {
                 player = new Player()
                 {
                     Username = username,
                     Score = 0,
-                    Token = Guid.NewGuid().ToString().Replace("-", ""),
+                    Token = hashManager.GenerateUserHash(),
                 };
 
-                gameManager.AddPlayer(player);
+                gameManager.AddPlayer(gameHash, player);
             }
-            else if (gameManager.CheckIfPlayerExistsByUsername(username))
+            else if (gameManager.CheckIfPlayerExistsByUsername(gameHash, username))
             {
                 string errorMessage = "User with your username already exists";
 
-                logger.LogError($"JoinGame: {errorMessage}");
+                logger.LogError($"Game #{gameHash} JoinGame: {errorMessage}");
                 await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnJoinGameError, errorMessage);
                 return;
             }
@@ -69,7 +71,7 @@ public partial class HubConnection : Hub
             {
                 string errorMessage = "Unexpected error, try again";
 
-                logger.LogError($"JoinGame: {errorMessage}");
+                logger.LogError($"Game #{gameHash} JoinGame: {errorMessage}");
                 await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnJoinGameError, errorMessage);
                 return;
             }
@@ -80,7 +82,7 @@ public partial class HubConnection : Hub
                 Score = player.Score
             };
 
-            List<PlayerScore> playerScores = gameManager.GetPlayerObjectsWithoutToken();
+            List<PlayerScore> playerScores = gameManager.GetPlayerObjectsWithoutToken(gameHash);
 
             GameSettings settingsClient = new GameSettings()
             {
@@ -102,7 +104,8 @@ public partial class HubConnection : Hub
                 CorrectGuessPlayerUsernames = game.GameState.CorrectGuessPlayerUsernames
             };
 
-            await Clients.All.SendAsync(HubEvents.OnUpdatePlayerScores, JsonHelper.Serialize(playerScores));
+            await Groups.AddToGroupAsync(Context.ConnectionId, gameHash);
+            await Clients.Group(gameHash).SendAsync(HubEvents.OnUpdatePlayerScores, JsonHelper.Serialize(playerScores));
             await Clients.Client(Context.ConnectionId).SendAsync(
                 HubEvents.OnJoinGame,
                 JsonHelper.Serialize(player),
@@ -110,10 +113,10 @@ public partial class HubConnection : Hub
                 JsonHelper.Serialize(stateClient)
             );
 
-            await SendAnnouncement($"{player.Username} has joined the game", BootstrapColors.Green);
+            await SendAnnouncement(gameHash, $"{player.Username} has joined the game", BootstrapColors.Green);
 
-            logger.LogInformation($"JoinGame: {player.Username} joined the game.");
-            logger.LogInformation($"Online players: {game.GameState.Players.Count}. Total players: {game.GameState.Players.Count}");
+            logger.LogInformation($"Game #{gameHash} JoinGame: {player.Username} joined the game.");
+            logger.LogInformation($"Game #{gameHash} Online players: {game.GameState.Players.Count}. Total players: {game.GameState.Players.Count}");
         }
         catch (Exception ex)
         {
@@ -122,38 +125,38 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubEvents.LeaveGame)]
-    public async Task LeaveGame(string token)
+    public async Task LeaveGame(string gameHash, string token)
     {
         try
         {
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
             
             if (game == null)
             {
-                logger.LogError($"LeaveGame: Game does not exist");
+                logger.LogError($"Game #{gameHash} LeaveGame: Game does not exist");
                 return;
             }
 
-            Player player = gameManager.GetPlayerByToken(token);
+            Player player = gameManager.GetPlayerByToken(gameHash, token);
 
             if (player == null)
             {
-                logger.LogError($"LeaveGame: Player with the token {token} does not exist");
+                logger.LogError($"Game #{gameHash} LeaveGame: Player with the token {token} does not exist");
                 return;
             }
 
-            gameManager.RemovePlayer(token);
+            gameManager.RemovePlayer(gameHash, token);
 
             if (game.GameState.Players.Count == 0)
             {
-                gameManager.SetGame(null);
-                logger.LogInformation($"LeaveGame: Game removed - no online players");
+                gameManager.RemoveGame(gameHash);
+                logger.LogInformation($"Game #{gameHash} LeaveGame: Game removed - no online players");
                 return;
             }
 
             if (!game.GameState.IsGameStarted && token == game.HostToken)
             {
-                gameManager.SetGame(null);
+                gameManager.RemoveGame(gameHash);
 
                 AnnouncementMessage message = new AnnouncementMessage()
                 {
@@ -161,15 +164,15 @@ public partial class HubConnection : Hub
                     BootstrapBackgroundColor = BootstrapColors.Red
                 };
 
-                await Clients.AllExcept(Context.ConnectionId).SendAsync(HubEvents.OnGameProblem, JsonHelper.Serialize(message));
+                await Clients.GroupExcept(gameHash, Context.ConnectionId).SendAsync(HubEvents.OnGameProblem, JsonHelper.Serialize(message));
 
-                logger.LogInformation($"LeaveGame: Host left the unstarted game - game removed");
+                logger.LogInformation($"Game #{gameHash} LeaveGame: Host left the unstarted game - game removed");
                 return;
             }
 
             if (game.GameState.IsGameStarted && game.GameState.Players.Count < 2)
             {
-                gameManager.SetGame(null);
+                gameManager.RemoveGame(gameHash);
 
                 AnnouncementMessage message = new AnnouncementMessage()
                 {
@@ -177,18 +180,18 @@ public partial class HubConnection : Hub
                     BootstrapBackgroundColor = BootstrapColors.Red
                 };
 
-                await Clients.AllExcept(Context.ConnectionId).SendAsync(HubEvents.OnGameProblem, JsonHelper.Serialize(message));
+                await Clients.GroupExcept(gameHash, Context.ConnectionId).SendAsync(HubEvents.OnGameProblem, JsonHelper.Serialize(message));
             }
 
-            List<PlayerScore> playerScores = gameManager.GetPlayerObjectsWithoutToken();
+            List<PlayerScore> playerScores = gameManager.GetPlayerObjectsWithoutToken(gameHash);
             string playerListSerialized = JsonHelper.Serialize(playerScores);
 
-            logger.LogInformation($"JoinGame: {player.Username} left the game");
-            logger.LogInformation($"Online players: {game.GameState.Players.Count}. Total players: {game.GameState.Players.Count}");
+            logger.LogInformation($"Game #{gameHash} LeaveGame: {player.Username} left the game");
+            logger.LogInformation($"Game #{gameHash} Online players: {game.GameState.Players.Count}. Total players: {game.GameState.Players.Count}");
 
-            await Clients.AllExcept(Context.ConnectionId).SendAsync(HubEvents.OnUpdatePlayerScores, playerListSerialized);
-
-            await SendAnnouncement($"{player.Username} has left the game", BootstrapColors.Red);
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameHash);
+            await Clients.GroupExcept(gameHash, Context.ConnectionId).SendAsync(HubEvents.OnUpdatePlayerScores, playerListSerialized);
+            await SendAnnouncement(gameHash, $"{player.Username} has left the game", BootstrapColors.Red);
         }
         catch (Exception ex)
         {

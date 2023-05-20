@@ -9,6 +9,7 @@ import useLocalStorageState from 'use-local-storage-state';
 import { useAppSelector } from '../../redux/hooks';
 import { useDispatch } from 'react-redux';
 import { updatedHiddenSecretWord } from '../../redux/slices/game-state-slice';
+import UrlHelper from '../../utils/UrlHelper';
 
 interface ChatProps {
   placeholderValue: string;
@@ -22,6 +23,7 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
   const gameState = useAppSelector((state) => state.gameState);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [gameHash, setGameHash] = useState<string>("");
   const [inputFormValue, setInputFormValue] = useState<string>("");
   const [isSendButtonActive, setIsSendButtonActive] = useState<boolean>(false);
 
@@ -36,7 +38,7 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
         return;
       }
 
-      await hub.invoke(HubEvents.sendChatMessage, token, inputFormValue);
+      await hub.invoke(HubEvents.sendChatMessage, gameHash, token, inputFormValue);
       
       if (inputFormRef && inputFormRef.current) {
         inputFormRef.current.value = "";
@@ -58,7 +60,11 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
   }
 
   useEffect(() => {
-    if (hub.getState() !== signalR.HubConnectionState.Connected) {
+    setGameHash(UrlHelper.getGameHash(window.location.href));
+  }, []);
+
+  useEffect(() => {
+    if (hub.getState() !== signalR.HubConnectionState.Connected || !gameHash) {
       return;
     }
 
@@ -77,8 +83,8 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
       setMessages(prevMessages => [...prevMessages, chatMessage]);
     });
 
-    hub.on(HubEvents.onRequestSecretWord, () => {
-      hub.invoke(HubEvents.getSecretWord, token);
+    hub.on(HubEvents.onRequestSecretWord, async () => {
+      await hub.invoke(HubEvents.getSecretWord, gameHash, token);
     });
 
     hub.on(HubEvents.onGetSecretWord, (secretWord: string) => {
@@ -86,7 +92,7 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
     })
 
     const loadChatMessages = async () => {
-      await hub.invoke(HubEvents.loadChatMessages, token);
+      await hub.invoke(HubEvents.loadChatMessages, gameHash, token);
     };
 
     loadChatMessages();
@@ -96,7 +102,7 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
       hub.off(HubEvents.onSendChatMessage);
       hub.off(HubEvents.onSendAnnouncement);
     }
-    }, [hub.getState()]);
+    }, [hub.getState(), gameHash]);
 
   useEffect(() => {
     if (inputFormValue.length > 0) {

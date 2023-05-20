@@ -6,23 +6,23 @@ namespace Dotnet.Server.Hubs;
 public partial class HubConnection : Hub
 {
     [HubMethodName(HubEvents.GetSecretWord)]
-    public async Task GetSecretWord(string token)
+    public async Task GetSecretWord(string gameHash, string token)
     {
         try
         {
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             if (game == null)
             {
-                logger.LogError($"GetSecretWord: Game does not exist");
+                //logger.LogError($"Game #{gameHash} GetSecretWord: Game does not exist");
                 return;
             }
 
-            Player player = gameManager.GetPlayerByToken(token);
+            Player player = gameManager.GetPlayerByToken(gameHash, token);
 
             if (player == null)
             {
-                //logger.LogError($"GetSecretWord: Player with the token {token} does not exist");
+                //logger.LogError($"Game #{gameHash} GetSecretWord: Player with the token {token} does not exist");
                 return;
             }
 
@@ -45,23 +45,23 @@ public partial class HubConnection : Hub
         }
     }
 
-    public async Task AddPlayerScoreAndAnnouncement(string token)
+    public async Task AddPlayerScoreAndAnnouncement(string gameHash, string token)
     {
         try 
         {
-            Game game = gameManager.GetGame();
+            Game game = gameManager.GetGame(gameHash);
 
             if (game == null)
             {
-                logger.LogError($"AddPlayerScoreAndAnnouncement: Game does not exist");
+                logger.LogError($"Game #{gameHash} AddPlayerScoreAndAnnouncement: Game does not exist");
                 return;
             }
 
-            Player player = gameManager.GetPlayerByToken(token);
+            Player player = gameManager.GetPlayerByToken(gameHash, token);
 
             if (player == null)
             {
-                logger.LogError($"AddPlayerScoreAndAnnouncement: Player with the token {token} does not exist");
+                logger.LogError($"Game #{gameHash} AddPlayerScoreAndAnnouncement: Player with the token {token} does not exist");
                 return;
             }
 
@@ -107,10 +107,10 @@ public partial class HubConnection : Hub
                 score = 2;
             }
 
-            gameManager.UpdatePlayerScore(player.Token, score);
+            gameManager.UpdatePlayerScore(gameHash, player.Token, score);
             game.GameState.CorrectAnswerCount++;
 
-            await SendAnnouncement($"{player.Username} guessed the word (+{score} points)", BootstrapColors.Green);
+            await SendAnnouncement(gameHash, $"{player.Username} guessed the word (+{score} points)", BootstrapColors.Green);
         }
         catch (Exception ex)
         {

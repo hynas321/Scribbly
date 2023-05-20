@@ -21,4 +21,7 @@ public class Config
 
     [JsonPropertyName("polishWordsApiKey")]
     public string PolishWordsApiKey { get; set; }
+
+    [JsonPropertyName("adminToken")]
+    public string AdminToken { get; set; }
 }

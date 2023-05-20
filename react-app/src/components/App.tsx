@@ -2,13 +2,14 @@ import 'bootstrap/dist/css/bootstrap.css'
 import MainView from './views/MainView';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import config from '../../config.json'
-import PageNotFound from './views/PageNotFound';
+import PageNotFoundView from './views/PageNotFoundView';
 import LogoAndAccountBar from './bars/LogoAndAccountBar';
 import { Provider } from 'react-redux';
 import { store } from '../redux/store';
 import { AccountHubContext, ConnectionHubContext, LongRunningConnectionHubContext, connectionHub, longRunningConnectionHub, accountConnectionHub } from "../context/ConnectionHubContext";
 import GameView from './views/GameView';
 import './App.css';
+import JoinGameView from './views/JoinGameView';
 
 function App() {
   const router = createBrowserRouter([
@@ -17,12 +18,16 @@ function App() {
       element: <MainView />
     },
     {
-      path: config.gameClientEndpoint,
+      path: `${config.gameClientEndpoint}/:gameHash`,
       element: <GameView />,
     },
     {
+      path: `${config.joinGameClientEndpoint}/:gameHash`,
+      element: <JoinGameView />
+    },
+    {
       path: "*",
-      element: <PageNotFound/ >
+      element: <PageNotFoundView/ >
     }
 ]);
 

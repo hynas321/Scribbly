@@ -1,24 +1,23 @@
+using Dotnet.Server.Database;
 using Dotnet.Server.JsonConfig;
 using Dotnet.Server.Managers;
 using Dotnet.Server.Models;
+using Dotnet.Server.Models.Static;
 
-namespace Dotnet.Server.Http.Requests;
+namespace Dotnet.Server.Http;
 
 class RandomWordFetcher
 {
-    private static string[] spareEnglishWords = new string[] { "greetings", "traveller", "spare", "words", "server", "project", "application"};
-    private static string[] sparePolishWords = new string[] { "przywitanie", "podróżnik", "zapasowy", "słowa", "serwer", "projekt", "aplikacja"};
-
-    public static async Task<string> FetchWordAsync()
+    public static async Task<string> FetchWordAsync(string gameHash)
     {
         GameManager gameManager = new GameManager();
-        Game game = gameManager.GetGame();
+        Game game = gameManager.GetGame(gameHash);
 
         switch (game.GameSettings.WordLanguage)
         {
-            case "en":
+            case Languages.EN:
                 return await FetchEnglishWord(game);
-            case "pl":
+            case Languages.PL:
                 return await FetchPolishWord(game);
             default:
                 return await FetchEnglishWord(game);
@@ -57,7 +56,7 @@ class RandomWordFetcher
                 }
                 else
                 {
-                    return GetSpareEnglishWord();
+                    return GetWordFromDatabase(Languages.EN);
                 }
             }
             catch
@@ -106,7 +105,7 @@ class RandomWordFetcher
                 }
                 else
                 {
-                    return GetSparePolishWord();
+                    return GetWordFromDatabase(Languages.PL);
                 }
             }
             catch
@@ -116,17 +115,10 @@ class RandomWordFetcher
         }
     }
 
-    private static string GetSpareEnglishWord()
-    {
-        Random random = new Random();
-
-        return spareEnglishWords[random.Next(spareEnglishWords.Length)];
+    private static string GetWordFromDatabase(string language)
+    {   
+        WordsRepository wordsRepository = new WordsRepository();
+        return wordsRepository.GetRandomWord(language);
     }
 
-    private static string GetSparePolishWord()
-    {
-        Random random = new Random();
-
-        return sparePolishWords[random.Next(spareEnglishWords.Length)];
-    }
 }
