@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import Hub from "../hub/Hub";
 import HubEvents from "../hub/HubEvents";
 import useLocalStorageState from "use-local-storage-state";
-import UrlHelper from "../utils/VerificationHelper";
+import UrlHelper from "../utils/UrlHelper";
 import * as signalR from '@microsoft/signalr';
 
 export const useDraw = (onDraw: (

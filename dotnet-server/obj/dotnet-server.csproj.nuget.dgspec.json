@@ -60,10 +60,6 @@
               "target": "Package",
               "version": "[13.0.3, )"
             },
-            "SocketIOSharp": {
-              "target": "Package",
-              "version": "[2.0.3, )"
-            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.4.0, )"

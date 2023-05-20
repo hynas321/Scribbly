@@ -11,7 +11,7 @@ import { updatedAlert, updatedVisible } from '../../redux/slices/alert-slice';
 import useLocalStorageState from 'use-local-storage-state';
 import tableLoading from './../../assets/table-loading.gif';
 import MainScoreboard from '../MainScoreboard';
-import UrlHelper from '../../utils/VerificationHelper';
+import UrlHelper from '../../utils/UrlHelper';
 import Popup from '../Popup';
 
 function MainView() {

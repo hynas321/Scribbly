@@ -1,3 +1,4 @@
+using Dotnet.Server.Http;
 using Dotnet.Server.Http.Requests;
 using Dotnet.Server.JsonConfig;
 using Dotnet.Server.Managers;
@@ -196,11 +197,11 @@ public partial class LongRunningHubConnection : Hub
 
                 if (game.GameState.CurrentRound > game.GameSettings.RoundsCount)
                 {   
-                    await accountHubContext.Clients.Group(gameHash).SendAsync(HubEvents.OnUpdateAccountScore);
-                    await SetCanvasText(gameHash, $"Thank you for playing! Automatic disconnection in 20s", BootstrapColors.Green);
-                    await Task.Delay(20000);
+                    await accountHubContext.Clients.All.SendAsync(HubEvents.OnUpdateAccountScore, gameHash);
+                    await SetCanvasText(gameHash, $"Thank you for playing! You may leave the game :)", BootstrapColors.Green);
+                    await Task.Delay(10000);
                     gameManager.RemoveGame(gameHash);
-                    await hubContext.Clients.Group(gameHash).SendAsync(HubEvents.OnEndGame);
+                    //await hubContext.Clients.Group(gameHash).SendAsync(HubEvents.OnEndGame);
                     break;
                 }
 

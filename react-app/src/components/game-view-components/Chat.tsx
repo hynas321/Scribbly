@@ -9,7 +9,7 @@ import useLocalStorageState from 'use-local-storage-state';
 import { useAppSelector } from '../../redux/hooks';
 import { useDispatch } from 'react-redux';
 import { updatedHiddenSecretWord } from '../../redux/slices/game-state-slice';
-import UrlHelper from '../../utils/VerificationHelper';
+import UrlHelper from '../../utils/UrlHelper';
 
 interface ChatProps {
   placeholderValue: string;

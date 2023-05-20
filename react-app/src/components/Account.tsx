@@ -7,7 +7,7 @@ import { AccountHubContext } from "../context/ConnectionHubContext";
 import HubEvents from "../hub/HubEvents";
 import * as signalR from '@microsoft/signalr';
 import { useGoogleLogout } from "react-google-login";
-import UrlHelper from "../utils/VerificationHelper";
+import UrlHelper from "../utils/UrlHelper";
 
 function Account() {
   const httpRequestHandler = new HttpRequestHandler();
@@ -46,12 +46,17 @@ function Account() {
     if (accountHub.getState() !== signalR.HubConnectionState.Connected) {
       return;
     }
-
-    accountHub.on(HubEvents.onUpdateAccountScore, async () => {
+    
+    accountHub.on(HubEvents.onUpdateAccountScore, async (gameHash: string) => {
       if (!isUserLoggedIn) {
-        return
+        return;
       }
 
+      if (gameHash !== UrlHelper.getGameHash(window.location.href)) {
+        return;
+      }
+
+      setGameHash(UrlHelper.getGameHash(window.location.href));
       setIsScoreToBeUpdated(true);
     });
 
@@ -73,7 +78,7 @@ function Account() {
     const updateScore = async () => {
       if (isScoreToBeUpdated) {
         const updatedScore = await httpRequestHandler.updateAccountScore(gameHash, token, oAuthToken);
-        console.log(updateScore);
+
         if (typeof updatedScore == "number") {
           setScore(updatedScore);
         }

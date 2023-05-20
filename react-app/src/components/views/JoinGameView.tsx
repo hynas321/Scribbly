@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { updatedAlert, updatedVisible } from "../../redux/slices/alert-slice";
 import { updatedUsername } from "../../redux/slices/player-score-slice";
-import UrlHelper from "../../utils/VerificationHelper";
+import UrlHelper from "../../utils/UrlHelper";
 import config from '../../../config.json';
 import MainScoreboard from "../MainScoreboard";
 import tableLoading from './../../assets/table-loading.gif'

@@ -20,7 +20,7 @@ import useLocalStorageState from 'use-local-storage-state';
 import { GameSettings, updatedGameSettings } from '../../redux/slices/game-settings-slice';
 import loading from './../../assets/loading.gif'
 import { GameState, clearedGameState, updatedGameState, updatedIsGameStarted } from '../../redux/slices/game-state-slice';
-import UrlHelper from '../../utils/VerificationHelper';
+import UrlHelper from '../../utils/UrlHelper';
 import ClipboardBar from '../bars/ClipboardBar';
 
 function GameView() {

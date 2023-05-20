@@ -10,7 +10,7 @@ import { ConnectionHubContext } from '../../context/ConnectionHubContext';
 import * as signalR from '@microsoft/signalr';
 import HubEvents from '../../hub/HubEvents';
 import useLocalStorageState from 'use-local-storage-state';
-import UrlHelper from '../../utils/VerificationHelper';
+import UrlHelper from '../../utils/UrlHelper';
 
 interface GameSettingsBoardProps {
   isPlayerHost: boolean;

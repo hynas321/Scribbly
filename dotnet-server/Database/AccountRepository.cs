@@ -17,7 +17,7 @@ public class AccountRepository
         
         using (SqliteConnection db = new SqliteConnection(connectionString))
         {
-            string createTableQuery = $"CREATE TABLE IF NOT EXISTS Account  " +
+            string createTableQuery = $"CREATE TABLE IF NOT EXISTS Account" +
                 "(Id TEXT PRIMARY KEY, AccessToken TEXT, Email TEXT, Name TEXT, GivenName TEXT, FamilyName TEXT, Score INTEGER)";
 
             db.Open();
@@ -33,6 +33,7 @@ public class AccountRepository
                 "VALUES (@Id, @AccessToken, @Email, @Name, @GivenName, @FamilyName, 0)";
 
             db.Open();
+
             int rowsAffected = db.Execute(insertQuery, account);
 
             if (rowsAffected == 0)
@@ -68,6 +69,7 @@ public class AccountRepository
             object parameters = new { AccessToken = accessToken };
 
             db.Open();
+
             return db.QueryFirstOrDefault<int>(query, parameters);
         }
     }
@@ -80,6 +82,7 @@ public class AccountRepository
             object parameters = new { Id = id };
 
             db.Open();
+
             return db.QueryFirstOrDefault<Account>(query, parameters);
         }
     }
@@ -91,6 +94,7 @@ public class AccountRepository
             string query = "SELECT GivenName, Email, Score FROM Account ORDER BY Score DESC LIMIT 5";
 
             db.Open();
+
             return db.Query<MainScoreboardScore>(query);
         }
     }
