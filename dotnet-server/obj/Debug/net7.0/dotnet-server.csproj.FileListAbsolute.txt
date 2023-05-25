@@ -33,16 +33,11 @@ C:\Projekty\tddd27_2023_scribbly\dotnet-server\obj\Debug\net7.0\dotnet-server.ge
 C:\Projekty\tddd27_2023_scribbly\dotnet-server\obj\Debug\net7.0\ref\dotnet-server.dll
 C:\Projekty\tddd27_2023_scribbly\dotnet-server\bin\Debug\net7.0\config.json
 C:\Projekty\tddd27_2023_scribbly\dotnet-server\bin\Debug\net7.0\Dapper.dll
-C:\Projekty\tddd27_2023_scribbly\dotnet-server\bin\Debug\net7.0\EmitterSharp.dll
-C:\Projekty\tddd27_2023_scribbly\dotnet-server\bin\Debug\net7.0\EngineIOSharp.dll
 C:\Projekty\tddd27_2023_scribbly\dotnet-server\bin\Debug\net7.0\Microsoft.Data.Sqlite.dll
 C:\Projekty\tddd27_2023_scribbly\dotnet-server\bin\Debug\net7.0\Newtonsoft.Json.dll
-C:\Projekty\tddd27_2023_scribbly\dotnet-server\bin\Debug\net7.0\SimpleThreadMonitor.dll
-C:\Projekty\tddd27_2023_scribbly\dotnet-server\bin\Debug\net7.0\SocketIOSharp.dll
 C:\Projekty\tddd27_2023_scribbly\dotnet-server\bin\Debug\net7.0\SQLitePCLRaw.batteries_v2.dll
 C:\Projekty\tddd27_2023_scribbly\dotnet-server\bin\Debug\net7.0\SQLitePCLRaw.core.dll
 C:\Projekty\tddd27_2023_scribbly\dotnet-server\bin\Debug\net7.0\SQLitePCLRaw.provider.e_sqlite3.dll
-C:\Projekty\tddd27_2023_scribbly\dotnet-server\bin\Debug\net7.0\WebSocketSharp.CustomHeaders.CustomHttpServer.dll
 C:\Projekty\tddd27_2023_scribbly\dotnet-server\bin\Debug\net7.0\runtimes\alpine-arm\native\libe_sqlite3.so
 C:\Projekty\tddd27_2023_scribbly\dotnet-server\bin\Debug\net7.0\runtimes\alpine-arm64\native\libe_sqlite3.so
 C:\Projekty\tddd27_2023_scribbly\dotnet-server\bin\Debug\net7.0\runtimes\alpine-x64\native\libe_sqlite3.so
