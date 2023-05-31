@@ -10,7 +10,7 @@ Host is able to set:
 
 ## Technological specification
 
-Websockets are used for managing chat and the drawn image.
+`SignalR` for managing realtime client-server communication
 
 #Frontend
 + `React` with `Typescript` (built with Vite)
@@ -18,6 +18,6 @@ Websockets are used for managing chat and the drawn image.
 
 #Backend
 + `ASP.NET Core` (REST API)
-+ `MySQL` database
++ `Sqlite` database
 + `Dapper` ORM framework
 + `Wordnik API` to fetch random word
