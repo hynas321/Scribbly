@@ -23,8 +23,8 @@ Host is able to set:
 + `Wordnik API` to fetch random word
 
 ## Screenshots
-Main menu!
-[Screenshot 2023-08-07 202112](https://github.com/hynas321/Scribbly/assets/76520333/b875f960-bd61-46db-86b1-d577020d7d2c)
+Main menu
+![Screenshot 2023-08-07 202112](https://github.com/hynas321/Scribbly/assets/76520333/b875f960-bd61-46db-86b1-d577020d7d2c)
 
 Game lobby
 ![Screenshot 2023-08-07 202202](https://github.com/hynas321/Scribbly/assets/76520333/7b526b2f-7a86-4cdb-9413-ca7fe76c2aec)
