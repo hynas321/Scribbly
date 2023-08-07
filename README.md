@@ -22,6 +22,10 @@ Host is able to set:
 + `Dapper` ORM framework
 + `Wordnik API` to fetch random word
 
+## Running the website
+React app: `npm run dev`
+Server: `dotnet run`
+
 ## Screenshots
 Main menu
 ![Screenshot 2023-08-07 202112](https://github.com/hynas321/Scribbly/assets/76520333/b875f960-bd61-46db-86b1-d577020d7d2c)
