@@ -1,4 +1,4 @@
-# TDDD27_2023_scribbly
+# Scribbly
 
 ## Functional specification
 Scribbly is a website that allows users to play a word guessing game. One user hosts the game in which there are a few rounds. Players can join the game via the invitation URL. In each round each player has a chance to draw an image presenting the randomly chosen word. Players write their guesses on the chat and whoever guesses the word correctly receives points. The player with the highest score after all rounds wins. 
