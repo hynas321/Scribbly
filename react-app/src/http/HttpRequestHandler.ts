@@ -1,106 +1,62 @@
+import axios from 'axios';
 import config from '../../config.json';
 import ApiEndpoints from './ApiEndpoints';
-import { CreateGameBody, JoinGameBody, PlayerIsHostResponse, UsernameExistsBody } from './HttpInterfaces';
+import { CreateGameBody, JoinGameBody } from './HttpInterfaces';
 
 class HttpRequestHandler {
   private httpServerUrl: string = config.httpServerUrl;
 
   async createGame(username: string): Promise<any> {
     const requestBody: CreateGameBody = {
-      username: username
+      username: username,
     };
 
     try {
-      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.gameCreate}`, {
-        method: 'POST',
-        body: JSON.stringify(requestBody),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error("Error");
-      } 
-
-      return await response.json();
-    }
-    catch (error) {
-      return error;
-    }
-  }
-
-  async joinGame(gameHash: string, token: string, username: string): Promise<any> {
-    const requestBody: JoinGameBody = {
-      username: username
-    };
-
-    try {
-      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.playerJoinGame}/${gameHash}`, {
-        method: 'POST',
-        body: JSON.stringify(requestBody),
+      const response = await axios.post(`${this.httpServerUrl}${ApiEndpoints.gameCreate}`, requestBody, {
         headers: {
           'Content-Type': 'application/json',
-          'Token': token
         }
       });
 
-      if (!response.ok) {
+      if (response.status !== 201) {
         throw new Error("Error");
       }
 
-      return await response.json();
-    }
-    catch (error) {
+      return response.data as object;
+
+    } catch (error: any) {
       return error;
     }
   }
 
   async checkIfGameExists(gameHash: string): Promise<any> {
     try {
-      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.gameExists}/${gameHash}`);
+      const response = await axios.get(`${this.httpServerUrl}${ApiEndpoints.gameExists}/${gameHash}`);
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("Error");
       }
 
-      return await response.json();
-    }
-    catch (error) {
-      return error;
-    }
-  }
-  
-  async checkIfPlayerExists(gameHash: string, token: string): Promise<any> {
-    try {
-      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.playerExists}/${gameHash}`, {
-        headers: {
-          'Token': token
-        }
-      });
-  
-      if (!response.ok) {
-        throw new Error("Error");
-      }
+      return response.data as boolean;
 
-      return await response.json() as boolean;
-    } 
-    catch (error) {
+    } catch (error: any) {
       return error;
     }
   }
 
-  async fetchTopAccountScores(): Promise<any> {
+  async fetchTopAccountScores(): Promise<MainScoreboardScore[]> {
     try {
-      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.accountGetTopScores}`);
+      const response = await axios.get(`${this.httpServerUrl}${ApiEndpoints.accountGetTopScores}`);
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("Error");
       }
 
-      return await response.json() as MainScoreboardScore[];
-    }
-    catch (error) {
+      console.log(response.data);
+
+      return response.data as MainScoreboardScore[];
+
+    } catch (error: any) {
       return error;
     }
   }
@@ -114,64 +70,65 @@ class HttpRequestHandler {
         name: profileObj.name,
         givenName: profileObj.givenName,
         familyName: profileObj.familyName,
-        score: 0
+        score: 0,
       };
 
       const requestBody = {
-        account: account
+        account: account,
       };
 
-      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.accountAddIfNotExists}`, {
-        method: 'POST',
-        body: JSON.stringify(requestBody),
+      const response = await axios.post(`${this.httpServerUrl}${ApiEndpoints.accountAddIfNotExists}`, requestBody, {
         headers: {
           'Content-Type': 'application/json',
-        }
+        },
       });
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("Error");
       }
 
-      return await response.json();
-    }
-    catch (error) {
+      return response.status as number;
+
+    } catch (error: any) {
       return error;
     }
   }
 
-  async fetchAccountScore(id: string): Promise<any> {
+  async fetchAccountScore(id: string): Promise<number> {
     try {
-      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.accountGetScore}/${id}`);
+      const response = await axios.get(`${this.httpServerUrl}${ApiEndpoints.accountGetScore}/${id}`);
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("Error");
       }
 
-      return await response.json() as number;
-    }
-    catch (error) {
+      return response.data as number;
+
+    } catch (error: any) {
       return error;
     }
   }
 
-  async updateAccountScore(gameHash: string, token: string, accessToken: string): Promise<any> {
+  async updateAccountScore(gameHash: string, token: string, accessToken: string): Promise<number> {
     try {
-      const response = await fetch(`${this.httpServerUrl}${ApiEndpoints.accountIncrementScore}/${gameHash}`, {
-        method: 'PUT',
-        headers: {
-          'Token': token,
-          'AccessToken': accessToken
+      const response = await axios.put(
+        `${this.httpServerUrl}${ApiEndpoints.accountIncrementScore}/${gameHash}`,
+        undefined,
+        {
+          headers: {
+            'Token': token,
+            'AccessToken': accessToken,
+          },
         }
-      });
+      );
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("Error");
       }
 
-      return await response.json() as number;
-    }
-    catch (error) {
+      return response.data as number;
+
+    } catch (error: any) {
       return error;
     }
   }
