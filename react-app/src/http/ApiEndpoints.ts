@@ -8,10 +8,6 @@ class ApiEndpoints {
   static gameCreate: string = "/api/Game/Create";
   static gameExists: string = "/api/Game/Exists";
 
-  //PlayerController
-  static playerJoinGame: string = "/api/Player/JoinGame";
-  static playerExists: string = "/api/Player/Exists";
-
   //AccountController
   static accountAddIfNotExists: string = "/api/Account/Add";
   static accountIncrementScore: string = "/api/Account/IncrementScore";
