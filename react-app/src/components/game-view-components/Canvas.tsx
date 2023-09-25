@@ -116,9 +116,9 @@ function Canvas() {
       <div className="d-flex justify-content-center mb-2">
         <canvas
           ref={canvasRef}
-          width={700}
-          height={500}
-          className="border border-black rounded-md canvas-scale"
+          width={670}
+          height={470}
+          className="border border-black rounded-md canvas-scale img-responsive"
           onMouseDown={onMouseDown}
           onTouchStart={onMouseDown}
         />
