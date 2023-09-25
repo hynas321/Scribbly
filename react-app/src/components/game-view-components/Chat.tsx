@@ -10,6 +10,7 @@ import { useAppSelector } from '../../redux/hooks';
 import { useDispatch } from 'react-redux';
 import { updatedHiddenSecretWord } from '../../redux/slices/game-state-slice';
 import UrlHelper from '../../utils/UrlHelper';
+import { animated, useSpring } from '@react-spring/web';
 
 interface ChatProps {
   placeholderValue: string;
@@ -121,8 +122,13 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
     messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
   }, [messages]);
   
+  const animationSprings = useSpring({
+    from: { x: 200 },
+    to: { x: 0 },
+  });
+
   return (
-    <div>
+    <animated.div style={{...animationSprings}}>
       <h5>
         { displaySecretWord && `${gameState.hiddenSecretWord}`}
       </h5>
@@ -154,7 +160,7 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
         </div>
       }
 
-    </div>
+    </animated.div>
   );
 }
 

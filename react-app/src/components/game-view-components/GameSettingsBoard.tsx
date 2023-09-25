@@ -1,8 +1,7 @@
 import Range from '../Range';
 import CheckForm from '../CheckForm';
-import CheckBox from '../CheckBox';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { GameSettings, updatedDrawingTimeSeconds, updatedNounsOnly, updatedRoundsCount, updatedWordLanguage } from '../../redux/slices/game-settings-slice';
+import { GameSettings, updatedDrawingTimeSeconds, updatedRoundsCount, updatedWordLanguage } from '../../redux/slices/game-settings-slice';
 import { BsGearFill } from 'react-icons/bs';
 import InputSelect from '../InputSelect';
 import { useContext, useEffect, useState } from "react";
@@ -11,6 +10,7 @@ import * as signalR from '@microsoft/signalr';
 import HubEvents from '../../hub/HubEvents';
 import useLocalStorageState from 'use-local-storage-state';
 import UrlHelper from '../../utils/UrlHelper';
+import { animated, useSpring } from '@react-spring/web';
 
 interface GameSettingsBoardProps {
   isPlayerHost: boolean;
@@ -23,15 +23,13 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
 
   const [gameHash, setGameHash] = useState<string>("");
 
-  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
+  const [token] = useLocalStorageState("token", { defaultValue: "" });
 
   let gameSettingsLoaded = false;
-  const nounsOnly = "Allow only nouns as random words";
   const drawingTimeText = "Drawing time";
   const numberOfRoundsText = "Number of rounds";
   const chooseLanguageText = "Language of random words";
 
-  
   useEffect(() => {
     setGameHash(UrlHelper.getGameHash(window.location.href));
   }, []);
@@ -44,14 +42,9 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
     hub.on(HubEvents.onLoadGameSettings, (gameSettingsSerialized: any) => {
       const gameSettings = JSON.parse(gameSettingsSerialized) as GameSettings;
 
-      dispatch(updatedNounsOnly(gameSettings.nounsOnly));
       dispatch(updatedDrawingTimeSeconds(gameSettings.drawingTimeSeconds));
       dispatch(updatedRoundsCount(gameSettings.roundsCount));
       dispatch(updatedWordLanguage(gameSettings.wordLanguage));
-    });
-
-    hub.on(HubEvents.onSetAbstractNouns, (checked: boolean) => {
-      dispatch(updatedNounsOnly(checked));
     });
 
     hub.on(HubEvents.onSetDrawingTimeSeconds, (value: number) => {
@@ -77,16 +70,11 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
     }
     return () => {
       hub.off(HubEvents.onLoadGameSettings);
-      hub.off(HubEvents.onSetAbstractNouns);
       hub.off(HubEvents.onSetDrawingTimeSeconds);
       hub.off(HubEvents.onSetRoundsCount);
       hub.off(HubEvents.onSetWordLanguage);
     }
   }, [hub.getState(), gameHash])
-
-  const handleCheckBoxChange = async (checked: boolean) => {
-    await hub.invoke(HubEvents.setAbstractNouns, gameHash, token, checked);
-  }
 
   const handleRangeChange = async (value: number) => {
     await hub.invoke(HubEvents.setDrawingTimeSeconds, gameHash, token, value);
@@ -100,21 +88,14 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
     await hub.invoke(HubEvents.setWordLanguage, gameHash, token, value);
   }
 
+  const animationSprings = useSpring({
+    from: { y: 200 },
+    to: { y: 0 },
+  });
+
   return (
-    <div className="bg-light rounded-5 px-5 pt-3 pb-3">
+    <animated.div className="bg-light rounded-5 px-5 pt-3 pb-3" style={{...animationSprings}}>
       <h4 className="text-center">Game Settings <BsGearFill/></h4>
-      <div className="mt-4">
-        { isPlayerHost ?
-          <CheckBox
-            text={nounsOnly}
-            defaultValue={settings.nounsOnly}
-            onChange={handleCheckBoxChange}
-          /> :
-          <label className="form-check-label">
-            {nounsOnly}: <b>{settings.nounsOnly.valueOf().toString() ? "Yes" : "No"}</b>
-          </label>
-        }
-      </div>
       <div className="mt-4">
         { isPlayerHost ?
           <Range
@@ -127,7 +108,7 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
             onChange={handleRangeChange} 
           /> :
           <label className="form-check-label">
-            {drawingTimeText}:<b>{settings.drawingTimeSeconds.valueOf().toString()}s</b>
+            {drawingTimeText}: <b>{settings.drawingTimeSeconds.valueOf().toString()}s</b>
           </label>
         }
       </div>
@@ -162,7 +143,7 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
         </label>
         }
       </div>
-    </div>
+    </animated.div>
   );
 }
 

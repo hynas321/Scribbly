@@ -21,6 +21,7 @@ import loading from './../../assets/loading.gif'
 import { GameState, clearedGameState, updatedGameState, updatedIsGameStarted } from '../../redux/slices/game-state-slice';
 import UrlHelper from '../../utils/UrlHelper';
 import ClipboardBar from '../bars/ClipboardBar';
+import { animated, useSpring } from '@react-spring/web';
 
 function GameView() {
   const hub = useContext(ConnectionHubContext);
@@ -230,13 +231,13 @@ function GameView() {
               <div className="col-lg-4 col-sm-10 col-12 mx-auto text-center order-lg-2 order-1">
                 <h5>Your username: {player.username}</h5>
                 { isPlayerHost && 
-                  <Button
-                    text="Start the game"
-                    type="success"
-                    active={isStartGameButtonActive}
-                    icon={<BsPlayCircle/>}
-                    onClick={handleStartGameButtonClick}
-                  />
+                    <Button
+                      text="Start the game"
+                      type="success"
+                      active={isStartGameButtonActive}
+                      icon={<BsPlayCircle/>}
+                      onClick={handleStartGameButtonClick}
+                    />
                 }
                 { !isPlayerHost && <h4 className="mt-3">Waiting for the host to start the game</h4> }
                   <Button

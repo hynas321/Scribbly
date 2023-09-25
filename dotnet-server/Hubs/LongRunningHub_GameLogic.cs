@@ -63,7 +63,6 @@ public partial class LongRunningHubConnection : Hub
             game.ChatMessages.Clear();
             game.GameState.IsGameStarted = true;
 
-            game.GameSettings.NounsOnly = settings.NounsOnly;
             game.GameSettings.DrawingTimeSeconds = settings.DrawingTimeSeconds;
             game.GameSettings.RoundsCount = settings.RoundsCount;
             game.GameSettings.WordLanguage = settings.WordLanguage;

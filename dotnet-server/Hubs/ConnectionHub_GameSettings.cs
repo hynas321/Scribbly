@@ -6,40 +6,6 @@ namespace Dotnet.Server.Hubs;
 
 public partial class HubConnection : Hub
 {
-    [HubMethodName(HubEvents.SetAbstractNouns)]
-    public async Task SetAbstractNouns(string gameHash, string token, bool setting)
-    {
-        try
-        {
-            Game game = gameManager.GetGame(gameHash);
-
-            if (game == null)
-            {
-                logger.LogError($"Game #{gameHash} SetAbstractNouns: Game does not exist");
-                return;
-            }
-
-            if (token != game.HostToken)
-            {
-                logger.LogError($"Game #{gameHash} SetAbstractNouns: Player with the token {token} is not a host");
-                return;
-            }
-
-            GameSettings settings = game.GameSettings;
-
-            settings.NounsOnly = setting;
-            game.GameSettings = settings;
-
-            await Clients.Group(gameHash).SendAsync(HubEvents.OnSetAbstractNouns, setting);
-
-            logger.LogInformation($"Game #{gameHash} SetAbstractNouns: Setting set to {setting}");
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(Convert.ToString(ex));
-        }
-    }
-
     [HubMethodName(HubEvents.SetDrawingTimeSeconds)]
     public async Task SetDrawingTimeSeconds(string gameHash, string token, int setting)
     {

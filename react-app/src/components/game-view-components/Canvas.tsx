@@ -10,9 +10,9 @@ import * as signalR from '@microsoft/signalr';
 import { useAppSelector } from "../../redux/hooks";
 import { useDispatch } from "react-redux";
 import { updatedCurrentDrawingTimeSeconds, updatedIsTimerVisible } from "../../redux/slices/game-state-slice";
-import useLocalStorageState from "use-local-storage-state";
 import { BsArrowReturnLeft, BsEraserFill } from "react-icons/bs";
 import Range from '../Range';
+import { animated, useSpring } from "@react-spring/web";
 
 function Canvas() {
   const hub = useContext(ConnectionHubContext);
@@ -25,9 +25,7 @@ function Canvas() {
   const [color, setColor] = useState<string>("#000000");
   const [thickness, setThickness] = useState<number>(5);
   const [canvasTitle, setCanvasTitle] = useState<AnnouncementMessage | null>(null);
-  const [isPlayerDrawing, setIsPlayerDrawing] = useState<boolean>(false);
-
-  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
+  const [, setIsPlayerDrawing] = useState<boolean>(false);
 
   const { canvasRef, onMouseDown, clearCanvas, undoLine } = useDraw(draw, hub, color, thickness);
 
@@ -93,8 +91,13 @@ function Canvas() {
     }
   }, [hub.getState()]);
 
+  const animationSprings = useSpring({
+    from: { y: 200 },
+    to: { y: 0 },
+  });
+
   return (
-    <>
+    <animated.div style={{...animationSprings}}>
       {
         gameState.isTimerVisible ?
         <div className="d-flex justify-content-center">
@@ -123,7 +126,7 @@ function Canvas() {
       {
         player.username == gameState.drawingPlayerUsername &&
         <>
-          <div className="custom-muted d-flex justify-content-center rounded py-2">
+          <div className="custom-muted d-flex justify-content-center rounded py-2 px-3">
             <CirclePicker
               color={color}
               width="100"
@@ -158,7 +161,7 @@ function Canvas() {
           </div>
         </>
       }
-    </>
+    </animated.div>
   )
 }
 

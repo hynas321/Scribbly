@@ -13,6 +13,7 @@ import tableLoading from './../../assets/table-loading.gif';
 import MainScoreboard from '../MainScoreboard';
 import UrlHelper from '../../utils/UrlHelper';
 import Popup from '../Popup';
+import { animated, useSpring } from '@react-spring/web';
 
 function MainView() {
   const httpRequestHandler = new HttpRequestHandler();
@@ -154,16 +155,21 @@ function MainView() {
     }, 3000);
   }
 
+  const springs = useSpring({
+    from: { y: 200 },
+    to: { y: 0 },
+  })
+
   return (
     <div className="container">
       <div className="col-lg-4 col-sm-7 col-xs-6 mx-auto text-center">
         <Popup 
-            title={"Join the game"}
-            inputFormPlaceholderText={"Paste the invitation URL here"}
-            visible={isPopupVisible}
-            onSubmit={handleOnSubmitPopup}
-            onClose={handleClosePopup}
-          />
+          title={"Join the game"}
+          inputFormPlaceholderText={"Paste the invitation URL here"}
+          visible={isPopupVisible}
+          onSubmit={handleOnSubmitPopup}
+          onClose={handleClosePopup}
+        />
         <Alert />
         <InputForm
           defaultValue={username}
@@ -183,7 +189,7 @@ function MainView() {
           onClick={handleJoinLobbyButtonClick}
         />
       </div>
-      <div className="col-lg-3 col-sm-6 col-xs-6 mt-5 text-center mx-auto">
+      <animated.div className="col-lg-4 col-md-8 mt-5 text-center mx-auto" style={{...springs}}>
         { isTableDisplayed ?
           <MainScoreboard
             title="Top 5 players"
@@ -194,7 +200,7 @@ function MainView() {
           :
           <img src={tableLoading} alt="Table loading" className="img-fluid" />
         }
-      </div>
+      </animated.div>
     </div>
   );
 }

@@ -20,19 +20,21 @@ function ClipboardBar({invitationUrl}: ClipboardBarProps) {
   
   return (
     <>
-      <CopyToClipboard 
-        text={invitationUrl}
-        onCopy={handleCopy}
-      >
+
         <div className="d-flex align-items-center">
-          <Button
-            text={"Copy invitation URL"}
-            active={true}
-            icon={<BsClipboard />}
-          />
+          <CopyToClipboard 
+            text={invitationUrl}
+            onCopy={handleCopy}
+          >
+            <Button
+              text={"Copy invitation URL"}
+              active={true}
+              icon={<BsClipboard />}
+            />
+          </CopyToClipboard>
           { copiedToClipboardVisible && <h4 className="text-success mx-5">Copied! <BsEmojiSmile /></h4>}
         </div>
-      </CopyToClipboard>
+
     </>
   )
 }
