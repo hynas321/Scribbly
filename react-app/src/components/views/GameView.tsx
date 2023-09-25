@@ -14,7 +14,6 @@ import HubEvents from '../../hub/HubEvents';
 import Canvas from '../game-view-components/Canvas';
 import ControlPanel from '../ControlPanel';
 import { useDispatch } from 'react-redux';
-import HttpRequestHandler from '../../http/HttpRequestHandler';
 import { updatedAlert, updatedVisible } from '../../redux/slices/alert-slice';
 import useLocalStorageState from 'use-local-storage-state';
 import { GameSettings, updatedGameSettings } from '../../redux/slices/game-settings-slice';

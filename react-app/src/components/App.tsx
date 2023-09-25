@@ -3,13 +3,14 @@ import MainView from './views/MainView';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import config from '../../config.json'
 import PageNotFoundView from './views/PageNotFoundView';
-import LogoAndAccountBar from './bars/LogoAndAccountBar';
+import Header from './bars/Header';
 import { Provider } from 'react-redux';
 import { store } from '../redux/store';
 import { AccountHubContext, ConnectionHubContext, LongRunningConnectionHubContext, connectionHub, longRunningConnectionHub, accountConnectionHub } from "../context/ConnectionHubContext";
 import GameView from './views/GameView';
 import './App.css';
 import JoinGameView from './views/JoinGameView';
+import Footer from './Footer';
 
 function App() {
   const router = createBrowserRouter([
@@ -36,7 +37,7 @@ return (
     <LongRunningConnectionHubContext.Provider value={longRunningConnectionHub}>
       <AccountHubContext.Provider value={accountConnectionHub}>
         <Provider store={store}>
-          <LogoAndAccountBar />
+          <Header />
           <RouterProvider router={router}/>
         </Provider>
       </AccountHubContext.Provider>

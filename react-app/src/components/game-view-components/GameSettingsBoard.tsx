@@ -101,7 +101,7 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
   }
 
   return (
-    <div className="bg-light rounded px-5 pt-3 pb-3">
+    <div className="bg-light rounded-5 px-5 pt-3 pb-3">
       <h4 className="text-center">Game Settings <BsGearFill/></h4>
       <div className="mt-4">
         { isPlayerHost ?

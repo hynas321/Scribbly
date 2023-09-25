@@ -8,7 +8,7 @@ function ChatMessage({chatMessage}: ChatMessageProps) {
   const playerUsername = useAppSelector((state) => state.player.username);
 
   return (
-    <div className={`bg-${chatMessage.bootstrapBackgroundColor ?? "primary"} mb-1 px-2 py-1`}>
+    <div className={`bg-${chatMessage.bootstrapBackgroundColor ?? "primary"} mb-1 px-2 py-1 rounded-3`}>
       <h6
         className={playerUsername == chatMessage.username ? "text-start text-warning" : "text-start text-dark" }
         style={{overflowWrap: "break-word"}}

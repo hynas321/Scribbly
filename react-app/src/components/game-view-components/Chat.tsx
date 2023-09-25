@@ -126,7 +126,7 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
       <h5>
         { displaySecretWord && `${gameState.hiddenSecretWord}`}
       </h5>
-      <div id="messages" className="rounded p-3 bg-light">
+      <div id="messages" className="rounded-5 p-3 bg-light">
         <div ref={messagesRef} style={{height: "450px", overflowY: "auto"}}>
           {messages.map((chatMessage, index) => (
             <ChatMessage

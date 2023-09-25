@@ -1,0 +1,21 @@
+button:hover {
+    box-shadow: 0 10px 15px 0 rgba(0,0,0,0.05),0 15px 25px 0 rgba(0,0,0,0.05);
+}
+
+footer {
+    position: "relative";
+    margin-top: 1rem;
+}
+
+a {
+    color:chocolate;
+    text-decoration: none;
+}
+
+a:hover {
+    color:orange;
+}
+
+.custom-muted {
+    background-color: #CCCCCC;
+}

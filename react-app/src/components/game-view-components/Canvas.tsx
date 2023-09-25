@@ -123,7 +123,7 @@ function Canvas() {
       {
         player.username == gameState.drawingPlayerUsername &&
         <>
-          <div className="bg-info d-flex justify-content-center rounded py-2">
+          <div className="custom-muted d-flex justify-content-center rounded py-2">
             <CirclePicker
               color={color}
               width="100"
