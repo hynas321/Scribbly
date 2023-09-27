@@ -11,7 +11,6 @@ namespace Dotnet.Server.Controllers;
 [Route("api/[controller]")]
 public class WordController : ControllerBase
 {
-    private readonly GameManager gamesManager = new GameManager();
     private readonly ILogger<PlayerController> logger;
 
     public WordController(ILogger<PlayerController> logger)

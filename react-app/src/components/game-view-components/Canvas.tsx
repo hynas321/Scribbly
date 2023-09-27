@@ -25,9 +25,9 @@ function Canvas() {
   const [color, setColor] = useState<string>("#000000");
   const [thickness, setThickness] = useState<number>(5);
   const [canvasTitle, setCanvasTitle] = useState<AnnouncementMessage | null>(null);
-  const [, setIsPlayerDrawing] = useState<boolean>(false);
+  const [isPlayerDrawing, setIsPlayerDrawing] = useState<boolean>(false);
 
-  const { canvasRef, onMouseDown, clearCanvas, undoLine } = useDraw(draw, hub, color, thickness);
+  const { canvasRef, onMouseDown, clearCanvas, undoLine } = useDraw(draw, hub, color, thickness, isPlayerDrawing);
 
   const canvasAnimationSpring = useSpring({
     from: { y: 200 },
@@ -35,7 +35,7 @@ function Canvas() {
   });
 
   const [canvasTitleAnimationSpring, setCanvasTitleAnimationSpring] = useSpring(() => ({ opacity: 0 }));
-  const [canvasToolsAnimationSpring, setCanvasToolsAnimationSpring] = useSpring(() => {{ opacity: 0 }});
+  const [, setCanvasToolsAnimationSpring] = useSpring(() => {{ 0 }});
 
   const circlePickerColors = [material.black, material.red['500'],
     material.pink['500'], material.purple['500'], material.deepPurple['500'],

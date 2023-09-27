@@ -14,7 +14,7 @@ public partial class HubConnection : Hub
 
             if (game == null)
             {
-                //logger.LogError($"Game #{gameHash} GetSecretWord: Game does not exist");
+                logger.LogError($"Game #{gameHash} GetSecretWord: Game does not exist");
                 return;
             }
 
@@ -22,7 +22,7 @@ public partial class HubConnection : Hub
 
             if (player == null)
             {
-                //logger.LogError($"Game #{gameHash} GetSecretWord: Player with the token {token} does not exist");
+                logger.LogError($"Game #{gameHash} GetSecretWord: Player with the token {token} does not exist");
                 return;
             }
 
