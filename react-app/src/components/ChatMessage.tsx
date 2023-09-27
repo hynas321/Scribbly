@@ -10,7 +10,7 @@ function ChatMessage({chatMessage}: ChatMessageProps) {
   return (
     <div className={`bg-${chatMessage.bootstrapBackgroundColor ?? "primary"} mb-1 px-2 py-1 rounded-3`}>
       <h6
-        className={playerUsername == chatMessage.username ? "text-start text-warning" : "text-start text-dark" }
+        className={playerUsername == chatMessage.username ? "text-start text-warning" : "text-start text-info" }
         style={{overflowWrap: "break-word"}}
       >
           <b>{ chatMessage.username == null ? "" : `${chatMessage.username}: ` }</b>

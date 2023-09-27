@@ -29,6 +29,14 @@ function Canvas() {
 
   const { canvasRef, onMouseDown, clearCanvas, undoLine } = useDraw(draw, hub, color, thickness);
 
+  const canvasAnimationSpring = useSpring({
+    from: { y: 200 },
+    to: { y: 0 },
+  });
+
+  const [canvasTitleAnimationSpring, setCanvasTitleAnimationSpring] = useSpring(() => ({ opacity: 0 }));
+  const [canvasToolsAnimationSpring, setCanvasToolsAnimationSpring] = useSpring(() => {{ opacity: 0 }});
+
   const circlePickerColors = [material.black, material.red['500'],
     material.pink['500'], material.purple['500'], material.deepPurple['500'],
     material.indigo['500'], material.blue['500'], material.green['500'],
@@ -91,13 +99,26 @@ function Canvas() {
     }
   }, [hub.getState()]);
 
-  const animationSprings = useSpring({
-    from: { y: 200 },
-    to: { y: 0 },
-  });
+  useEffect(() => {
+    setCanvasTitleAnimationSpring({
+      opacity: 1,
+      from: { opacity: 0 },
+      config: { duration: 500 }
+    });
+  }, [canvasTitle]);
+
+  useEffect(() => {
+    if (player.username !== gameState.drawingPlayerUsername) {
+      setCanvasToolsAnimationSpring({
+        opacity: 1,
+        from: { opacity: 0 }
+      });
+    }
+
+  }, [gameState.drawingPlayerUsername]);
 
   return (
-    <animated.div style={{...animationSprings}}>
+    <animated.div style={{...canvasAnimationSpring}}>
       {
         gameState.isTimerVisible ?
         <div className="d-flex justify-content-center">
@@ -111,7 +132,12 @@ function Canvas() {
           </div>
         </div>
         :
-        canvasTitle && <h5 className={`text-${canvasTitle.bootstrapBackgroundColor}`}>{canvasTitle.text}</h5>
+        canvasTitle && 
+          <animated.h5
+            className={`text-${canvasTitle.bootstrapBackgroundColor}`}
+            style={{...canvasTitleAnimationSpring}}>
+              {canvasTitle.text}
+          </animated.h5>
       }
       <div className="d-flex justify-content-center mb-2">
         <canvas
@@ -124,7 +150,7 @@ function Canvas() {
         />
       </div>
       {
-        player.username == gameState.drawingPlayerUsername &&
+        player.username === gameState.drawingPlayerUsername &&
         <>
           <div className="custom-muted d-flex justify-content-center rounded py-2 px-3">
             <CirclePicker

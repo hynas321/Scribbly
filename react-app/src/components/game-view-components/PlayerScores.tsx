@@ -48,13 +48,13 @@ function PlayerScores({title, playerScores, displayPoints, displayIndex, display
     }
   }, [hub.getState()]);
 
-  const animationSprings = useSpring({
+  const playerScoresAnimationSpring = useSpring({
     from: { x: -200 },
     to: { x: 0 },
   });
 
   return (
-    <animated.div style={{...animationSprings}}>
+    <animated.div style={{...playerScoresAnimationSpring}}>
       { displayRound && <h5>Round {gameState.currentRound}/{gameSettings.roundsCount}</h5>}
       <ul className="list-group">
         <li className="list-group-item justify-content-between align-items-center">

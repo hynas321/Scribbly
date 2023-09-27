@@ -31,7 +31,12 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
   const inputFormRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
 
-  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
+  const [token] = useLocalStorageState("token", { defaultValue: "" });
+
+  const chatAnimationSpring = useSpring({
+    from: { x: 200 },
+    to: { x: 0 },
+  });
 
   const handleButtonPress = () => {
     const SendChatMessage = async () => {
@@ -121,14 +126,9 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
 
     messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
   }, [messages]);
-  
-  const animationSprings = useSpring({
-    from: { x: 200 },
-    to: { x: 0 },
-  });
 
   return (
-    <animated.div style={{...animationSprings}}>
+    <animated.div style={{...chatAnimationSpring}}>
       <h5>
         { displaySecretWord && `${gameState.hiddenSecretWord}`}
       </h5>

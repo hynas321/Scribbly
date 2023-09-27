@@ -88,13 +88,13 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
     await hub.invoke(HubEvents.setWordLanguage, gameHash, token, value);
   }
 
-  const animationSprings = useSpring({
+  const gameSettingsBoardAnimationSpring = useSpring({
     from: { y: 200 },
     to: { y: 0 },
   });
 
   return (
-    <animated.div className="bg-light rounded-5 px-5 pt-3 pb-3" style={{...animationSprings}}>
+    <animated.div className="bg-light rounded-5 px-5 pt-3 pb-3" style={{...gameSettingsBoardAnimationSpring}}>
       <h4 className="text-center">Game Settings <BsGearFill/></h4>
       <div className="mt-4">
         { isPlayerHost ?

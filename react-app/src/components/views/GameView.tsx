@@ -12,7 +12,6 @@ import { useContext } from "react";
 import { ConnectionHubContext, LongRunningConnectionHubContext } from '../../context/ConnectionHubContext';
 import HubEvents from '../../hub/HubEvents';
 import Canvas from '../game-view-components/Canvas';
-import ControlPanel from '../ControlPanel';
 import { useDispatch } from 'react-redux';
 import { updatedAlert, updatedVisible } from '../../redux/slices/alert-slice';
 import useLocalStorageState from 'use-local-storage-state';
@@ -21,7 +20,7 @@ import loading from './../../assets/loading.gif'
 import { GameState, clearedGameState, updatedGameState, updatedIsGameStarted } from '../../redux/slices/game-state-slice';
 import UrlHelper from '../../utils/UrlHelper';
 import ClipboardBar from '../bars/ClipboardBar';
-import { animated, useSpring } from '@react-spring/web';
+import ControlPanel from '../game-view-components/ControlPanel';
 
 function GameView() {
   const hub = useContext(ConnectionHubContext);
@@ -45,8 +44,7 @@ function GameView() {
   const [isStartGameButtonActive, setIsStartGameButtonActive] = useState<boolean>(false);
 
   const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
-  const [oAuthToken, setOAuthToken] = useLocalStorageState("oAuthToken", { defaultValue: ""});
-  const [username, setUsername] = useLocalStorageState("username", { defaultValue: ""});
+  const [username] = useLocalStorageState("username", { defaultValue: ""});
 
   const handleStartGameButtonClick = async () => {
     await longRunningHub.start();
@@ -226,6 +224,7 @@ function GameView() {
                     displayIndex={false}
                     displayRound={false}
                   />
+                  <ClipboardBar invitationUrl={window.location.href} />
                 </div>
               </div>
               <div className="col-lg-4 col-sm-10 col-12 mx-auto text-center order-lg-2 order-1">
@@ -258,9 +257,6 @@ function GameView() {
                     displaySecretWord={false}
                   />
                 </div>
-              </div>
-              <div className="order-lg-4 order-4">
-                <ClipboardBar invitationUrl={window.location.href} />
               </div>
             </div>
           </div>
