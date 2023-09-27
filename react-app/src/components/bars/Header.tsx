@@ -1,7 +1,7 @@
 import { BsPencilFill } from "react-icons/bs";
 import Account from "../Account";
 
-function LogoAndAccountBar() {
+function Header() {
   return (
     <div className="container-fluid">
       <div className="row mb-3">
@@ -21,4 +21,4 @@ function LogoAndAccountBar() {
   )
 }
 
-export default LogoAndAccountBar;
+export default Header;

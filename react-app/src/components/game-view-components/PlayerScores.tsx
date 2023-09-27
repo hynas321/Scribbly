@@ -6,6 +6,7 @@ import HubEvents from "../../hub/HubEvents";
 import { ConnectionHubContext } from "../../context/ConnectionHubContext";
 import { useAppSelector } from "../../redux/hooks";
 import * as signalR from '@microsoft/signalr';
+import { animated, useSpring } from "@react-spring/web";
 
 interface PlayerScoresProps {
   title: string,
@@ -46,8 +47,14 @@ function PlayerScores({title, playerScores, displayPoints, displayIndex, display
       hub.off(HubEvents.onUpdateDrawingPlayer);
     }
   }, [hub.getState()]);
+
+  const playerScoresAnimationSpring = useSpring({
+    from: { x: -200 },
+    to: { x: 0 },
+  });
+
   return (
-    <>
+    <animated.div style={{...playerScoresAnimationSpring}}>
       { displayRound && <h5>Round {gameState.currentRound}/{gameSettings.roundsCount}</h5>}
       <ul className="list-group">
         <li className="list-group-item justify-content-between align-items-center">
@@ -81,7 +88,7 @@ function PlayerScores({title, playerScores, displayPoints, displayIndex, display
           </li>
         ))}
       </ul>
-    </>
+    </animated.div>
   )
 }
 

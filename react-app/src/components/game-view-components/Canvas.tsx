@@ -10,9 +10,9 @@ import * as signalR from '@microsoft/signalr';
 import { useAppSelector } from "../../redux/hooks";
 import { useDispatch } from "react-redux";
 import { updatedCurrentDrawingTimeSeconds, updatedIsTimerVisible } from "../../redux/slices/game-state-slice";
-import useLocalStorageState from "use-local-storage-state";
 import { BsArrowReturnLeft, BsEraserFill } from "react-icons/bs";
 import Range from '../Range';
+import { animated, useSpring } from "@react-spring/web";
 
 function Canvas() {
   const hub = useContext(ConnectionHubContext);
@@ -25,11 +25,17 @@ function Canvas() {
   const [color, setColor] = useState<string>("#000000");
   const [thickness, setThickness] = useState<number>(5);
   const [canvasTitle, setCanvasTitle] = useState<AnnouncementMessage | null>(null);
-  const [isPlayerDrawing, setIsPlayerDrawing] = useState<boolean>(false);
-
-  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
+  const [, setIsPlayerDrawing] = useState<boolean>(false);
 
   const { canvasRef, onMouseDown, clearCanvas, undoLine } = useDraw(draw, hub, color, thickness);
+
+  const canvasAnimationSpring = useSpring({
+    from: { y: 200 },
+    to: { y: 0 },
+  });
+
+  const [canvasTitleAnimationSpring, setCanvasTitleAnimationSpring] = useSpring(() => ({ opacity: 0 }));
+  const [canvasToolsAnimationSpring, setCanvasToolsAnimationSpring] = useSpring(() => {{ opacity: 0 }});
 
   const circlePickerColors = [material.black, material.red['500'],
     material.pink['500'], material.purple['500'], material.deepPurple['500'],
@@ -93,8 +99,26 @@ function Canvas() {
     }
   }, [hub.getState()]);
 
+  useEffect(() => {
+    setCanvasTitleAnimationSpring({
+      opacity: 1,
+      from: { opacity: 0 },
+      config: { duration: 500 }
+    });
+  }, [canvasTitle]);
+
+  useEffect(() => {
+    if (player.username !== gameState.drawingPlayerUsername) {
+      setCanvasToolsAnimationSpring({
+        opacity: 1,
+        from: { opacity: 0 }
+      });
+    }
+
+  }, [gameState.drawingPlayerUsername]);
+
   return (
-    <>
+    <animated.div style={{...canvasAnimationSpring}}>
       {
         gameState.isTimerVisible ?
         <div className="d-flex justify-content-center">
@@ -108,22 +132,27 @@ function Canvas() {
           </div>
         </div>
         :
-        canvasTitle && <h5 className={`text-${canvasTitle.bootstrapBackgroundColor}`}>{canvasTitle.text}</h5>
+        canvasTitle && 
+          <animated.h5
+            className={`text-${canvasTitle.bootstrapBackgroundColor}`}
+            style={{...canvasTitleAnimationSpring}}>
+              {canvasTitle.text}
+          </animated.h5>
       }
       <div className="d-flex justify-content-center mb-2">
         <canvas
           ref={canvasRef}
-          width={700}
-          height={500}
-          className="border border-black rounded-md canvas-scale"
+          width={670}
+          height={470}
+          className="border border-black rounded-md canvas-scale img-responsive"
           onMouseDown={onMouseDown}
           onTouchStart={onMouseDown}
         />
       </div>
       {
-        player.username == gameState.drawingPlayerUsername &&
+        player.username === gameState.drawingPlayerUsername &&
         <>
-          <div className="bg-info d-flex justify-content-center rounded py-2">
+          <div className="custom-muted d-flex justify-content-center rounded py-2 px-3">
             <CirclePicker
               color={color}
               width="100"
@@ -158,7 +187,7 @@ function Canvas() {
           </div>
         </>
       }
-    </>
+    </animated.div>
   )
 }
 

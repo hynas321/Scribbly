@@ -1,4 +1,5 @@
-import Button from "./Button";
+import { animated, useSpring } from "@react-spring/web";
+import Button from "../Button";
 import { BsDoorOpen } from "react-icons/bs";
 
 interface ControlPanelProps {
@@ -6,8 +7,13 @@ interface ControlPanelProps {
 }
 
 function ControlPanel({onClick}: ControlPanelProps) {
+  const controlPanelAnimationSpring = useSpring({
+    from: { x: -200 },
+    to: { x: 0 },
+  });
+
   return (
-    <>
+    <animated.div style={{...controlPanelAnimationSpring}}>
       <Button
         text="Leave the game"
         active={true}
@@ -15,7 +21,7 @@ function ControlPanel({onClick}: ControlPanelProps) {
         icon={<BsDoorOpen />}
         onClick={onClick}
       />
-    </>
+    </animated.div>
   )
 }
 

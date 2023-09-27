@@ -1,12 +1,10 @@
 class HubEvents {
   //GameSettings
   static LoadGameSettings: string = "LoadGameSettings";
-  static setAbstractNouns: string = "SetAbstractNouns";
   static setDrawingTimeSeconds: string = "SetDrawingTimeSeconds";
   static setRoundsCount: string = "SetRoundsCount";
   static setWordLanguage: string = "SetWordLanguage";
   static onLoadGameSettings: string = "OnLoadGameSettings";
-  static onSetAbstractNouns: string = "OnSetAbstractNouns";
   static onSetDrawingTimeSeconds: string = "OnSetDrawingTimeSeconds";
   static onSetRoundsCount: string = "OnSetRoundsCount";
   static onSetWordLanguage: string = "OnSetWordLanguage";

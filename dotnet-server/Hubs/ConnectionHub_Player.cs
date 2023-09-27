@@ -86,7 +86,6 @@ public partial class HubConnection : Hub
 
             GameSettings settingsClient = new GameSettings()
             {
-                NounsOnly = game.GameSettings.NounsOnly,
                 DrawingTimeSeconds = game.GameSettings.DrawingTimeSeconds,
                 RoundsCount = game.GameSettings.RoundsCount,
                 WordLanguage = game.GameSettings.WordLanguage

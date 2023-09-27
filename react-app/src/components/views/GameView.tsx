@@ -12,9 +12,7 @@ import { useContext } from "react";
 import { ConnectionHubContext, LongRunningConnectionHubContext } from '../../context/ConnectionHubContext';
 import HubEvents from '../../hub/HubEvents';
 import Canvas from '../game-view-components/Canvas';
-import ControlPanel from '../ControlPanel';
 import { useDispatch } from 'react-redux';
-import HttpRequestHandler from '../../http/HttpRequestHandler';
 import { updatedAlert, updatedVisible } from '../../redux/slices/alert-slice';
 import useLocalStorageState from 'use-local-storage-state';
 import { GameSettings, updatedGameSettings } from '../../redux/slices/game-settings-slice';
@@ -22,6 +20,7 @@ import loading from './../../assets/loading.gif'
 import { GameState, clearedGameState, updatedGameState, updatedIsGameStarted } from '../../redux/slices/game-state-slice';
 import UrlHelper from '../../utils/UrlHelper';
 import ClipboardBar from '../bars/ClipboardBar';
+import ControlPanel from '../game-view-components/ControlPanel';
 
 function GameView() {
   const hub = useContext(ConnectionHubContext);
@@ -45,8 +44,7 @@ function GameView() {
   const [isStartGameButtonActive, setIsStartGameButtonActive] = useState<boolean>(false);
 
   const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
-  const [oAuthToken, setOAuthToken] = useLocalStorageState("oAuthToken", { defaultValue: ""});
-  const [username, setUsername] = useLocalStorageState("username", { defaultValue: ""});
+  const [username] = useLocalStorageState("username", { defaultValue: ""});
 
   const handleStartGameButtonClick = async () => {
     await longRunningHub.start();
@@ -191,7 +189,7 @@ function GameView() {
 
             <div className="container text-center">
               <div className="row">
-                <div className="col-lg-2 col-md-6 col-12 order-lg-1 order-md-2 order-3 mb-3">
+                <div className="col-xl-2 col-lg-6 col-md-6 col-12 order-xl-1 order-lg-2 order-md-2 order-3 mb-3">
                   <PlayerScores
                     title={"Scoreboard"}
                     playerScores={playerScores}
@@ -201,10 +199,10 @@ function GameView() {
                   />
                   <ControlPanel onClick={handleLeaveGameButtonClick} />
                 </div>
-                <div className="col-lg-7 col-md-12 col-12 order-lg-1 order-md-1 order-1 mb-3">
+                <div className="col-xl-7 col-lg-12 col-md-12 col-12 order-xl-2 order-lg-1 order-md-1 order-1 mb-3">
                   <Canvas />
                 </div>
-                <div className="col-lg-3 col-md-6 col-12 order-lg-1 order-md-3 order-2 mb-3">
+                <div className="col-xl-3 col-lg-6 col-md-6 col-12 order-xl-2 order-lg-3 order-md-3 order-2 mb-3">
                   <Chat 
                     placeholderValue="Enter your guess"
                     displaySecretWord={true}
@@ -226,18 +224,19 @@ function GameView() {
                     displayIndex={false}
                     displayRound={false}
                   />
+                  <ClipboardBar invitationUrl={window.location.href} />
                 </div>
               </div>
               <div className="col-lg-4 col-sm-10 col-12 mx-auto text-center order-lg-2 order-1">
                 <h5>Your username: {player.username}</h5>
                 { isPlayerHost && 
-                  <Button
-                    text="Start the game"
-                    type="success"
-                    active={isStartGameButtonActive}
-                    icon={<BsPlayCircle/>}
-                    onClick={handleStartGameButtonClick}
-                  />
+                    <Button
+                      text="Start the game"
+                      type="success"
+                      active={isStartGameButtonActive}
+                      icon={<BsPlayCircle/>}
+                      onClick={handleStartGameButtonClick}
+                    />
                 }
                 { !isPlayerHost && <h4 className="mt-3">Waiting for the host to start the game</h4> }
                   <Button
@@ -258,9 +257,6 @@ function GameView() {
                     displaySecretWord={false}
                   />
                 </div>
-              </div>
-              <div className="order-lg-4 order-4">
-                <ClipboardBar invitationUrl={window.location.href} />
               </div>
             </div>
           </div>

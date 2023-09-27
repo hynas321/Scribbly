@@ -10,6 +10,7 @@ import { useAppSelector } from '../../redux/hooks';
 import { useDispatch } from 'react-redux';
 import { updatedHiddenSecretWord } from '../../redux/slices/game-state-slice';
 import UrlHelper from '../../utils/UrlHelper';
+import { animated, useSpring } from '@react-spring/web';
 
 interface ChatProps {
   placeholderValue: string;
@@ -30,7 +31,12 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
   const inputFormRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
 
-  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
+  const [token] = useLocalStorageState("token", { defaultValue: "" });
+
+  const chatAnimationSpring = useSpring({
+    from: { x: 200 },
+    to: { x: 0 },
+  });
 
   const handleButtonPress = () => {
     const SendChatMessage = async () => {
@@ -120,13 +126,13 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
 
     messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
   }, [messages]);
-  
+
   return (
-    <div>
+    <animated.div style={{...chatAnimationSpring}}>
       <h5>
         { displaySecretWord && `${gameState.hiddenSecretWord}`}
       </h5>
-      <div id="messages" className="rounded p-3 bg-light">
+      <div id="messages" className="rounded-5 p-3 bg-light">
         <div ref={messagesRef} style={{height: "450px", overflowY: "auto"}}>
           {messages.map((chatMessage, index) => (
             <ChatMessage
@@ -154,7 +160,7 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
         </div>
       }
 
-    </div>
+    </animated.div>
   );
 }
 

@@ -9,7 +9,7 @@ function DrawingTimeBar({currentProgress, minProgress, maxProgress, text}: Progr
   return (
     <div className="progress" style={{height: "110%"}}>
       <div
-        className="progress-bar"
+        className="progress-bar progress-bar-striped progress-bar-animated"
         role="progressbar"
         style={{ width: `${(currentProgress / maxProgress) * 100}%`}}
         aria-valuenow={currentProgress}
