@@ -4,9 +4,9 @@ namespace Dotnet.Server.Managers;
 
 class GameManager
 {
-    private int maxChatMessageCount = 25;
+    private readonly int maxChatMessageCount = 25;
     private readonly ILogger<GameManager> logger;
-    private static Dictionary<string, Game> Games = new Dictionary<string, Game>();
+    private static readonly Dictionary<string, Game> Games = new Dictionary<string, Game>();
 
     public GameManager()
     {

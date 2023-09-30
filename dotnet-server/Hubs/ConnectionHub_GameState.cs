@@ -66,7 +66,7 @@ public partial class HubConnection : Hub
             }
 
             double timeLeftPercentage =
-                ((double)game.GameState.CurrentDrawingTimeSeconds / game.GameSettings.DrawingTimeSeconds) * 100;
+                (double)game.GameState.CurrentDrawingTimeSeconds / game.GameSettings.DrawingTimeSeconds * 100;
 
             int score = 0;
 

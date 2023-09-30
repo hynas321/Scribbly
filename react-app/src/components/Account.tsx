@@ -21,7 +21,7 @@ function Account() {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(false);
   const [isScoreToBeUpdated, setIsScoreToBeUpdated] = useState<boolean>(false);
 
-  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
+  const [token] = useLocalStorageState("token", { defaultValue: "" });
   const [oAuthToken, setOAuthToken] = useLocalStorageState("oAuthToken", { defaultValue: ""});
   const [accountId, setAccountId] = useLocalStorageState("accountId", { defaultValue: ""});
 

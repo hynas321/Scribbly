@@ -16,23 +16,19 @@ class RandomWordFetcher
         switch (game.GameSettings.WordLanguage)
         {
             case Languages.EN:
-                return await FetchEnglishWord(game);
+                return await FetchEnglishWord();
             case Languages.PL:
-                return await FetchPolishWord(game);
+                return await FetchPolishWord();
             default:
-                return await FetchEnglishWord(game);
+                return await FetchEnglishWord();
         }
     }
 
-    public static async Task<string> FetchEnglishWord(Game game)
+    public static async Task<string> FetchEnglishWord()
     {
-        GameManager gameManager = new GameManager();
         ConfigHelper configHelper = new ConfigHelper();
         Config config = configHelper.GetConfig();
-        
-        string apiUrl = "";
-
-        apiUrl = $"https://api.wordnik.com/v4/words.json/randomWord?hasDictionaryDef=true&includePartOfSpeech=noun&minCorpusCount=10000&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=-1&includeTags=false&api_key=" + config.EnglishWordsApiKey;
+        string apiUrl = $"https://api.wordnik.com/v4/words.json/randomWord?hasDictionaryDef=true&includePartOfSpeech=noun&minCorpusCount=10000&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=-1&includeTags=false&api_key=" + config.EnglishWordsApiKey;
 
         using (HttpClient client = new HttpClient())
         {
@@ -60,18 +56,14 @@ class RandomWordFetcher
     }
 
     //Api does not work (Status code 503)
-    public static async Task<string> FetchPolishWord(Game game)
+    public static async Task<string> FetchPolishWord()
     {
-        GameManager gameManager = new GameManager();
         ConfigHelper configHelper = new ConfigHelper();
         Config config = configHelper.GetConfig();
-        
-        string apiUrl = "";
-
         Random random = new Random();
         int wordLength = random.Next(5, 20);
 
-        apiUrl = $"https://polish-words.p.rapidapi.com/noun/random/{wordLength}";
+        string apiUrl = $"https://polish-words.p.rapidapi.com/noun/random/{wordLength}";
 
         using (HttpClient client = new HttpClient())
         {

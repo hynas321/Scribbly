@@ -1,6 +1,6 @@
 import { useState } from "react";
 import CopyToClipboard from "react-copy-to-clipboard";
-import { BsClipboard, BsEmojiSmile, BsPersonAdd } from "react-icons/bs";
+import { BsClipboard, BsEmojiSmile } from "react-icons/bs";
 import Button from "../Button";
 import { animated, useSpring } from "@react-spring/web";
 

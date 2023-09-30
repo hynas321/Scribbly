@@ -1,5 +1,4 @@
 using Dotnet.Server.Http;
-using Dotnet.Server.Http.Requests;
 using Dotnet.Server.JsonConfig;
 using Dotnet.Server.Managers;
 using Dotnet.Server.Models;
@@ -102,7 +101,7 @@ public partial class LongRunningHubConnection : Hub
                     if (drawingPlayersTokens.Count != onlinePlayerTokens.Count)
                     {
                         game.GameState.DrawingPlayersTokens = drawingPlayersTokens
-                            .Where(token => onlinePlayerTokens.Contains(token))
+                            .Where(onlinePlayerTokens.Contains)
                             .ToList();
                     }
 

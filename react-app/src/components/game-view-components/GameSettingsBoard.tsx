@@ -4,7 +4,7 @@ import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { GameSettings, updatedDrawingTimeSeconds, updatedRoundsCount, updatedWordLanguage } from '../../redux/slices/game-settings-slice';
 import { BsGearFill } from 'react-icons/bs';
 import InputSelect from '../InputSelect';
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { ConnectionHubContext } from '../../context/ConnectionHubContext';
 import * as signalR from '@microsoft/signalr';
 import HubEvents from '../../hub/HubEvents';
@@ -22,8 +22,14 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
   const settings = useAppSelector((state) => state.gameSettings);
 
   const [gameHash, setGameHash] = useState<string>("");
+  const firstRender = useRef(true);
 
   const [token] = useLocalStorageState("token", { defaultValue: "" });
+
+  const gameSettingsBoardAnimationSpring = useSpring({
+    from: { y: 200 },
+    to: { y: 0 },
+  });
 
   let gameSettingsLoaded = false;
   const drawingTimeText = "Drawing time";
@@ -31,11 +37,15 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
   const chooseLanguageText = "Language of random words";
 
   useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+    }
+
     setGameHash(UrlHelper.getGameHash(window.location.href));
   }, []);
 
   useEffect(() => {
-    if (hub.getState() != signalR.HubConnectionState.Connected) {
+    if (hub.getState() != signalR.HubConnectionState.Connected || !gameHash) {
       return;
     }
 
@@ -77,21 +87,28 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
   }, [hub.getState(), gameHash])
 
   const handleRangeChange = async (value: number) => {
+    if (!gameHash) {
+      return;
+    }
+
     await hub.invoke(HubEvents.setDrawingTimeSeconds, gameHash, token, value);
   }
 
   const handleCheckFormChange = async (value: number) => {
+    if (!gameHash) {
+      return;
+    }
+
     await hub.invoke(HubEvents.setRoundsCount, gameHash, token, Number(value));
   }
 
   const handleInputSelectChange = async (value: string) => {
+    if (!gameHash) {
+      return;
+    }
+
     await hub.invoke(HubEvents.setWordLanguage, gameHash, token, value);
   }
-
-  const gameSettingsBoardAnimationSpring = useSpring({
-    from: { y: 200 },
-    to: { y: 0 },
-  });
 
   return (
     <animated.div className="bg-light rounded-5 px-5 pt-3 pb-3" style={{...gameSettingsBoardAnimationSpring}}>

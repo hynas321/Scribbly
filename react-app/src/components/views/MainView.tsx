@@ -24,13 +24,13 @@ function MainView() {
   const navigate = useNavigate();
 
   const [scoreboardScores, setScoreboardScores] = useState<MainScoreboardScore[]>([]);
-  const [gameHash, setGameHash] = useState<string>("");
+  const [, setGameHash] = useState<string>("");
   const [isCreateGameButtonActive, setIsCreateGameButtonActive] = useState<boolean>(false);
   const [isJoinGameButtonActive, setIsJoinGameButtonActive] = useState<boolean>(false);
   const [isTableDisplayed, setIsTableDisplayed] = useState<boolean>(false);
   const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
 
-  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
+  const [, setToken] = useLocalStorageState("token", { defaultValue: "" });
   const [username, setUsername] = useLocalStorageState("username", { defaultValue: ""});
 
   const handleInputFormChange = (value: string) => {
