@@ -132,7 +132,7 @@ public partial class HubConnection : Hub
             
             if (game == null)
             {
-                logger.LogError($"Game #{gameHash} LeaveGame: Game does not exist");
+                logger.LogInformation($"Game #{gameHash} LeaveGame: Game does not exist");
                 return;
             }
 

@@ -107,6 +107,8 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
       hub.off(HubEvents.onLoadChatMessages);
       hub.off(HubEvents.onSendChatMessage);
       hub.off(HubEvents.onSendAnnouncement);
+      hub.off(HubEvents.onRequestSecretWord);
+      hub.off(HubEvents.onGetSecretWord);
     }
     }, [hub.getState(), gameHash]);
 

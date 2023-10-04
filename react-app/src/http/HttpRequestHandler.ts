@@ -52,8 +52,6 @@ class HttpRequestHandler {
         throw new Error("Error");
       }
 
-      console.log(response.data);
-
       return response.data as MainScoreboardScore[];
 
     } catch (error: any) {

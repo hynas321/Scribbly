@@ -45,6 +45,7 @@ function PlayerScores({title, playerScores, displayPoints, displayIndex, display
     return () => {
       hub.off(HubEvents.onUpdateCurrentRound);
       hub.off(HubEvents.onUpdateDrawingPlayer);
+      hub.off(HubEvents.onUpdateCorrectGuessPlayerUsernames);
     }
   }, [hub.getState()]);
 
