@@ -1,45 +1,51 @@
 # Scribbly
 
-## Functional specification
-Scribbly is a website that allows users to play a word guessing game. One user hosts the game in which there are a few rounds. Players can join the game via the invitation URL. In each round each player has a chance to draw an image presenting the randomly chosen word. Players write their guesses on the chat and whoever guesses the word correctly receives points. The player with the highest score after all rounds wins. 
+## Description
+**Scribbly** is an online platform designed for engaging in a word-guessing game. On this platform, a designated user serves as the game host, and the game is usually organized into multiple rounds. 
 
-Host is able to set:
-+ number of rounds
-+ type of random words
-+ timespan of each round
+To participate, players can enter the game by using an invitation link. During each round, every player is given an opportunity to create a visual representation of a randomly selected word. The other participants then submit their word guesses in the chat, and the player who correctly identifies the word earns points. 
+
+The player with the highest score at the end of all the rounds wins.
 
 ## Technological specification
 
-`SignalR` for managing realtime client-server communication
+### Frontend
++ **React** with **Typescript** (built with Vite)
+#### NPM packages:
++ **Bootstrap** - styling and responsive design
++ **Redux** - state management
++ **Ajax** - HTTP communication
++ **use-local-storage-state** - used to keep access tokens for OAuth 2.0 and game tokens which determine permissions related to lobby host and drawing on canvas
 
-#Frontend
-+ `React` with `Typescript` (built with Vite)
-+ `Bootstrap` library for styling
 
-#Backend
-+ `ASP.NET Core` (REST API)
-+ `Sqlite` database
-+ `Dapper` ORM framework
-+ `Wordnik API` to fetch random word
+### Backend
++ **ASP.NET Core** (REST API)
++ **Sqlite** database
++ **Dapper** ORM framework
++ **Wordnik API** to fetch a random word
+
+**SignalR** for managing realtime client-server communication
 
 ## Running the website
-React app: `npm run dev`
+React app: `npm install` `npm run dev`
 Server: `dotnet run`
 
 ## Screenshots
-Main menu
-![Screenshot 2023-08-07 202112](https://github.com/hynas321/Scribbly/assets/76520333/b875f960-bd61-46db-86b1-d577020d7d2c)
 
-Game lobby
-![Screenshot 2023-08-07 202202](https://github.com/hynas321/Scribbly/assets/76520333/7b526b2f-7a86-4cdb-9413-ca7fe76c2aec)
+#### Main menu
+![screenshot1](https://github.com/hynas321/Scribbly/assets/76520333/b41caab8-ce0f-4c4d-9b96-765cbdbb3737)
 
-Drawing view
-![Screenshot 2023-08-07 202314](https://github.com/hynas321/Scribbly/assets/76520333/3d58487e-e886-49dd-9fcd-169fbb7c55c0)
+#### Main menu - pop-up
+![screenshot2](https://github.com/hynas321/Scribbly/assets/76520333/7c17d624-f0fd-4fb0-9ca7-b259050412ed)
 
-Guessing view
-![Screenshot 2023-08-07 202408](https://github.com/hynas321/Scribbly/assets/76520333/6dd0257d-5897-463f-b238-167ce9ac2392)
+#### Lobby
+![screenshot3](https://github.com/hynas321/Scribbly/assets/76520333/a013b445-89f5-4e16-a058-ee8c3f98bf28)
 
+#### Game - drawing
+![screenshot4](https://github.com/hynas321/Scribbly/assets/76520333/e735a809-3186-4b60-bdd6-39e5eb05046c)
 
+#### Game - drawing phase ended
+![screenshot5](https://github.com/hynas321/Scribbly/assets/76520333/60886dc8-4a74-4e14-b479-d954b106125a)
 
-
-
+#### Responsive design - example
+![Screenshot 2023-10-17 235554](https://github.com/hynas321/Scribbly/assets/76520333/4742da73-6230-450b-a91c-4c6f4f298a6e)
