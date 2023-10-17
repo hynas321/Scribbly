@@ -17,7 +17,6 @@ The player with the highest score at the end of all the rounds wins.
 + **Ajax** - HTTP communication
 + **use-local-storage-state** - used to keep access tokens for OAuth 2.0 and game tokens which determine permissions related to lobby host and drawing on canvas
 
-
 ### Backend
 + **ASP.NET Core** (REST API)
 + **Sqlite** database
@@ -39,13 +38,19 @@ Server: `dotnet run`
 ![screenshot2](https://github.com/hynas321/Scribbly/assets/76520333/7c17d624-f0fd-4fb0-9ca7-b259050412ed)
 
 #### Lobby
-![screenshot3](https://github.com/hynas321/Scribbly/assets/76520333/a013b445-89f5-4e16-a058-ee8c3f98bf28)
+![screenshot3](https://github.com/hynas321/Scribbly/assets/76520333/49d2a6b3-6030-43b6-b58e-82a7a391bace)
+
 
 #### Game - drawing
-![screenshot4](https://github.com/hynas321/Scribbly/assets/76520333/e735a809-3186-4b60-bdd6-39e5eb05046c)
+![screenshot4](https://github.com/hynas321/Scribbly/assets/76520333/e654f3d9-f090-47e6-9f11-7027d0a0a93f)
+
 
 #### Game - drawing phase ended
 ![screenshot5](https://github.com/hynas321/Scribbly/assets/76520333/60886dc8-4a74-4e14-b479-d954b106125a)
 
-#### Responsive design - example
+#### Responsive design - example 1
 ![Screenshot 2023-10-17 235554](https://github.com/hynas321/Scribbly/assets/76520333/4742da73-6230-450b-a91c-4c6f4f298a6e)
+
+#### Responsive design - example 2
+![Screenshot 2023-10-18 005618](https://github.com/hynas321/Scribbly/assets/76520333/dff1f5d6-9928-47b6-9756-72ce02e8c336)
+
