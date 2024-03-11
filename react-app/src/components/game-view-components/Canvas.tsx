@@ -118,9 +118,8 @@ function Canvas() {
   }, [gameState.drawingPlayerUsername]);
 
   return (
-    <animated.div style={{...canvasAnimationSpring}}>
-      {
-        gameState.isTimerVisible ?
+    <animated.div style={{ ...canvasAnimationSpring }}>
+      {gameState.isTimerVisible ? (
         <div className="d-flex justify-content-center">
           <div className="mb-3 col-10">
             <DrawingTimeBar
@@ -131,14 +130,16 @@ function Canvas() {
             />
           </div>
         </div>
-        :
-        canvasTitle && 
+      ) : (
+        canvasTitle && (
           <animated.h5
             className={`text-${canvasTitle.bootstrapBackgroundColor}`}
-            style={{...canvasTitleAnimationSpring}}>
-              {canvasTitle.text}
+            style={{ ...canvasTitleAnimationSpring }}
+          >
+            {canvasTitle.text}
           </animated.h5>
-      }
+        )
+      )}
       <div className="d-flex justify-content-center mb-2">
         <canvas
           ref={canvasRef}
@@ -149,8 +150,7 @@ function Canvas() {
           onTouchStart={onMouseDown}
         />
       </div>
-      {
-        player.username === gameState.drawingPlayerUsername &&
+      {player.username === gameState.drawingPlayerUsername && (
         <>
           <div className="custom-muted d-flex justify-content-center rounded py-2 px-3">
             <CirclePicker
@@ -161,16 +161,16 @@ function Canvas() {
             />
           </div>
           <div className="d-flex justify-content-center">
-            <Button 
+            <Button
               text={"Undo"}
               active={true}
-              icon={<BsArrowReturnLeft/>}
+              icon={<BsArrowReturnLeft />}
               onClick={undoLine}
             />
-            <Button 
+            <Button
               text={"Clear canvas"}
               active={true}
-              icon={<BsEraserFill/>}
+              icon={<BsEraserFill />}
               onClick={clearCanvas}
             />
             <div className="mx-3">
@@ -181,14 +181,14 @@ function Canvas() {
                 maxValue={30}
                 step={3}
                 defaultValue={3}
-                onChange={handleThicknessRangeChange} 
+                onChange={handleThicknessRangeChange}
               />
             </div>
           </div>
         </>
-      }
+      )}
     </animated.div>
-  )
+  );
 }
 
 export default Canvas;

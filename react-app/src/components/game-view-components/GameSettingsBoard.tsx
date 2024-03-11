@@ -111,10 +111,10 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
   }
 
   return (
-    <animated.div className="bg-light rounded-5 px-5 pt-3 pb-3" style={{...gameSettingsBoardAnimationSpring}}>
-      <h4 className="text-center">Game Settings <BsGearFill/></h4>
+    <animated.div className="bg-light rounded-5 px-5 pt-3 pb-3" style={{ ...gameSettingsBoardAnimationSpring }}>
+      <h4 className="text-center">Game Settings <BsGearFill /></h4>
       <div className="mt-4">
-        { isPlayerHost ?
+        {isPlayerHost ? (
           <Range
             title={drawingTimeText}
             suffix={"seconds"}
@@ -122,43 +122,46 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
             maxValue={120}
             step={15}
             defaultValue={settings.drawingTimeSeconds}
-            onChange={handleRangeChange} 
-          /> :
+            onChange={handleRangeChange}
+          />
+        ) : (
           <label className="form-check-label">
             {drawingTimeText}: <b>{settings.drawingTimeSeconds.valueOf().toString()}s</b>
           </label>
-        }
+        )}
       </div>
       <div className="mt-4">
-        { isPlayerHost ?
+        {isPlayerHost ? (
           <CheckForm
             title={numberOfRoundsText}
             radioCount={6}
             defaultValue={settings.roundsCount}
             onChange={handleCheckFormChange}
-          /> :
+          />
+        ) : (
           <label className="form-check-label">
             {numberOfRoundsText}: <b>{settings.roundsCount.valueOf().toString()}</b>
           </label>
-        }
+        )}
       </div>
       <div className="mt-4">
-        { isPlayerHost ?
+        {isPlayerHost ? (
           <InputSelect
             title={chooseLanguageText}
             defaultValue={settings.wordLanguage}
             onChange={handleInputSelectChange}
-          /> :
+          />
+        ) : (
           <label className="form-check-label">
             {chooseLanguageText}: 
             <b>
               {
-                settings.wordLanguage.valueOf().toString() == "en" ? " English" :
-                settings.wordLanguage.valueOf().toString() == "pl" ? " Polish" : "?"
+                settings.wordLanguage.valueOf().toString() === "en" ? " English" :
+                settings.wordLanguage.valueOf().toString() === "pl" ? " Polish" : "?"
               }
             </b>
-        </label>
-        }
+          </label>
+        )}
       </div>
     </animated.div>
   );

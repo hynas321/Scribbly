@@ -35,7 +35,7 @@ function JoinGameView() {
   });
 
   const handleInputFormChange = (value: string) => {
-    setUsername(value.trim());
+    setUsername(value);
   }
 
   const handleJoinGameButtonClick = async () => {

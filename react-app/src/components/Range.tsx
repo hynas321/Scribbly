@@ -34,7 +34,7 @@ function Range({title, suffix, minValue, maxValue, step, defaultValue, onChange}
         onChange={handleChange}
       /> 
     </>
-  )
+  );
 }
 
 export default Range;

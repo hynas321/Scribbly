@@ -8,10 +8,10 @@ export default function Footer() {
           src={githubLogo}
           alt="Table loading"
           className="img-fluid"
-          style={{height: "2.5em"}}
+          style={{ height: "2.5em" }}
         />
         <a href="https://github.com/hynas321">https://github.com/hynas321</a>
       </span>
     </footer>
-  )
+  );
 }

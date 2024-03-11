@@ -131,17 +131,17 @@ function Account() {
   return (
     <div className="d-flex justify-content-end">
       <h6 className="mt-2">
-        { isUserLoggedIn && `${givenName} ` }
-        { isUserLoggedIn && <span className="badge rounded-pill bg-success mt-2">{score} points</span>}
+        {isUserLoggedIn && `${givenName} `}
+        {isUserLoggedIn && <span className="badge rounded-pill bg-success mt-2">{score} points</span>}
       </h6>
       <div className="mx-3">
-        {
-          isUserLoggedIn ?
+        {isUserLoggedIn ? (
           <GoogleLogout
             clientId={clientId}
             buttonText="Logout"
             onLogoutSuccess={onLogoutSuccess}
-          /> :
+          />
+        ) : (
           <GoogleLogin
             clientId={clientId}
             buttonText="Login"
@@ -149,10 +149,10 @@ function Account() {
             cookiePolicy={"single_host_origin"}
             isSignedIn={true}
           />
-        }
+        )}
       </div>
     </div>
-  )
+  );
 }
 
 export default Account;

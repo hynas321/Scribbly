@@ -12,6 +12,7 @@ export const useDraw = (onDraw: (
   color: string,
   thickness: number,
   isPlayerDrawing: boolean) => {
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previousRelativePoint = useRef<Point | null>(null);
   

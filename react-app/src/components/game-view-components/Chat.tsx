@@ -130,12 +130,12 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
   }, [messages]);
 
   return (
-    <animated.div style={{...chatAnimationSpring}}>
+    <animated.div style={{ ...chatAnimationSpring }}>
       <h5>
-        { displaySecretWord && `${gameState.hiddenSecretWord}`}
+        {displaySecretWord && `${gameState.hiddenSecretWord}`}
       </h5>
       <div id="messages" className="rounded-5 p-3 bg-light">
-        <div ref={messagesRef} style={{height: "450px", overflowY: "auto"}}>
+        <div ref={messagesRef} style={{ height: "450px", overflowY: "auto" }}>
           {messages.map((chatMessage, index) => (
             <ChatMessage
               key={index}
@@ -144,24 +144,22 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
           ))}
         </div>
       </div>
-      {
-        (player.username != gameState.drawingPlayerUsername || gameState.drawingPlayerUsername == "") &&
+      {(player.username !== gameState.drawingPlayerUsername || gameState.drawingPlayerUsername === "") && (
         <div className="d-flex justify-content-center align-items-center">
           <Button
             text={"Send"}
             active={isSendButtonActive}
             onClick={handleButtonPress}
           />
-          <InputForm 
-            defaultValue={""} 
+          <InputForm
+            defaultValue={""}
             placeholderValue={placeholderValue}
             onChange={handleInputFormChange}
             onKeyDown={handleEnterPress}
-            ref={inputFormRef} 
+            ref={inputFormRef}
           />
         </div>
-      }
-
+      )}
     </animated.div>
   );
 }

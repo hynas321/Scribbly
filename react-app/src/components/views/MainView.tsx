@@ -34,7 +34,7 @@ function MainView() {
   const [username, setUsername] = useLocalStorageState("username", { defaultValue: ""});
 
   const handleInputFormChange = (value: string) => {
-    setUsername(value.trim());
+    setUsername(value);
   }
 
   const handleCreateGameButtonClick = async () => {

@@ -1,6 +1,6 @@
 namespace Dotnet.Server.Models;
 
-class RandomWordApiResponse
+public class RandomWordApiResponse
 {
     public string Word { get; set; }
 }

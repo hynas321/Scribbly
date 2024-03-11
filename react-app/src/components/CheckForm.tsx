@@ -38,7 +38,7 @@ function CheckForm({title, radioCount, defaultValue, onChange}: CheckFormProps) 
       <label className="form-label">{title}</label>
       <div>{radiosList}</div>
     </div>
-  )
+  );
 }
 
 export default CheckForm;

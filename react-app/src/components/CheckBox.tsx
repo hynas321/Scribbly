@@ -27,7 +27,7 @@ function CheckBox({text, defaultValue, onChange}: CheckBoxProps) {
       />
       <label className="form-check-label">{text}</label>
     </div>
-  )
+  );
 }
 
 export default CheckBox;

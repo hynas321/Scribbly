@@ -10,25 +10,25 @@ function MainScoreboard({title, scoreboardScores, displayPoints, displayIndex}: 
     <>
       <ul className="list-group">
         <li className="list-group-item justify-content-between align-items-center">
-            <b>{title}</b>
+          <b>{title}</b>
         </li>
         {scoreboardScores.map((scoreboardScore, index) => (
           <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-            { displayIndex && "#" + (index + 1)}
+            {displayIndex && "#" + (index + 1)}
             <div className="d-flex flex-column align-items-center">
-              <span >
+              <span>
                 {`${scoreboardScore.givenName} (${scoreboardScore.email.split('@')[0]})`}
               </span>
-              { displayPoints &&
+              {displayPoints && (
                 <span className="badge rounded-pill bg-dark mt-2">{scoreboardScore.score} points</span>
-              }
+              )}
             </div>
             <div></div>
           </li>
-          ))}
+        ))}
       </ul>
     </>
-  )
+  );
 }
 
 export default MainScoreboard;
