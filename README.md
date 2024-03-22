@@ -14,7 +14,7 @@ The player with the highest score at the end of all the rounds wins.
 #### NPM packages:
 + **Bootstrap** - styling and responsive design
 + **Redux** - state management
-+ **Ajax** - HTTP communication
++ **Axios** - HTTP communication
 + **use-local-storage-state** - used to keep access tokens for OAuth 2.0 and game tokens which determine permissions related to lobby host and drawing on canvas
 
 ### Backend
