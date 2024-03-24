@@ -54,7 +54,6 @@ class HubEvents {
   static endSession = "EndSession";  
   static onSessionEnded = "OnSessionEnded";
   static onUpdateAccountScore: string = "OnUpdateAccountScore";
-
 }
 
 export default HubEvents;

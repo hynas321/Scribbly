@@ -12,7 +12,7 @@ const initialState: Alert = {
   type: "danger"
 };
 
-const gameSettingsSlice = createSlice({
+const alertSlice = createSlice({
   name: "alert",
   initialState,
   reducers: {
@@ -33,5 +33,5 @@ const gameSettingsSlice = createSlice({
   }
 })
 
-export const { updatedText, updatedVisible, updatedType, updatedAlert } = gameSettingsSlice.actions;
-export default gameSettingsSlice.reducer;
+export const { updatedText, updatedVisible, updatedType, updatedAlert } = alertSlice.actions;
+export default alertSlice.reducer;

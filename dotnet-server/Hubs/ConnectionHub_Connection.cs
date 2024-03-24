@@ -1,4 +1,6 @@
+using Dotnet.Server.JsonConfig;
 using Dotnet.Server.Managers;
+using Dotnet.Server.Models;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Dotnet.Server.Hubs;
@@ -18,14 +20,12 @@ public partial class HubConnection : Hub
         await base.OnConnectedAsync();
     }
 
-    /*public override async Task OnDisconnectedAsync(Exception exception)
+    public override async Task OnDisconnectedAsync(Exception exception)
     {   
-        (Player removedPlayer, string gameHash) = _userManager.DeleteUserByConnectionId(Context.ConnectionId);
+        (Player removedPlayer, string gameHash) = gameManager.RemovePlayer(Context.ConnectionId);
 
         if (removedPlayer != null && gameHash != null)
         {
-            gameManager.RemovePlayer(gameHash, token);
-            
             List<PlayerScore> playerScores = gameManager.GetPlayerObjectsWithoutToken(gameHash);
             string playerListSerialized = JsonHelper.Serialize(playerScores);
             Game game = gameManager.GetGame(gameHash);
@@ -41,5 +41,5 @@ public partial class HubConnection : Hub
         }
 
         await base.OnDisconnectedAsync(exception);
-    }*/
+    }
 }

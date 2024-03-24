@@ -234,4 +234,29 @@ class GameManager
             logger.LogError($"{ex}");
         }
     }
+
+    public (Player player, string gameHash) RemovePlayer(string connectionId)
+    {
+        try
+        {
+            Dictionary<string, Game> games = Games;
+
+            foreach (var game in games)
+            {
+                Player playerToRemove = game.Value.GameState.Players.FirstOrDefault(player => player.ConnectionId == connectionId);
+
+                if (playerToRemove != null)
+                {
+                    RemovePlayer(game.Key, playerToRemove.Token);
+                    return (playerToRemove, game.Key);
+                }
+            }
+
+            return (null, null);
+        }
+        catch (Exception)
+        {
+            return (null, null);
+        }
+    }
 }
