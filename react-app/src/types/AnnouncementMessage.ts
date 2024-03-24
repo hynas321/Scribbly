@@ -1,4 +1,4 @@
-type AnnouncementMessage = {
+export type AnnouncementMessage = {
   text: string,
   bootstrapBackgroundColor: string
 }

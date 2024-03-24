@@ -13,6 +13,8 @@ import { updatedCurrentDrawingTimeSeconds, updatedIsTimerVisible } from "../../r
 import { BsArrowReturnLeft, BsEraserFill } from "react-icons/bs";
 import Range from '../Range';
 import { animated, useSpring } from "@react-spring/web";
+import { DrawnLine } from "../../types/DrawnLine";
+import { AnnouncementMessage } from "../../types/AnnouncementMessage";
 
 function Canvas() {
   const hub = useContext(ConnectionHubContext);

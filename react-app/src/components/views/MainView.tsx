@@ -14,6 +14,7 @@ import MainScoreboard from '../MainScoreboard';
 import UrlHelper from '../../utils/UrlHelper';
 import Popup from '../Popup';
 import { animated, useSpring } from '@react-spring/web';
+import { MainScoreboardScore } from '../../types/MainScoreboardScore';
 
 function MainView() {
   const httpRequestHandler = new HttpRequestHandler();
@@ -46,7 +47,7 @@ function MainView() {
     try {
       const data = await httpRequestHandler.createGame(username);
 
-      if (!("gameHash" || "hostToken" in data)) {
+      if (!("gameHash" || "hostToken" in data) || data.gameHash == undefined) {
         displayAlert("Could not create the game, try again.", "primary");
         return;
       }

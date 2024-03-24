@@ -18,7 +18,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options => 
 {
     options.AddPolicy("AllowReactApp",
-        builder => builder.WithOrigins(config?.CorsOrigin!)
+        builder => builder.WithOrigins("*")
             .AllowAnyHeader()
             .AllowAnyMethod()   
     );
@@ -40,4 +40,4 @@ app.UseCors("AllowReactApp");
 app.MapHub<HubConnection>("/hub/connection");
 app.MapHub<LongRunningHubConnection>("/long-running-hub/connection");
 app.MapHub<AccountHubConnection>("/account-hub/connection");
-app.Run(config?.HttpServerUrl);
+app.Run();

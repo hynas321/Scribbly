@@ -1,10 +1,11 @@
 import { useAppSelector } from "../redux/hooks";
+import { ChatMessage } from "../types/ChatMessage";
 
 export interface ChatMessageProps {
   chatMessage: ChatMessage
 }
 
-function ChatMessage({chatMessage}: ChatMessageProps) {
+function ChatMessageElement({chatMessage}: ChatMessageProps) {
   const playerUsername = useAppSelector((state) => state.player.username);
 
   return (
@@ -20,4 +21,4 @@ function ChatMessage({chatMessage}: ChatMessageProps) {
   );
 }
 
-export default ChatMessage;
+export default ChatMessageElement;

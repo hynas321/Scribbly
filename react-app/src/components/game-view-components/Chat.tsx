@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import ChatMessage from '../ChatMessage';
+import ChatMessageElement from '../ChatMessage';
 import InputForm from '../InputForm';
 import Button from '../Button';
 import { ConnectionHubContext } from '../../context/ConnectionHubContext';
@@ -11,6 +11,7 @@ import { useDispatch } from 'react-redux';
 import { updatedHiddenSecretWord } from '../../redux/slices/game-state-slice';
 import UrlHelper from '../../utils/UrlHelper';
 import { animated, useSpring } from '@react-spring/web';
+import { ChatMessage } from '../../types/ChatMessage';
 
 interface ChatProps {
   placeholderValue: string;
@@ -137,7 +138,7 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
       <div id="messages" className="rounded-5 p-3 bg-light">
         <div ref={messagesRef} style={{ height: "450px", overflowY: "auto" }}>
           {messages.map((chatMessage, index) => (
-            <ChatMessage
+            <ChatMessageElement
               key={index}
               chatMessage={chatMessage}
             />

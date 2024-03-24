@@ -1,4 +1,4 @@
-type Account = {
+export type Account = {
   id: string,
   accessToken: string,
   email: string,

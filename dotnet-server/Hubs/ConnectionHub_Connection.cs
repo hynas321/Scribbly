@@ -18,8 +18,28 @@ public partial class HubConnection : Hub
         await base.OnConnectedAsync();
     }
 
-    public override async Task OnDisconnectedAsync(Exception exception)
+    /*public override async Task OnDisconnectedAsync(Exception exception)
     {   
+        (Player removedPlayer, string gameHash) = _userManager.DeleteUserByConnectionId(Context.ConnectionId);
+
+        if (removedPlayer != null && gameHash != null)
+        {
+            gameManager.RemovePlayer(gameHash, token);
+            
+            List<PlayerScore> playerScores = gameManager.GetPlayerObjectsWithoutToken(gameHash);
+            string playerListSerialized = JsonHelper.Serialize(playerScores);
+            Game game = gameManager.GetGame(gameHash);
+
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameHash);
+            await Clients.GroupExcept(gameHash, Context.ConnectionId).SendAsync(HubEvents.OnUpdatePlayerScores, playerListSerialized);
+            await SendAnnouncement(gameHash, $"{removedPlayer.Username} has left the game", BootstrapColors.Red);
+
+            if (game.GameState.Players.Count == 0)
+            {   
+                gameManager.RemoveGame(gameHash);
+            }
+        }
+
         await base.OnDisconnectedAsync(exception);
-    }
+    }*/
 }

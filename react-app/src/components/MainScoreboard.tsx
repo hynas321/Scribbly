@@ -1,3 +1,5 @@
+import { MainScoreboardScore } from "../types/MainScoreboardScore";
+
 interface MainScoreboardProps {
   title: string,
   scoreboardScores: MainScoreboardScore[],

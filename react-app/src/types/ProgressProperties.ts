@@ -1,4 +1,4 @@
-type ProgressProperties = {
+export type ProgressProperties = {
   currentProgress: number,
   minProgress: number,
 	maxProgress: number

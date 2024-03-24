@@ -4,6 +4,8 @@ import HubEvents from "../hub/HubEvents";
 import useLocalStorageState from "use-local-storage-state";
 import UrlHelper from "../utils/UrlHelper";
 import * as signalR from '@microsoft/signalr';
+import { DrawnLine } from "../types/DrawnLine";
+import { Point } from "../types/Point";
 
 export const useDraw = (onDraw: (
     canvasContext: CanvasRenderingContext2D,

@@ -1,4 +1,4 @@
-type Round = {
+export type Round = {
   currentRound: number,
   roundCount: number
 }

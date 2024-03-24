@@ -21,6 +21,8 @@ import { GameState, clearedGameState, updatedGameState, updatedIsGameStarted } f
 import UrlHelper from '../../utils/UrlHelper';
 import ClipboardBar from '../bars/ClipboardBar';
 import ControlPanel from '../game-view-components/ControlPanel';
+import { Player } from '../../types/Player';
+import { AnnouncementMessage } from '../../types/AnnouncementMessage';
 
 function GameView() {
   const hub = useContext(ConnectionHubContext);

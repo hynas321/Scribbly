@@ -100,15 +100,15 @@ public class WordController : ControllerBase
 
             if (isWordDeleted)
             {
-                logger.LogInformation("Delete Status: 201. Created");
-
-                return StatusCode(StatusCodes.Status201Created);
-            }
-            else
-            {
                 logger.LogInformation("Delete Status: 200. OK");
 
                 return StatusCode(StatusCodes.Status200OK);
+            }
+            else
+            {
+                logger.LogInformation("Delete Status: 404. Not found");
+
+                return StatusCode(StatusCodes.Status404NotFound);
             }
         }
         catch (Exception ex)

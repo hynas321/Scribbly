@@ -7,6 +7,7 @@ import { ConnectionHubContext } from "../../context/ConnectionHubContext";
 import { useAppSelector } from "../../redux/hooks";
 import * as signalR from '@microsoft/signalr';
 import { animated, useSpring } from "@react-spring/web";
+import { PlayerScore } from "../../types/PlayerScore";
 
 interface PlayerScoresProps {
   title: string,

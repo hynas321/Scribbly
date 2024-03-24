@@ -1,3 +1,5 @@
+import { PlayerScore } from "../types/PlayerScore";
+
 export interface CreateGameBody {
   username: string;
 }

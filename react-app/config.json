@@ -1,7 +1,6 @@
 {
-    "httpServerUrl": "http://127.0.0.1:1234",
-    "mainClientEndpoint": "/",
-    "gameClientEndpoint": "/game",
-    "joinGameClientEndpoint": "/join-game",
-    "pageNotFoundEndpoint": "/not-found"
+  "mainClientEndpoint": "/",
+  "gameClientEndpoint": "/game",
+  "joinGameClientEndpoint": "/join-game",
+  "pageNotFoundEndpoint": "/not-found"
 }
