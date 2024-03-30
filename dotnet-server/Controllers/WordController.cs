@@ -11,10 +11,15 @@ namespace Dotnet.Server.Controllers;
 public class WordController : ControllerBase
 {
     private readonly ILogger<PlayerController> logger;
+    private readonly IConfiguration configuration;
 
-    public WordController(ILogger<PlayerController> logger)
+    public WordController(
+        ILogger<PlayerController> logger,
+        IConfiguration configuration
+    )
     {
         this.logger = logger;
+        this.configuration = configuration;
     }
 
     [HttpPost("Add")]
@@ -29,10 +34,7 @@ public class WordController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            ConfigHelper configHelper = new ConfigHelper();
-            Config config = configHelper.GetConfig();
-
-            if (adminToken != config.AdminToken)
+            if (adminToken != configuration[AppSettingsVariables.AdminToken])
             {
                 logger.LogInformation("Add Status: 401. Unauthorized");
                 return StatusCode(StatusCodes.Status401Unauthorized);
@@ -44,7 +46,7 @@ public class WordController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            WordsRepository wordsRepository = new WordsRepository();
+            WordsRepository wordsRepository = new WordsRepository(configuration);
             bool isWordAdded = wordsRepository.AddWord(body.Text, body.Language);
 
             if (isWordAdded)
@@ -80,10 +82,9 @@ public class WordController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            ConfigHelper configHelper = new ConfigHelper();
-            Config config = configHelper.GetConfig();
+            WordsRepository wordsRepository = new WordsRepository(configuration);
 
-            if (adminToken != config.AdminToken)
+            if (adminToken != configuration[AppSettingsVariables.AdminToken])
             {
                 logger.LogInformation("Add Status: 401. Unauthorized");
                 return StatusCode(StatusCodes.Status401Unauthorized);
@@ -95,7 +96,6 @@ public class WordController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            WordsRepository wordsRepository = new WordsRepository();
             bool isWordDeleted = wordsRepository.DeleteWord(body.Text, body.Language);
 
             if (isWordDeleted)
@@ -131,16 +131,14 @@ public class WordController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            ConfigHelper configHelper = new ConfigHelper();
-            Config config = configHelper.GetConfig();
+            WordsRepository wordsRepository = new WordsRepository(configuration);
 
-            if (adminToken != config.AdminToken)
+            if (adminToken != configuration[AppSettingsVariables.AdminToken])
             {
                 logger.LogInformation("Add Status: 401. Unauthorized");
                 return StatusCode(StatusCodes.Status401Unauthorized);
             }
 
-            WordsRepository wordsRepository = new WordsRepository();
             WordBody[] words = wordsRepository.GetWords();
 
             return StatusCode(StatusCodes.Status200OK, words);

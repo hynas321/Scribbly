@@ -1,5 +1,4 @@
 using Dapper;
-using Dotnet.Server.JsonConfig;
 using Dotnet.Server.Models;
 using Microsoft.Data.Sqlite;
 
@@ -9,11 +8,9 @@ public class WordsRepository
 {
     private readonly string connectionString;
 
-    public WordsRepository()
+    public WordsRepository(IConfiguration configuration)
     {
-        ConfigHelper configHelper = new ConfigHelper();
-        Config config = configHelper.GetConfig();
-        connectionString = config.DatabaseConnectionString ?? "null";
+        connectionString = configuration.GetConnectionString("DatabaseConnectionString");       
         
         using (SqliteConnection db = new SqliteConnection(connectionString))
         {

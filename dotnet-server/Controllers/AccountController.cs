@@ -12,10 +12,15 @@ namespace Dotnet.Server.Controllers;
 public class AccountController : ControllerBase
 {
     private readonly ILogger<AccountController> logger;
+    private readonly IConfiguration configuration;
 
-    public AccountController(ILogger<AccountController> logger)
+    public AccountController(
+        ILogger<AccountController> logger,
+        IConfiguration configuration
+    )
     {
         this.logger = logger;
+        this.configuration = configuration;
     }
 
     [HttpPost("Add")]
@@ -30,7 +35,7 @@ public class AccountController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            AccountRepository accountRepository = new AccountRepository();
+            AccountRepository accountRepository = new AccountRepository(configuration);
 
             bool accountAdded = accountRepository.AddAccountIfNotExists(body.Account);
 
@@ -68,7 +73,7 @@ public class AccountController : ControllerBase
             }
 
             GameManager gameManager = new GameManager();
-            AccountRepository accountRepository = new AccountRepository();
+            AccountRepository accountRepository = new AccountRepository(configuration);
 
             Player player = gameManager.GetPlayerByToken(gameHash, token);
 
@@ -105,7 +110,7 @@ public class AccountController : ControllerBase
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            AccountRepository accountRepository = new AccountRepository();
+            AccountRepository accountRepository = new AccountRepository(configuration);
             Account account = accountRepository.GetAccount(id);
 
             if (account == null)
@@ -132,7 +137,7 @@ public class AccountController : ControllerBase
     {
         try 
         {
-            AccountRepository accountRepository = new AccountRepository();
+            AccountRepository accountRepository = new AccountRepository(configuration);
             IEnumerable<MainScoreboardScore> topPlayerScores = accountRepository.GetTopAccountPlayerScores();
             string topPlayerScoresSerialized = JsonHelper.Serialize(topPlayerScores);
             
