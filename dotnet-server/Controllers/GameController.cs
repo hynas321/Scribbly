@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Dotnet.Server.Http.Requests;
 using Dotnet.Server.Managers;
 using Dotnet.Server.JsonConfig;
-using Dotnet.Server.Http;
 
 namespace Dotnet.Server.Controllers;
 

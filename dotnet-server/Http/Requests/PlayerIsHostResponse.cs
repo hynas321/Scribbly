@@ -1,5 +1,5 @@
 namespace Dotnet.Server.Http.Requests;
-class PlayerIsHostResponse
+public class PlayerIsHostResponse
 {
     public bool isHost { get; set; }
 }

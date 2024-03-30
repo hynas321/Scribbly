@@ -13,6 +13,8 @@ import { updatedCurrentDrawingTimeSeconds, updatedIsTimerVisible } from "../../r
 import { BsArrowReturnLeft, BsEraserFill } from "react-icons/bs";
 import Range from '../Range';
 import { animated, useSpring } from "@react-spring/web";
+import { DrawnLine } from "../../types/DrawnLine";
+import { AnnouncementMessage } from "../../types/AnnouncementMessage";
 
 function Canvas() {
   const hub = useContext(ConnectionHubContext);
@@ -25,9 +27,9 @@ function Canvas() {
   const [color, setColor] = useState<string>("#000000");
   const [thickness, setThickness] = useState<number>(5);
   const [canvasTitle, setCanvasTitle] = useState<AnnouncementMessage | null>(null);
-  const [, setIsPlayerDrawing] = useState<boolean>(false);
+  const [isPlayerDrawing, setIsPlayerDrawing] = useState<boolean>(false);
 
-  const { canvasRef, onMouseDown, clearCanvas, undoLine } = useDraw(draw, hub, color, thickness);
+  const { canvasRef, onMouseDown, clearCanvas, undoLine } = useDraw(draw, hub, color, thickness, isPlayerDrawing);
 
   const canvasAnimationSpring = useSpring({
     from: { y: 200 },
@@ -35,7 +37,7 @@ function Canvas() {
   });
 
   const [canvasTitleAnimationSpring, setCanvasTitleAnimationSpring] = useSpring(() => ({ opacity: 0 }));
-  const [canvasToolsAnimationSpring, setCanvasToolsAnimationSpring] = useSpring(() => {{ opacity: 0 }});
+  const [, setCanvasToolsAnimationSpring] = useSpring(() => {{ 0 }});
 
   const circlePickerColors = [material.black, material.red['500'],
     material.pink['500'], material.purple['500'], material.deepPurple['500'],
@@ -118,9 +120,8 @@ function Canvas() {
   }, [gameState.drawingPlayerUsername]);
 
   return (
-    <animated.div style={{...canvasAnimationSpring}}>
-      {
-        gameState.isTimerVisible ?
+    <animated.div style={{ ...canvasAnimationSpring }}>
+      {gameState.isTimerVisible ? (
         <div className="d-flex justify-content-center">
           <div className="mb-3 col-10">
             <DrawingTimeBar
@@ -131,14 +132,16 @@ function Canvas() {
             />
           </div>
         </div>
-        :
-        canvasTitle && 
+      ) : (
+        canvasTitle && (
           <animated.h5
             className={`text-${canvasTitle.bootstrapBackgroundColor}`}
-            style={{...canvasTitleAnimationSpring}}>
-              {canvasTitle.text}
+            style={{ ...canvasTitleAnimationSpring }}
+          >
+            {canvasTitle.text}
           </animated.h5>
-      }
+        )
+      )}
       <div className="d-flex justify-content-center mb-2">
         <canvas
           ref={canvasRef}
@@ -149,8 +152,7 @@ function Canvas() {
           onTouchStart={onMouseDown}
         />
       </div>
-      {
-        player.username === gameState.drawingPlayerUsername &&
+      {player.username === gameState.drawingPlayerUsername && (
         <>
           <div className="custom-muted d-flex justify-content-center rounded py-2 px-3">
             <CirclePicker
@@ -161,16 +163,16 @@ function Canvas() {
             />
           </div>
           <div className="d-flex justify-content-center">
-            <Button 
+            <Button
               text={"Undo"}
               active={true}
-              icon={<BsArrowReturnLeft/>}
+              icon={<BsArrowReturnLeft />}
               onClick={undoLine}
             />
-            <Button 
+            <Button
               text={"Clear canvas"}
               active={true}
-              icon={<BsEraserFill/>}
+              icon={<BsEraserFill />}
               onClick={clearCanvas}
             />
             <div className="mx-3">
@@ -181,14 +183,14 @@ function Canvas() {
                 maxValue={30}
                 step={3}
                 defaultValue={3}
-                onChange={handleThicknessRangeChange} 
+                onChange={handleThicknessRangeChange}
               />
             </div>
           </div>
         </>
-      }
+      )}
     </animated.div>
-  )
+  );
 }
 
 export default Canvas;

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import ChatMessage from '../ChatMessage';
+import ChatMessageElement from '../ChatMessage';
 import InputForm from '../InputForm';
 import Button from '../Button';
 import { ConnectionHubContext } from '../../context/ConnectionHubContext';
@@ -11,6 +11,7 @@ import { useDispatch } from 'react-redux';
 import { updatedHiddenSecretWord } from '../../redux/slices/game-state-slice';
 import UrlHelper from '../../utils/UrlHelper';
 import { animated, useSpring } from '@react-spring/web';
+import { ChatMessage } from '../../types/ChatMessage';
 
 interface ChatProps {
   placeholderValue: string;
@@ -107,6 +108,8 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
       hub.off(HubEvents.onLoadChatMessages);
       hub.off(HubEvents.onSendChatMessage);
       hub.off(HubEvents.onSendAnnouncement);
+      hub.off(HubEvents.onRequestSecretWord);
+      hub.off(HubEvents.onGetSecretWord);
     }
     }, [hub.getState(), gameHash]);
 
@@ -128,38 +131,36 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
   }, [messages]);
 
   return (
-    <animated.div style={{...chatAnimationSpring}}>
+    <animated.div style={{ ...chatAnimationSpring }}>
       <h5>
-        { displaySecretWord && `${gameState.hiddenSecretWord}`}
+        {displaySecretWord && `${gameState.hiddenSecretWord}`}
       </h5>
       <div id="messages" className="rounded-5 p-3 bg-light">
-        <div ref={messagesRef} style={{height: "450px", overflowY: "auto"}}>
+        <div ref={messagesRef} style={{ height: "450px", overflowY: "auto" }}>
           {messages.map((chatMessage, index) => (
-            <ChatMessage
+            <ChatMessageElement
               key={index}
               chatMessage={chatMessage}
             />
           ))}
         </div>
       </div>
-      {
-        (player.username != gameState.drawingPlayerUsername || gameState.drawingPlayerUsername == "") &&
+      {(player.username !== gameState.drawingPlayerUsername || gameState.drawingPlayerUsername === "") && (
         <div className="d-flex justify-content-center align-items-center">
           <Button
             text={"Send"}
             active={isSendButtonActive}
             onClick={handleButtonPress}
           />
-          <InputForm 
-            defaultValue={""} 
+          <InputForm
+            defaultValue={""}
             placeholderValue={placeholderValue}
             onChange={handleInputFormChange}
             onKeyDown={handleEnterPress}
-            ref={inputFormRef} 
+            ref={inputFormRef}
           />
         </div>
-      }
-
+      )}
     </animated.div>
   );
 }

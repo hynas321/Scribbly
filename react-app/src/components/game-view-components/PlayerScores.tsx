@@ -7,6 +7,7 @@ import { ConnectionHubContext } from "../../context/ConnectionHubContext";
 import { useAppSelector } from "../../redux/hooks";
 import * as signalR from '@microsoft/signalr';
 import { animated, useSpring } from "@react-spring/web";
+import { PlayerScore } from "../../types/PlayerScore";
 
 interface PlayerScoresProps {
   title: string,
@@ -45,6 +46,7 @@ function PlayerScores({title, playerScores, displayPoints, displayIndex, display
     return () => {
       hub.off(HubEvents.onUpdateCurrentRound);
       hub.off(HubEvents.onUpdateDrawingPlayer);
+      hub.off(HubEvents.onUpdateCorrectGuessPlayerUsernames);
     }
   }, [hub.getState()]);
 
@@ -54,8 +56,8 @@ function PlayerScores({title, playerScores, displayPoints, displayIndex, display
   });
 
   return (
-    <animated.div style={{...playerScoresAnimationSpring}}>
-      { displayRound && <h5>Round {gameState.currentRound}/{gameSettings.roundsCount}</h5>}
+    <animated.div style={{ ...playerScoresAnimationSpring }}>
+      {displayRound && <h5>Round {gameState.currentRound}/{gameSettings.roundsCount}</h5>}
       <ul className="list-group">
         <li className="list-group-item justify-content-between align-items-center">
           <b>{title}</b>
@@ -63,33 +65,33 @@ function PlayerScores({title, playerScores, displayPoints, displayIndex, display
         {playerScores.map((playerScore, index) => (
           <li
             key={index}
-            className={`list-group-item d-flex justify-content-between align-items-center
-            ${
-              gameState.correctGuessPlayerUsernames != undefined &&
-              gameState.correctGuessPlayerUsernames.includes(playerScore.username) ? "bg-custom-lime" :
-              gameState.drawingPlayerUsername == playerScore.username ? "bg-light" : "bg-white"}`
-            }
-            style={{overflowWrap: "break-word"}}
+            className={`list-group-item d-flex justify-content-between align-items-center ${
+              gameState.correctGuessPlayerUsernames !== undefined &&
+              gameState.correctGuessPlayerUsernames.includes(playerScore.username)
+                ? "bg-custom-lime"
+                : gameState.drawingPlayerUsername === playerScore.username
+                ? "bg-light"
+                : "bg-white"
+            }`}
+            style={{ overflowWrap: "break-word" }}
           >
-            { displayIndex && "#" + (index + 1)}
+            {displayIndex && "#" + (index + 1)}
             <div className="d-flex flex-column align-items-center">
-              <span 
-                className={player.username == playerScore.username ? "text-warning" : "text-dark"}
-              >
+              <span className={player.username === playerScore.username ? "text-warning" : "text-dark"}>
                 <b>{playerScore.username} </b>
-                { gameState.hostPlayerUsername == playerScore.username && <BsShieldShaded/> }
-                { gameState.drawingPlayerUsername == playerScore.username && <BsPaletteFill/> }
+                {gameState.hostPlayerUsername === playerScore.username && <BsShieldShaded />}
+                {gameState.drawingPlayerUsername === playerScore.username && <BsPaletteFill />}
               </span>
-              { displayPoints &&
+              {displayPoints && (
                 <span className="badge rounded-pill bg-dark mt-2">{playerScore.score} points</span>
-              }
+              )}
             </div>
             <div></div>
           </li>
         ))}
       </ul>
     </animated.div>
-  )
+  );
 }
 
 export default PlayerScores;

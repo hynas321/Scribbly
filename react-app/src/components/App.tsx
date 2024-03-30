@@ -28,7 +28,7 @@ function App() {
       path: "*",
       element: <PageNotFoundView/ >
     }
-]);
+  ]);
 
 return (
   <ConnectionHubContext.Provider value={connectionHub}>

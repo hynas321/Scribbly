@@ -3,9 +3,11 @@ import * as signalR from "@microsoft/signalr";
 class Hub {
   private connection: signalR.HubConnection
 
-  constructor(url: string) {
+  constructor(hubConnectionSuffix: string) {
+    const httpWebSocketUrl: string = import.meta.env.VITE_WEBSOCKET_URL;
+
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl(url, {
+      .withUrl(`${httpWebSocketUrl}${hubConnectionSuffix}`, {
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,
         withCredentials: false

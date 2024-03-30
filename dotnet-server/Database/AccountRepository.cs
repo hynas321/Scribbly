@@ -1,5 +1,4 @@
 using Dapper;
-using Dotnet.Server.JsonConfig;
 using Dotnet.Server.Models;
 using Microsoft.Data.Sqlite;
 
@@ -9,12 +8,10 @@ public class AccountRepository
 {
     private readonly string connectionString;
 
-    public AccountRepository()
+    public AccountRepository(IConfiguration configuration)
     {
-        ConfigHelper configHelper = new ConfigHelper();
-        Config config = configHelper.GetConfig();
-        connectionString = config.DatabaseConnectionString ?? "null";
-        
+        connectionString = configuration.GetConnectionString("DatabaseConnectionString");
+
         using (SqliteConnection db = new SqliteConnection(connectionString))
         {
             string createTableQuery = $"CREATE TABLE IF NOT EXISTS Account" +

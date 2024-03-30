@@ -4,9 +4,9 @@ namespace Dotnet.Server.Managers;
 
 class GameManager
 {
-    private int maxChatMessageCount = 25;
+    private readonly int maxChatMessageCount = 25;
     private readonly ILogger<GameManager> logger;
-    private static Dictionary<string, Game> Games = new Dictionary<string, Game>();
+    private static readonly Dictionary<string, Game> Games = new Dictionary<string, Game>();
 
     public GameManager()
     {
@@ -232,6 +232,31 @@ class GameManager
         catch (Exception ex)
         {
             logger.LogError($"{ex}");
+        }
+    }
+
+    public (Player player, string gameHash) RemovePlayer(string connectionId)
+    {
+        try
+        {
+            Dictionary<string, Game> games = Games;
+
+            foreach (var game in games)
+            {
+                Player playerToRemove = game.Value.GameState.Players.FirstOrDefault(player => player.ConnectionId == connectionId);
+
+                if (playerToRemove != null)
+                {
+                    RemovePlayer(game.Key, playerToRemove.Token);
+                    return (playerToRemove, game.Key);
+                }
+            }
+
+            return (null, null);
+        }
+        catch (Exception)
+        {
+            return (null, null);
         }
     }
 }

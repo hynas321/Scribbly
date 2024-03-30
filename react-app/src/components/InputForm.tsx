@@ -30,26 +30,25 @@ const InputForm = forwardRef((
 
   return (
     <div className="form-group mt-3">
-      {
-        defaultValue ?
-          <input
-            value={value}
-            className="form-control"
-            placeholder={placeholderValue}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            ref={ref}
-          />
-        :
-          <input
-            className="form-control"
-            placeholder={placeholderValue}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            ref={ref}
-          />
-      }
-        {placeholderValue && <small>{smallTextValue}</small>}
+      {defaultValue ? (
+        <input
+          value={value}
+          className="form-control"
+          placeholder={placeholderValue}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          ref={ref}
+        />
+      ) : (
+        <input
+          className="form-control"
+          placeholder={placeholderValue}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          ref={ref}
+        />
+      )}
+      {placeholderValue && <small>{smallTextValue}</small>}
     </div>
   );
 });

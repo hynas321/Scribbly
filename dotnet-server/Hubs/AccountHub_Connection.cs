@@ -36,6 +36,7 @@ public partial class AccountHubConnection : Hub
             }
             
             logger.LogInformation($"New Session {Context.ConnectionId} for the account ID {accountId}");
+
             AccountHubState.AccountConnections.Add(accountId, Context.ConnectionId);
         }
         catch (Exception ex)

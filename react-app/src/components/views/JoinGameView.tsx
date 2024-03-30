@@ -12,6 +12,8 @@ import config from '../../../config.json';
 import MainScoreboard from "../MainScoreboard";
 import tableLoading from './../../assets/table-loading.gif'
 import Alert from "../Alert";
+import { animated, useSpring } from "@react-spring/web";
+import { MainScoreboardScore } from "../../types/MainScoreboardScore";
 
 function JoinGameView() { 
   const httpRequestHandler = new HttpRequestHandler();
@@ -28,8 +30,13 @@ function JoinGameView() {
 
   const [username, setUsername] = useLocalStorageState("username", { defaultValue: ""});
 
+  const animationSpring = useSpring({
+    from: { y: 200 },
+    to: { y: 0 },
+  });
+
   const handleInputFormChange = (value: string) => {
-    setUsername(value.trim());
+    setUsername(value);
   }
 
   const handleJoinGameButtonClick = async () => {
@@ -132,7 +139,9 @@ function JoinGameView() {
           onClick={handleJoinGameButtonClick}
         />
       </div>
-      <div className="col-lg-3 col-sm-6 col-xs-6 mt-5 text-center mx-auto">
+      <animated.div
+        className="col-lg-3 col-sm-6 col-xs-6 mt-5 text-center mx-auto"
+        style={{...animationSpring}}>
         { isTableDisplayed ?
           <MainScoreboard
             title="Top 5 players"
@@ -143,7 +152,7 @@ function JoinGameView() {
           :
           <img src={tableLoading} alt="Table loading" className="img-fluid" />
         }
-      </div>
+      </animated.div>
     </div>
   )
 }

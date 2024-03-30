@@ -1,5 +1,4 @@
 using Dotnet.Server.Http;
-using Dotnet.Server.Http.Requests;
 using Dotnet.Server.JsonConfig;
 using Dotnet.Server.Managers;
 using Dotnet.Server.Models;
@@ -13,16 +12,20 @@ public partial class LongRunningHubConnection : Hub
     private readonly ILogger<HubConnection> logger;
     private readonly IHubContext<HubConnection> hubContext;
     private readonly IHubContext<AccountHubConnection> accountHubContext;
+    private readonly RandomWordFetcher randomWordFetcher;
 
     public LongRunningHubConnection(
         ILogger<HubConnection> logger,
         IHubContext<HubConnection> hubContext,
-        IHubContext<AccountHubConnection> accountHubContext
+        IHubContext<AccountHubConnection> accountHubContext,
+        IConfiguration configuration
     )
     {
         this.logger = logger;
         this.hubContext = hubContext;
         this.accountHubContext = accountHubContext;
+
+        randomWordFetcher = new RandomWordFetcher(configuration);
     }
 
     [HubMethodName(HubEvents.StartGame)]
@@ -102,7 +105,7 @@ public partial class LongRunningHubConnection : Hub
                     if (drawingPlayersTokens.Count != onlinePlayerTokens.Count)
                     {
                         game.GameState.DrawingPlayersTokens = drawingPlayersTokens
-                            .Where(token => onlinePlayerTokens.Contains(token))
+                            .Where(onlinePlayerTokens.Contains)
                             .ToList();
                     }
 
@@ -120,7 +123,7 @@ public partial class LongRunningHubConnection : Hub
                     int randomTokenIndex = random.Next(game.GameState.DrawingPlayersTokens.Count);
                     string drawingToken = game.GameState.DrawingPlayersTokens[randomTokenIndex];
                     string drawingPlayerUsername = gameManager.GetPlayerByToken(gameHash, drawingToken).Username;
-                    string actualSecretWord = await RandomWordFetcher.FetchWordAsync(gameHash) ?? throw new NullReferenceException();
+                    string actualSecretWord = await randomWordFetcher.FetchWordAsync(gameHash) ?? throw new NullReferenceException();
                     string hiddenSecretWord = Convert.ToString(actualSecretWord.Length);
 
                     game.GameState.DrawingPlayerUsername = drawingPlayerUsername;

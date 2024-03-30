@@ -4,13 +4,17 @@ import HubEvents from "../hub/HubEvents";
 import useLocalStorageState from "use-local-storage-state";
 import UrlHelper from "../utils/UrlHelper";
 import * as signalR from '@microsoft/signalr';
+import { DrawnLine } from "../types/DrawnLine";
+import { Point } from "../types/Point";
 
 export const useDraw = (onDraw: (
     canvasContext: CanvasRenderingContext2D,
     line: DrawnLine) => void,
   hub: Hub,
   color: string,
-  thickness: number) => {
+  thickness: number,
+  isPlayerDrawing: boolean) => {
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previousRelativePoint = useRef<Point | null>(null);
   
@@ -18,18 +22,30 @@ export const useDraw = (onDraw: (
   const [currentLineNumber, setCurrentLineNumber] = useState<number>(0);
   const [isMouseDown, setIsMouseDown] = useState<boolean>(false);
 
-  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
+  const [token] = useLocalStorageState("token", { defaultValue: "" });
 
   const onMouseDown = () => {
+    if (!isPlayerDrawing) {
+      return;
+    }
+
     setCurrentLineNumber(currentLineNumber + 1);
     setIsMouseDown(true);
   }
 
   const clearCanvas = async () => {
+    if (!isPlayerDrawing) {
+      return;
+    }
+
     await hub.invoke(HubEvents.clearCanvas, gameHash, token);
   }
 
   const undoLine = async () => {
+    if (!isPlayerDrawing) {
+      return;
+    }
+
     await hub.invoke(HubEvents.undoLine, gameHash, token);
   }
 
@@ -41,7 +57,6 @@ export const useDraw = (onDraw: (
     if (hub.getState() !== signalR.HubConnectionState.Connected || !gameHash) {
       return;
     }
-
 
     const getCanvasContext = (): (CanvasRenderingContext2D | null) => {
       const canvas = canvasRef.current;

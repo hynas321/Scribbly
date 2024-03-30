@@ -1,11 +1,12 @@
 import axios from 'axios';
-import config from '../../config.json';
 import ApiEndpoints from './ApiEndpoints';
-import { CreateGameBody, JoinGameBody } from './HttpInterfaces';
+import { CreateGameBody } from './HttpInterfaces';
+import { MainScoreboardScore } from '../types/MainScoreboardScore';
+import { Account } from '../types/Account';
 
 class HttpRequestHandler {
-  private httpServerUrl: string = config.httpServerUrl;
-
+  private httpServerUrl: string = import.meta.env.VITE_SERVER_URL;
+  
   async createGame(username: string): Promise<any> {
     const requestBody: CreateGameBody = {
       username: username,
@@ -51,8 +52,6 @@ class HttpRequestHandler {
       if (response.status !== 200) {
         throw new Error("Error");
       }
-
-      console.log(response.data);
 
       return response.data as MainScoreboardScore[];
 

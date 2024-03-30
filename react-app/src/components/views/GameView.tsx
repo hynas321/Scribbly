@@ -21,6 +21,8 @@ import { GameState, clearedGameState, updatedGameState, updatedIsGameStarted } f
 import UrlHelper from '../../utils/UrlHelper';
 import ClipboardBar from '../bars/ClipboardBar';
 import ControlPanel from '../game-view-components/ControlPanel';
+import { Player } from '../../types/Player';
+import { AnnouncementMessage } from '../../types/AnnouncementMessage';
 
 function GameView() {
   const hub = useContext(ConnectionHubContext);
@@ -178,15 +180,13 @@ function GameView() {
 
   return (
     <>
-      {
-        !isGameDisplayed ? 
-          <div className='d-flex justify-content-center align-items-center mt-4'>
-            <img src={loading} alt="Loading" className="w-30 h-30 img-fluid" />
-          </div>
-        : 
-          (
-            gameState.isGameStarted ?
-
+      {!isGameDisplayed ? (
+        <div className='d-flex justify-content-center align-items-center mt-4'>
+          <img src={loading} alt="Loading" className="w-30 h-30 img-fluid" />
+        </div>
+      ) : (
+        <>
+          {gameState.isGameStarted ? (
             <div className="container text-center">
               <div className="row">
                 <div className="col-xl-2 col-lg-6 col-md-6 col-12 order-xl-1 order-lg-2 order-md-2 order-3 mb-3">
@@ -203,65 +203,64 @@ function GameView() {
                   <Canvas />
                 </div>
                 <div className="col-xl-3 col-lg-6 col-md-6 col-12 order-xl-2 order-lg-3 order-md-3 order-2 mb-3">
-                  <Chat 
+                  <Chat
                     placeholderValue="Enter your guess"
                     displaySecretWord={true}
                   />
                 </div>
               </div>
-            </div> 
-
-            :
-
+            </div>
+          ) : (
             <div className="container mb-3">
-            <div className="row">
-              <div className="col-lg-4 col-sm-5 col-12 mx-auto mt-2 text-center order-lg-1 order-2 mb-3">
-                <div className="col-lg-6">
-                  <PlayerScores
-                    title={"Players in the lobby"}
-                    playerScores={playerScores}
-                    displayPoints={false}
-                    displayIndex={false}
-                    displayRound={false}
-                  />
-                  <ClipboardBar invitationUrl={window.location.href} />
+              <div className="row">
+                <div className="col-lg-4 col-sm-5 col-12 mx-auto mt-2 text-center order-lg-1 order-2 mb-3">
+                  <div className="col-lg-6">
+                    <PlayerScores
+                      title={"Players in the lobby"}
+                      playerScores={playerScores}
+                      displayPoints={false}
+                      displayIndex={false}
+                      displayRound={false}
+                    />
+                    <ClipboardBar invitationUrl={window.location.href} />
+                  </div>
                 </div>
-              </div>
-              <div className="col-lg-4 col-sm-10 col-12 mx-auto text-center order-lg-2 order-1">
-                <h5>Your username: {player.username}</h5>
-                { isPlayerHost && 
+                <div className="col-lg-4 col-sm-10 col-12 mx-auto text-center order-lg-2 order-1">
+                  <h5>Your username: {player.username}</h5>
+                  {isPlayerHost && (
                     <Button
                       text="Start the game"
                       type="success"
                       active={isStartGameButtonActive}
-                      icon={<BsPlayCircle/>}
+                      icon={<BsPlayCircle />}
                       onClick={handleStartGameButtonClick}
                     />
-                }
-                { !isPlayerHost && <h4 className="mt-3">Waiting for the host to start the game</h4> }
+                  )}
+                  {!isPlayerHost && <h4 className="mt-3">Waiting for the host to start the game</h4>}
                   <Button
                     text="Leave the game"
                     active={true}
-                    icon={<BsDoorOpen/>}
+                    icon={<BsDoorOpen />}
                     type={"danger"}
                     onClick={handleLeaveGameButtonClick}
                   />
-                <div className="mt-3">
-                  <GameSettingsBoard isPlayerHost={isPlayerHost} />
+                  <div className="mt-3">
+                    <GameSettingsBoard isPlayerHost={isPlayerHost} />
+                  </div>
                 </div>
-              </div>
-              <div className="col-lg-4 order-lg-3 col-sm-7 col-12 order-3">
-                <div className="col-lg-9 col-sm-12 col-12 float-end mb-3">
-                  <Chat
-                    placeholderValue={"Enter your message"}
-                    displaySecretWord={false}
-                  />
+                <div className="col-lg-4 order-lg-3 col-sm-7 col-12 order-3">
+                  <div className="col-lg-9 col-sm-12 col-12 float-end mb-3">
+                    <Chat
+                      placeholderValue={"Enter your message"}
+                      displaySecretWord={false}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )
-      }
+          )}
+        </>
+      )}
     </>
   );
 }

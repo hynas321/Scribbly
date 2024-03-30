@@ -19,7 +19,8 @@ function Popup({title, inputFormPlaceholderText, visible, onSubmit, onClose}: Po
       right: 'auto',
       bottom: 'auto',
       transform: 'translate(-50%, -50%)',
-      width: '350px'
+      width: '350px',
+      borderRadius: '15px'
     },
   };
   
@@ -53,22 +54,22 @@ function Popup({title, inputFormPlaceholderText, visible, onSubmit, onClose}: Po
           onChange={handleInputFormChange}
         />
         <div className="d-flex justify-content-end">
-            <Button 
-              text={"Cancel"}
-              active={true}
-              type={"danger"}
-              onClick={onClose}
-            />
-            <Button 
-              text={"Submit"}
-              active={joinLobbyActiveButton}
-              type={"success"}
-              onClick={() => onSubmit(inputFormValue)}
-            />
+          <Button 
+            text={"Cancel"}
+            active={true}
+            type={"danger"}
+            onClick={onClose}
+          />
+          <Button 
+            text={"Submit"}
+            active={joinLobbyActiveButton}
+            type={"success"}
+            onClick={() => onSubmit(inputFormValue)}
+          />
         </div>
       </div>
     </Modal>
-  )
+  );
 }
 
 export default Popup;

@@ -43,6 +43,7 @@ public partial class HubConnection : Hub
                     Username = username,
                     Score = 0,
                     Token = game.HostToken,
+                    ConnectionId = Context.ConnectionId
                 };
 
                 game.GameState.HostPlayerUsername = player.Username;
@@ -55,6 +56,7 @@ public partial class HubConnection : Hub
                     Username = username,
                     Score = 0,
                     Token = hashManager.GenerateUserHash(),
+                    ConnectionId = Context.ConnectionId
                 };
 
                 gameManager.AddPlayer(gameHash, player);
@@ -132,7 +134,7 @@ public partial class HubConnection : Hub
             
             if (game == null)
             {
-                logger.LogError($"Game #{gameHash} LeaveGame: Game does not exist");
+                logger.LogInformation($"Game #{gameHash} LeaveGame: Game does not exist");
                 return;
             }
 

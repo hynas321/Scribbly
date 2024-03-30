@@ -14,6 +14,7 @@ import MainScoreboard from '../MainScoreboard';
 import UrlHelper from '../../utils/UrlHelper';
 import Popup from '../Popup';
 import { animated, useSpring } from '@react-spring/web';
+import { MainScoreboardScore } from '../../types/MainScoreboardScore';
 
 function MainView() {
   const httpRequestHandler = new HttpRequestHandler();
@@ -24,17 +25,17 @@ function MainView() {
   const navigate = useNavigate();
 
   const [scoreboardScores, setScoreboardScores] = useState<MainScoreboardScore[]>([]);
-  const [gameHash, setGameHash] = useState<string>("");
+  const [, setGameHash] = useState<string>("");
   const [isCreateGameButtonActive, setIsCreateGameButtonActive] = useState<boolean>(false);
   const [isJoinGameButtonActive, setIsJoinGameButtonActive] = useState<boolean>(false);
   const [isTableDisplayed, setIsTableDisplayed] = useState<boolean>(false);
   const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
 
-  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
+  const [, setToken] = useLocalStorageState("token", { defaultValue: "" });
   const [username, setUsername] = useLocalStorageState("username", { defaultValue: ""});
 
   const handleInputFormChange = (value: string) => {
-    setUsername(value.trim());
+    setUsername(value);
   }
 
   const handleCreateGameButtonClick = async () => {
@@ -46,7 +47,7 @@ function MainView() {
     try {
       const data = await httpRequestHandler.createGame(username);
 
-      if (!("gameHash" || "hostToken" in data)) {
+      if (!("gameHash" || "hostToken" in data) || data.gameHash == undefined) {
         displayAlert("Could not create the game, try again.", "primary");
         return;
       }
