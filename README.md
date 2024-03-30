@@ -1,5 +1,7 @@
 # Scribbly
 
+https://scribbly.azurewebsites.net/
+
 ## Description
 **Scribbly** is an online platform designed for engaging in a word-guessing game. On this platform, a designated user serves as the game host, and the game is usually organized into multiple rounds. 
 
