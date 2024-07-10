@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using Dotnet.Server.Http.Requests;
 using Dotnet.Server.Database;
-using Dotnet.Server.JsonConfig;
 using Dotnet.Server.Models;
 using Dotnet.Server.Managers;
+using dotnet_server.Utilities;
+using dotnet_server.Models.Http.Request;
 
 namespace Dotnet.Server.Controllers;
 
@@ -11,88 +11,86 @@ namespace Dotnet.Server.Controllers;
 [Route("api/[controller]")]
 public class AccountController : ControllerBase
 {
-    private readonly ILogger<AccountController> logger;
-    private readonly IConfiguration configuration;
+    private readonly IAccountRepository _accountRepository;
+    private readonly IGameManager _gameManager;
+    private readonly ILogger<AccountController> _logger;
 
     public AccountController(
-        ILogger<AccountController> logger,
-        IConfiguration configuration
+        IAccountRepository accountRepository,
+        IGameManager gameManager,
+        ILogger<AccountController> logger
     )
     {
-        this.logger = logger;
-        this.configuration = configuration;
+        _accountRepository = accountRepository;
+        _gameManager = gameManager;
+        _logger = logger;
     }
 
     [HttpPost("Add")]
-    public IActionResult AddAccountIfNotExists([FromBody] AddAccountBody body)
+    public IActionResult Add([FromBody] AddAccountBody body)
     {
         try 
         {
             if (!ModelState.IsValid)
             {   
-                logger.LogError("AddAccountIfNotExists Status: 400. Bad request");
+                _logger.LogError("AddAccountIfNotExists Status: 400. Bad request");
 
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            AccountRepository accountRepository = new AccountRepository(configuration);
-
-            bool accountAdded = accountRepository.AddAccountIfNotExists(body.Account);
+            bool accountAdded = _accountRepository.AddAccount(body.Account);
 
             if (accountAdded)
             {
-                logger.LogInformation("AddAccountIfNotExists Status: 201. Created");
+                _logger.LogInformation("AddAccountIfNotExists Status: 201. Created");
 
                 return StatusCode(StatusCodes.Status201Created);
             }
             else
             {
-                logger.LogInformation("AddAccountIfNotExists Status: 200. Ok");
+                _logger.LogInformation("AddAccountIfNotExists Status: 200. Ok");
 
                 return StatusCode(StatusCodes.Status200OK);
             }
         }
         catch (Exception ex)
         {   
-            logger.LogError($"AddAccountIfNotExists Status: 500. Internal server error {ex}");
+            _logger.LogError($"AddAccountIfNotExists Status: 500. Internal server error {ex}");
 
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
 
     [HttpPut("IncrementScore/{gameHash}")]
-    public IActionResult IncrementAccountScore([FromRoute] string gameHash, [FromHeader] string token, [FromHeader] string accessToken)
+    public IActionResult IncrementScore([FromRoute] string gameHash, [FromHeader] string token, [FromHeader] string accessToken)
     {
         try
         {
             if (!ModelState.IsValid)
             {   
-                logger.LogError("IncrementAccountScore Status: 400. Bad request");
+                _logger.LogError("IncrementAccountScore Status: 400. Bad request");
 
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            GameManager gameManager = new GameManager();
-            AccountRepository accountRepository = new AccountRepository(configuration);
-
-            Player player = gameManager.GetPlayerByToken(gameHash, token);
+            Player player = _gameManager.GetPlayerByToken(gameHash, token);
 
             if (player == null)
             {
-                logger.LogError("IncrementAccountScore Status: 404. Not Found");
+                _logger.LogError("IncrementAccountScore Status: 404. Not Found");
 
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
-            accountRepository.IncrementAccountScore(accessToken, player.Score);
+            _accountRepository.IncrementAccountScore(accessToken, player.Score);
 
-            logger.LogInformation("IncrementAccountScore Status: 200. OK");
+            _logger.LogInformation("IncrementAccountScore Status: 200. OK");
 
-            return StatusCode(StatusCodes.Status200OK, accountRepository.GetAccountScore(accessToken));
+            return StatusCode(StatusCodes.Status200OK, _accountRepository.GetAccountScore(accessToken));
         }
         catch (Exception ex)
         {
-            logger.LogError($"GetTopPlayerScores Status: 500. Internal server error {ex}");
+            _logger.LogError($"GetTopPlayerScores Status: 500. Internal server error {ex}");
 
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
@@ -105,49 +103,47 @@ public class AccountController : ControllerBase
         {
             if (!ModelState.IsValid)
             {   
-                logger.LogError("Get Status: 400. Bad request");
+                _logger.LogError("Get Status: 400. Bad request");
 
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            AccountRepository accountRepository = new AccountRepository(configuration);
-            Account account = accountRepository.GetAccount(id);
+            Account account = _accountRepository.GetAccount(id);
 
             if (account == null)
             {
-                logger.LogError("Get Status: 404. Not found");
+                _logger.LogError("Get Status: 404. Not found");
 
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
-            logger.LogInformation("Get Status: 200. OK");
+            _logger.LogInformation("Get Status: 200. OK");
 
             return StatusCode(StatusCodes.Status200OK, account.Score);
         }
         catch (Exception ex)
         {
-            logger.LogError($"Get Status: 500. Internal server error {ex}");
+            _logger.LogError($"Get Status: 500. Internal server error {ex}");
 
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
 
     [HttpGet("GetTop")]
-    public IActionResult GetTopAccountsByScore()
+    public IActionResult GetTop()
     {
         try 
         {
-            AccountRepository accountRepository = new AccountRepository(configuration);
-            IEnumerable<MainScoreboardScore> topPlayerScores = accountRepository.GetTopAccountPlayerScores();
+            IEnumerable<MainScoreboardScore> topPlayerScores = _accountRepository.GetTopAccountPlayerScores();
             string topPlayerScoresSerialized = JsonHelper.Serialize(topPlayerScores);
             
-            logger.LogInformation("GetTopAccountsScores Status: 200. OK");
+            _logger.LogInformation("GetTopAccountsScores Status: 200. OK");
 
             return StatusCode(StatusCodes.Status200OK, topPlayerScoresSerialized);
         }
         catch (Exception ex)
         {   
-            logger.LogError($"GetTopAccountsScores Status: 500. Internal server error. {ex}");
+            _logger.LogError($"GetTopAccountsScores Status: 500. Internal server error. {ex}");
 
             return StatusCode(StatusCodes.Status500InternalServerError);
         }

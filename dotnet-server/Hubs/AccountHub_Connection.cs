@@ -4,11 +4,11 @@ namespace Dotnet.Server.Hubs;
 
 public partial class AccountHubConnection : Hub
 {
-    private readonly ILogger<AccountHubConnection> logger;
+    private readonly ILogger<AccountHubConnection> _logger;
 
     public AccountHubConnection(ILogger<AccountHubConnection> logger)
     {
-        this.logger = logger;
+        _logger = logger;
     }
 
     public override async Task OnConnectedAsync()
@@ -21,7 +21,7 @@ public partial class AccountHubConnection : Hub
         await base.OnDisconnectedAsync(exception);
     }
 
-    [HubMethodName(HubEvents.CreateSession)]
+    [HubMethodName(HubMessages.CreateSession)]
     public async Task CreateSession(string accountId)
     {
         try
@@ -30,22 +30,22 @@ public partial class AccountHubConnection : Hub
             {
                 string connectionId = AccountHubState.AccountConnections[accountId];
                 AccountHubState.AccountConnections.Remove(accountId);
-                await Clients.Client(connectionId).SendAsync(HubEvents.OnSessionEnded);
+                await Clients.Client(connectionId).SendAsync(HubMessages.OnSessionEnded);
 
-                logger.LogInformation($"Session {connectionId} ended for the account ID {accountId}");
+                _logger.LogInformation($"Session {connectionId} ended for the account ID {accountId}");
             }
             
-            logger.LogInformation($"New Session {Context.ConnectionId} for the account ID {accountId}");
+            _logger.LogInformation($"New Session {Context.ConnectionId} for the account ID {accountId}");
 
             AccountHubState.AccountConnections.Add(accountId, Context.ConnectionId);
         }
         catch (Exception ex)
         {
-            logger.LogError(Convert.ToString(ex));
+            _logger.LogError(Convert.ToString(ex));
         }
     }
 
-    [HubMethodName(HubEvents.EndSession)]
+    [HubMethodName(HubMessages.EndSession)]
     public void EndSession(string accountId)
     {
         try
@@ -58,13 +58,13 @@ public partial class AccountHubConnection : Hub
                 {
                     AccountHubState.AccountConnections.Remove(accountId);
 
-                    logger.LogInformation($"Session {connectionId} ended for the account ID {accountId}");
+                    _logger.LogInformation($"Session {connectionId} ended for the account ID {accountId}");
                 }
             }
         }
         catch (Exception ex)
         {
-            logger.LogError(Convert.ToString(ex));
+            _logger.LogError(Convert.ToString(ex));
         }
     }
 

@@ -1,262 +1,148 @@
+using Dotnet.Server.Managers;
 using Dotnet.Server.Models;
+using dotnet_server.Repositories.Interfaces;
 
-namespace Dotnet.Server.Managers;
-
-class GameManager
+public class GameManager : IGameManager
 {
-    private readonly int maxChatMessageCount = 25;
-    private readonly ILogger<GameManager> logger;
-    private static readonly Dictionary<string, Game> Games = new Dictionary<string, Game>();
+    private const int MaxChatMessageCount = 25;
+    private readonly IGameRepository _gameRepository;
 
-    public GameManager()
+    public GameManager(IGameRepository gameRepository)
     {
-        ILoggerFactory loggerFactory = new LoggerFactory();
-        logger = loggerFactory.CreateLogger<GameManager>();
+        _gameRepository = gameRepository;
     }
 
     public void CreateGame(Game game, string gameHash)
-    { 
-        try
-        {
-            Games.Add(gameHash, game);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError($"{ex}");
-        }
+    {
+        _gameRepository.AddGame(gameHash, game);
     }
 
     public Game GetGame(string gameHash)
     {
-        try
-        {
-            return Games[gameHash];
-        }
-        catch (Exception ex)
-        {
-            logger.LogError($"{ex}");
-            return null;
-        }
+        return _gameRepository.GetGame(gameHash);
     }
 
     public void RemoveGame(string gameHash)
     {
-        try
-        {
-            Games.Remove(gameHash);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError($"{ex}");
-        }
+        _gameRepository.RemoveGame(gameHash);
     }
 
     public void AddPlayer(string gameHash, Player player)
-    {   
-        try
-        {
-            GetGame(gameHash).GameState.Players.Add(player);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError($"{ex}");
-        }
+    {
+        var game = _gameRepository.GetGame(gameHash);
+        game.GameState.Players.Add(player);
     }
 
     public void RemovePlayer(string gameHash, string token)
     {
-        try
-        {
-            GetGame(gameHash).GameState.Players.RemoveAll(obj => obj.Token == token);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError($"{ex}");
-        }
+        var game = _gameRepository.GetGame(gameHash);
+        game.GameState.Players.RemoveAll(p => p.Token == token);
     }
 
     public Player GetPlayerByToken(string gameHash, string token)
     {
-        try
-        {
-            return GetGame(gameHash).GameState.Players.Find(obj => obj.Token == token);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError($"{ex}");
-            return null;
-        }
-
+        var game = _gameRepository.GetGame(gameHash);
+        return game.GameState.Players.Find(p => p.Token == token);
     }
 
     public List<PlayerScore> GetPlayerObjectsWithoutToken(string gameHash)
     {
-        try
-        {
-            List<PlayerScore> playerObjs = new List<PlayerScore>();
-            Game game = GetGame(gameHash);
+        var game = _gameRepository.GetGame(gameHash);
 
-            foreach(Player player in game.GameState.Players)
-            {
-                playerObjs.Add(
-                    new PlayerScore
-                    {
-                        Username = player.Username,
-                        Score = player.Score
-                    }
-                );
-            }
-
-            return playerObjs;
-        }
-        catch (Exception ex)
+        if (game == null)
         {
-            logger.LogError($"{ex}");
-            return null;
+            return new List<PlayerScore>();
         }
+
+        return game.GameState.Players.Select(p => new PlayerScore
+        {
+            Username = p.Username,
+            Score = p.Score
+        }).ToList();
     }
 
     public List<string> GetOnlinePlayersTokens(string gameHash)
     {
-        try
+        var game = _gameRepository.GetGame(gameHash);
+
+        if (game == null)
         {
-            List<PlayerScore> onlinePlayers = GetPlayerObjectsWithoutToken(gameHash);
-            List<string> playerTokens = new List<string>();
-            Game game = GetGame(gameHash);
-
-            foreach(Player player in game.GameState.Players)
-            {
-                bool playerIsOnline = onlinePlayers.Exists(obj => obj.Username == player.Username);
-
-                if (playerIsOnline)
-                {
-                    playerTokens.Add(player.Token);
-                }
-            }
-
-            return playerTokens;
+            return new List<string>();
         }
-        catch (Exception ex)
-        {
-            logger.LogError($"{ex}");
-            return null;
-        }
+
+        var onlinePlayers = GetPlayerObjectsWithoutToken(gameHash);
+
+        return game.GameState.Players
+            .Where(p => onlinePlayers.Any(op => op.Username == p.Username))
+            .Select(p => p.Token)
+            .ToList();
     }
 
     public bool CheckIfPlayerExistsByToken(string gameHash, string token)
     {
-        try
-        {
-            return GetGame(gameHash).GameState.Players.Find(obj => obj.Token == token) != null;
-        }
-        catch (Exception ex)
-        {
-            logger.LogError($"{ex}");
-            return false;
-        }
+        var game = _gameRepository.GetGame(gameHash);
+        return game.GameState.Players.Any(p => p.Token == token);
     }
 
     public bool CheckIfPlayerExistsByUsername(string gameHash, string username)
     {
-        try
-        {
-            return GetGame(gameHash).GameState.Players.Find(obj => obj.Username == username) != null;
-        }
-        catch (Exception ex)
-        {
-            logger.LogError($"{ex}");
-            return false;
-        }
+        var game = _gameRepository.GetGame(gameHash);
+        return game.GameState.Players.Any(p => p.Username == username);
     }
 
     public void AddChatMessage(string gameHash, ChatMessage chatMessage)
     {
-        try
-        {
-            Game game = GetGame(gameHash);
-            List<ChatMessage> messages = game.ChatMessages;
+        var game = _gameRepository.GetGame(gameHash);
+        var messages = game.ChatMessages;
 
-            if (messages.Count == maxChatMessageCount)
-            {
-                messages.RemoveAt(0);
-            }
-
-            messages.Add(chatMessage);
-        }
-        catch (Exception ex)
+        if (messages.Count >= MaxChatMessageCount)
         {
-            logger.LogError($"{ex}");
+            messages.RemoveAt(0);
         }
+
+        messages.Add(chatMessage);
     }
 
     public void AddChatMessage(string gameHash, AnnouncementMessage message)
     {
-        try
+        var chatMessage = new ChatMessage
         {
-            Game game = GetGame(gameHash);
-            List<ChatMessage> messages = game.ChatMessages;
+            Username = null,
+            Text = message.Text,
+            BootstrapBackgroundColor = message.BootstrapBackgroundColor
+        };
 
-            if (messages.Count == maxChatMessageCount)
-            {
-                messages.RemoveAt(0);
-            }
-
-            ChatMessage chatMessage = new ChatMessage()
-            {
-                Username = null,
-                Text = message.Text,
-                BootstrapBackgroundColor = message.BootstrapBackgroundColor
-            };
-
-            messages.Add(chatMessage);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError($"{ex}");
-        }
+        AddChatMessage(gameHash, chatMessage);
     }
 
     public void UpdatePlayerScore(string gameHash, string token, int score)
     {
-        try
-        {
-            Game game = GetGame(gameHash);
-            Player player = game.GameState.Players.Find(player => player.Token == token);
+        var game = _gameRepository.GetGame(gameHash);
+        var player = game.GameState.Players.Find(p => p.Token == token);
 
-            if (player != null)
-            {
-                player.Score += score;
-                game.GameState.Players.Sort((player1, player2) => player2.Score.CompareTo(player1.Score));
-            }
-        }
-        catch (Exception ex)
+        if (player != null)
         {
-            logger.LogError($"{ex}");
+            player.Score += score;
+            game.GameState.Players.Sort((p1, p2) => p2.Score.CompareTo(p1.Score));
         }
     }
 
     public (Player player, string gameHash) RemovePlayer(string connectionId)
     {
-        try
-        {
-            Dictionary<string, Game> games = Games;
+        var games = _gameRepository.GetAllGames();
 
-            foreach (var game in games)
+        foreach (var game in games)
+        {
+            var playerToRemove = game.Value.GameState.Players
+                .FirstOrDefault(p => p.ConnectionId == connectionId);
+
+            if (playerToRemove != null)
             {
-                Player playerToRemove = game.Value.GameState.Players.FirstOrDefault(player => player.ConnectionId == connectionId);
-
-                if (playerToRemove != null)
-                {
-                    RemovePlayer(game.Key, playerToRemove.Token);
-                    return (playerToRemove, game.Key);
-                }
+                RemovePlayer(game.Key, playerToRemove.Token);
+                return (playerToRemove, game.Key);
             }
+        }
 
-            return (null, null);
-        }
-        catch (Exception)
-        {
-            return (null, null);
-        }
+        return (null, null);
     }
 }

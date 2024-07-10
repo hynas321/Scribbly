@@ -1,8 +1,9 @@
 using Dotnet.Server.Models;
 using Microsoft.AspNetCore.Mvc;
-using Dotnet.Server.Http.Requests;
 using Dotnet.Server.Managers;
-using Dotnet.Server.JsonConfig;
+using dotnet_server.Utilities;
+using dotnet_server.Models.Http.Request;
+using dotnet_server.Models.Http.Response;
 
 namespace Dotnet.Server.Controllers;
 
@@ -10,13 +11,19 @@ namespace Dotnet.Server.Controllers;
 [Route("api/[controller]")]
 public class GameController : ControllerBase
 {
-    private readonly GameManager gameManager = new GameManager();
-    private readonly HashManager hashManager = new HashManager();
-    private readonly ILogger<GameController> logger;
+    private readonly IGameManager _gameManager;
+    private readonly IHashManager _hashManager;
+    private readonly ILogger<GameController> _logger;
 
-    public GameController(ILogger<GameController> logger)
+    public GameController(
+        IGameManager gameManager,
+        IHashManager hashManager,
+        ILogger<GameController> logger
+    )
     {
-        this.logger = logger;
+        _gameManager = gameManager;
+        _hashManager = hashManager;
+        _logger = logger;
     }
 
     [HttpPost("Create")]
@@ -26,16 +33,16 @@ public class GameController : ControllerBase
         {
             if (!ModelState.IsValid)
             {   
-                logger.LogError("Create Status: 400. Bad request");
+                _logger.LogError("Create Status: 400. Bad request");
 
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
             
             Game game = new Game();
-            string gameHash = hashManager.GenerateGameHash();
+            string gameHash = _hashManager.GenerateGameHash();
 
             game.GameState.HostPlayerUsername = body.Username;
-            gameManager.CreateGame(game, gameHash);
+            _gameManager.CreateGame(game, gameHash);
 
             CreateGameResponse response = new CreateGameResponse()
             {
@@ -43,14 +50,14 @@ public class GameController : ControllerBase
                 HostToken = game.HostToken
             };
 
-            logger.LogInformation($"Create Status: 201. Game has been created with gameHash: {response.GameHash}. " +
+            _logger.LogInformation($"Create Status: 201. Game has been created with gameHash: {response.GameHash}. " +
                 $"Host token: {response.HostToken}");
             
             return StatusCode(StatusCodes.Status201Created, JsonHelper.Serialize(response));
         }
         catch (Exception ex)
         {   
-            logger.LogError($"Create Status: 500. Internal server error {ex}");
+            _logger.LogError($"Create Status: 500. Internal server error {ex}");
 
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
@@ -63,20 +70,20 @@ public class GameController : ControllerBase
         {
             if (!ModelState.IsValid)
             {   
-                logger.LogError("Exists Status: 400. Bad request");
+                _logger.LogError("Exists Status: 400. Bad request");
 
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            bool gameExists = gameManager.GetGame(gameHash) != null;
+            bool gameExists = _gameManager.GetGame(gameHash) != null;
 
-            logger.LogInformation("Exists Status: 200. OK");
+            _logger.LogInformation("Exists Status: 200. OK");
 
             return StatusCode(StatusCodes.Status200OK, gameExists);
         }
         catch (Exception ex)
         {
-            logger.LogError($"Exists Status: 500. Internal server error {ex}");
+            _logger.LogError($"Exists Status: 500. Internal server error {ex}");
 
             return StatusCode(StatusCodes.Status500InternalServerError);
         }

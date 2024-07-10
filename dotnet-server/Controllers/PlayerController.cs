@@ -1,6 +1,6 @@
-using Dotnet.Server.Http;
 using Dotnet.Server.Managers;
 using Dotnet.Server.Models;
+using dotnet_server.Models.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dotnet.Server.Controllers;
@@ -9,12 +9,13 @@ namespace Dotnet.Server.Controllers;
 [Route("api/[controller]")]
 public class PlayerController : ControllerBase
 {
-    private readonly GameManager gamesManager = new GameManager();
-    private readonly ILogger<PlayerController> logger;
+    private readonly IGameManager _gameManager;
+    private readonly ILogger<PlayerController> _logger;
 
-    public PlayerController(ILogger<PlayerController> logger)
+    public PlayerController(IGameManager gameManager, ILogger<PlayerController> logger)
     {
-        this.logger = logger;
+        _gameManager = gameManager;
+        _logger = logger;
     }
 
     [HttpGet("Exists/{gameHash}")]
@@ -24,29 +25,29 @@ public class PlayerController : ControllerBase
         {
             if (!ModelState.IsValid)
             {   
-                logger.LogError("Exists Status: 400. Bad request");
+                _logger.LogError("Exists Status: 400. Bad request");
 
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            Game game = gamesManager.GetGame(gameHash);
+            Game game = _gameManager.GetGame(gameHash);
 
             if (game == null)
             {
-                logger.LogError("Exists Status: 404. Game not found");
+                _logger.LogError("Exists Status: 404. Game not found");
 
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
-            bool playerExists = gamesManager.GetPlayerByToken(gameHash, token) != null;
+            bool playerExists = _gameManager.GetPlayerByToken(gameHash, token) != null;
 
-            logger.LogInformation("Exists Status: 200. OK");
+            _logger.LogInformation("Exists Status: 200. OK");
 
             return StatusCode(StatusCodes.Status200OK, playerExists);
         }
         catch (Exception ex)
         {
-            logger.LogError($"Exists Status: 500. Internal server error {ex}");
+            _logger.LogError($"Exists Status: 500. Internal server error {ex}");
 
             return StatusCode(StatusCodes.Status500InternalServerError);
         }

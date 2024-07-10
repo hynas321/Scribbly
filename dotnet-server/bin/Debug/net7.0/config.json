@@ -1,9 +1,0 @@
-{
-    "httpServerUrl": "http://127.0.0.1:1234",
-    "webSocketPort": 5050,
-    "corsOrigin": "*",
-    "databaseConnectionString": "Data Source=Database.db;",
-    "englishWordsApiKey": "Api key",
-    "polishWordsApiKey": "Api key",
-    "adminToken": "1gble2th1opbmes1jsdy5yam1gprmw"
-}
