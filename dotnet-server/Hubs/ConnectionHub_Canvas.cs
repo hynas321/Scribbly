@@ -1,5 +1,5 @@
-using Dotnet.Server.JsonConfig;
 using Dotnet.Server.Models;
+using dotnet_server.Utilities;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 
@@ -7,22 +7,22 @@ namespace Dotnet.Server.Hubs;
 
 public partial class HubConnection : Hub
 {
-    [HubMethodName(HubEvents.DrawOnCanvas)]
+    [HubMethodName(HubMessages.DrawOnCanvas)]
     public async Task DrawOnCanvas(string gameHash, string token, string drawnLineSerialized)
     {   
         try 
         {
-            Game game = gameManager.GetGame(gameHash);
+            Game game = _gameManager.GetGame(gameHash);
 
             if (game == null)
             {
-                logger.LogError($"Game #{gameHash} DrawOnCanvas: Game does not exist");
+                _logger.LogError($"Game #{gameHash} DrawOnCanvas: Game does not exist");
                 return;
             }
 
             if (token != game.GameState.DrawingToken)
             {
-                logger.LogError($"DrawOnCanvas: Player with the token {token} cannot draw on canvas");
+                _logger.LogError($"DrawOnCanvas: Player with the token {token} cannot draw on canvas");
                 return;
             }
 
@@ -30,30 +30,30 @@ public partial class HubConnection : Hub
 
             if (drawnLine == null)
             {
-                logger.LogError($"Game #{gameHash} DrawOnCanvas: Serialized drawnline {drawnLineSerialized} has an incorrect format");
+                _logger.LogError($"Game #{gameHash} DrawOnCanvas: Serialized drawnline {drawnLineSerialized} has an incorrect format");
                 return;
             }
 
             game.GameState.DrawnLines.Add(drawnLine);
 
-            await Clients.Group(gameHash).SendAsync(HubEvents.OnDrawOnCanvas, JsonHelper.Serialize(drawnLine));
+            await Clients.Group(gameHash).SendAsync(HubMessages.OnDrawOnCanvas, JsonHelper.Serialize(drawnLine));
         }
         catch (Exception ex)
         {
-            logger.LogError(Convert.ToString(ex));
+            _logger.LogError(Convert.ToString(ex));
         }
     }
 
-    [HubMethodName(HubEvents.LoadCanvas)]
+    [HubMethodName(HubMessages.LoadCanvas)]
     public async Task LoadCanvas(string gameHash, string token)
     {
         try 
         {
-            Game game = gameManager.GetGame(gameHash);
+            Game game = _gameManager.GetGame(gameHash);
 
             if (game == null)
             {
-                logger.LogError($"Game #{gameHash} LoadCanvas: Game does not exist");
+                _logger.LogError($"Game #{gameHash} LoadCanvas: Game does not exist");
                 return;
             }
 
@@ -61,60 +61,60 @@ public partial class HubConnection : Hub
 
             await Clients
                 .Client(Context.ConnectionId)
-                .SendAsync(HubEvents.OnLoadCanvas, JsonHelper.Serialize(drawnLines));
+                .SendAsync(HubMessages.OnLoadCanvas, JsonHelper.Serialize(drawnLines));
 
         }
         catch (Exception ex)
         {
-            logger.LogError(Convert.ToString(ex));
+            _logger.LogError(Convert.ToString(ex));
         }
     }
 
-    [HubMethodName(HubEvents.ClearCanvas)]
+    [HubMethodName(HubMessages.ClearCanvas)]
     public async Task ClearCanvas(string gameHash, string token)
     {   
         try 
         {
-            Game game = gameManager.GetGame(gameHash);
+            Game game = _gameManager.GetGame(gameHash);
 
             if (game == null)
             {
-                logger.LogError($"Game #{gameHash} ClearCanvas: Game does not exist");
+                _logger.LogError($"Game #{gameHash} ClearCanvas: Game does not exist");
                 return;
             }
 
             if (token != game.GameState.DrawingToken)
             {
-                logger.LogError($"Game #{gameHash} ClearCanvas: Player with the token {token} cannot clear the canvas");
+                _logger.LogError($"Game #{gameHash} ClearCanvas: Player with the token {token} cannot clear the canvas");
                 return;
             }
 
             game.GameState.DrawnLines.Clear();
 
-            await Clients.Group(gameHash).SendAsync(HubEvents.OnClearCanvas);
+            await Clients.Group(gameHash).SendAsync(HubMessages.OnClearCanvas);
         }
         catch (Exception ex)
         {
-            logger.LogError(Convert.ToString(ex));
+            _logger.LogError(Convert.ToString(ex));
         }
     }
 
-    [HubMethodName(HubEvents.UndoLine)]
+    [HubMethodName(HubMessages.UndoLine)]
     public async Task UndoLine(string gameHash, string token)
     {
         try 
         {
-            Game game = gameManager.GetGame(gameHash);
+            Game game = _gameManager.GetGame(gameHash);
 
             if (game == null)
             {
-                logger.LogError($"Game #{gameHash} UndoLine: Game does not exist");
+                _logger.LogError($"Game #{gameHash} UndoLine: Game does not exist");
                 return;
             }
 
             if (token != game.GameState.DrawingToken)
             {
-                logger.LogError($"Game #{gameHash} UndoLine: Player with the token {token} cannot undo line the canvas");
+                _logger.LogError($"Game #{gameHash} UndoLine: Player with the token {token} cannot undo line the canvas");
                 return;
             }
 
@@ -126,13 +126,13 @@ public partial class HubConnection : Hub
 
                 drawnLines.RemoveAll(line => line.CurrentLine == lastNumber);
 
-                await Clients.Group(gameHash).SendAsync(HubEvents.OnClearCanvas);
-                await Clients.Group(gameHash).SendAsync(HubEvents.OnLoadCanvas, JsonHelper.Serialize(drawnLines));
+                await Clients.Group(gameHash).SendAsync(HubMessages.OnClearCanvas);
+                await Clients.Group(gameHash).SendAsync(HubMessages.OnLoadCanvas, JsonHelper.Serialize(drawnLines));
             }
         }
         catch (Exception ex)
         {
-            logger.LogError(Convert.ToString(ex));
+            _logger.LogError(Convert.ToString(ex));
         }
     }
 }

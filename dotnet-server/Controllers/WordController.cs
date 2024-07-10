@@ -1,7 +1,6 @@
 using Dotnet.Server.Database;
-using Dotnet.Server.JsonConfig;
-using Dotnet.Server.Models;
 using Dotnet.Server.Models.Static;
+using dotnet_server.Models.Http.Request;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dotnet.Server.Controllers;
@@ -10,16 +9,16 @@ namespace Dotnet.Server.Controllers;
 [Route("api/[controller]")]
 public class WordController : ControllerBase
 {
-    private readonly ILogger<PlayerController> logger;
-    private readonly IConfiguration configuration;
+    private readonly ILogger<PlayerController> _logger;
+    private readonly IConfiguration _configuration;
 
     public WordController(
         ILogger<PlayerController> logger,
         IConfiguration configuration
     )
     {
-        this.logger = logger;
-        this.configuration = configuration;
+        _logger = logger;
+        _configuration = configuration;
     }
 
     [HttpPost("Add")]
@@ -29,42 +28,42 @@ public class WordController : ControllerBase
         {
             if (!ModelState.IsValid)
             {   
-                logger.LogError("Add Status: 400. Bad request");
+                _logger.LogError("Add Status: 400. Bad request");
 
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            if (adminToken != configuration[AppSettingsVariables.AdminToken])
+            if (adminToken != _configuration[AppSettingsVariables.AdminToken])
             {
-                logger.LogInformation("Add Status: 401. Unauthorized");
+                _logger.LogInformation("Add Status: 401. Unauthorized");
                 return StatusCode(StatusCodes.Status401Unauthorized);
             }
 
             if (body.Language != Languages.EN && body.Language != Languages.PL)
             {
-                logger.LogInformation("Add Status: 400. Bad request");
+                _logger.LogInformation("Add Status: 400. Bad request");
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            WordsRepository wordsRepository = new WordsRepository(configuration);
+            WordRepository wordsRepository = new WordRepository(_configuration);
             bool isWordAdded = wordsRepository.AddWord(body.Text, body.Language);
 
             if (isWordAdded)
             {
-                logger.LogInformation("Add Status: 201. Created");
+                _logger.LogInformation("Add Status: 201. Created");
 
                 return StatusCode(StatusCodes.Status201Created);
             }
             else
             {
-                logger.LogInformation("Add Status: 200. OK");
+                _logger.LogInformation("Add Status: 200. OK");
 
                 return StatusCode(StatusCodes.Status200OK);
             }
         }
         catch (Exception ex)
         {
-            logger.LogError($"Add Status: 500. Internal server error {ex}");
+            _logger.LogError($"Add Status: 500. Internal server error {ex}");
 
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
@@ -77,22 +76,22 @@ public class WordController : ControllerBase
         {
             if (!ModelState.IsValid)
             {   
-                logger.LogError("Delete Status: 400. Bad request");
+                _logger.LogError("Delete Status: 400. Bad request");
 
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            WordsRepository wordsRepository = new WordsRepository(configuration);
+            WordRepository wordsRepository = new WordRepository(_configuration);
 
-            if (adminToken != configuration[AppSettingsVariables.AdminToken])
+            if (adminToken != _configuration[AppSettingsVariables.AdminToken])
             {
-                logger.LogInformation("Add Status: 401. Unauthorized");
+                _logger.LogInformation("Add Status: 401. Unauthorized");
                 return StatusCode(StatusCodes.Status401Unauthorized);
             }
 
             if (body.Language != Languages.EN && body.Language != Languages.PL)
             {
-                logger.LogInformation("Add Status: 400. Bad request");
+                _logger.LogInformation("Add Status: 400. Bad request");
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
@@ -100,20 +99,20 @@ public class WordController : ControllerBase
 
             if (isWordDeleted)
             {
-                logger.LogInformation("Delete Status: 200. OK");
+                _logger.LogInformation("Delete Status: 200. OK");
 
                 return StatusCode(StatusCodes.Status200OK);
             }
             else
             {
-                logger.LogInformation("Delete Status: 404. Not found");
+                _logger.LogInformation("Delete Status: 404. Not found");
 
                 return StatusCode(StatusCodes.Status404NotFound);
             }
         }
         catch (Exception ex)
         {
-            logger.LogError($"Delete Status: 500. Internal server error {ex}");
+            _logger.LogError($"Delete Status: 500. Internal server error {ex}");
 
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
@@ -126,26 +125,26 @@ public class WordController : ControllerBase
         {
             if (!ModelState.IsValid)
             {   
-                logger.LogError("Delete Status: 400. Bad request");
+                _logger.LogError("Delete Status: 400. Bad request");
 
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            WordsRepository wordsRepository = new WordsRepository(configuration);
+            WordRepository wordsRepository = new WordRepository(_configuration);
 
-            if (adminToken != configuration[AppSettingsVariables.AdminToken])
+            if (adminToken != _configuration[AppSettingsVariables.AdminToken])
             {
-                logger.LogInformation("Add Status: 401. Unauthorized");
+                _logger.LogInformation("Add Status: 401. Unauthorized");
                 return StatusCode(StatusCodes.Status401Unauthorized);
             }
 
-            WordBody[] words = wordsRepository.GetWords();
+            List<WordBody> words = wordsRepository.GetWords();
 
             return StatusCode(StatusCodes.Status200OK, words);
         }
         catch (Exception ex)
         {
-            logger.LogError($"Get words Status: 500. Internal server error {ex}");
+            _logger.LogError($"Get words Status: 500. Internal server error {ex}");
 
             return StatusCode(StatusCodes.Status500InternalServerError);
         }

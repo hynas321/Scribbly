@@ -1,18 +1,19 @@
-using Dotnet.Server.JsonConfig;
 using Dotnet.Server.Managers;
 using Dotnet.Server.Models;
+using dotnet_server.Utilities;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Dotnet.Server.Hubs;
 
 public partial class HubConnection : Hub
 {
-    private readonly GameManager gameManager = new GameManager();
-    private readonly ILogger<HubConnection> logger;
+    private readonly IGameManager _gameManager;
+    private readonly ILogger<HubConnection> _logger;
 
-    public HubConnection(ILogger<HubConnection> logger)
+    public HubConnection(ILogger<HubConnection> logger, IGameManager gameManager)
     {
-        this.logger = logger;
+        _gameManager = gameManager;
+        _logger = logger;
     }
 
     public override async Task OnConnectedAsync()
@@ -22,24 +23,31 @@ public partial class HubConnection : Hub
 
     public override async Task OnDisconnectedAsync(Exception exception)
     {   
-        (Player removedPlayer, string gameHash) = gameManager.RemovePlayer(Context.ConnectionId);
-
-        if (removedPlayer != null && gameHash != null)
+        try
         {
-            List<PlayerScore> playerScores = gameManager.GetPlayerObjectsWithoutToken(gameHash);
-            string playerListSerialized = JsonHelper.Serialize(playerScores);
-            Game game = gameManager.GetGame(gameHash);
+            (Player removedPlayer, string gameHash) = _gameManager.RemovePlayer(Context.ConnectionId);
 
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameHash);
-            await Clients.GroupExcept(gameHash, Context.ConnectionId).SendAsync(HubEvents.OnUpdatePlayerScores, playerListSerialized);
-            await SendAnnouncement(gameHash, $"{removedPlayer.Username} has left the game", BootstrapColors.Red);
+            if (removedPlayer != null && gameHash != null)
+            {
+                List<PlayerScore> playerScores = _gameManager.GetPlayerObjectsWithoutToken(gameHash);
+                string playerListSerialized = JsonHelper.Serialize(playerScores);
+                Game game = _gameManager.GetGame(gameHash);
 
-            if (game.GameState.Players.Count == 0)
-            {   
-                gameManager.RemoveGame(gameHash);
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameHash);
+                await Clients.GroupExcept(gameHash, Context.ConnectionId).SendAsync(HubMessages.OnUpdatePlayerScores, playerListSerialized);
+                await SendAnnouncement(gameHash, $"{removedPlayer.Username} has left the game", BootstrapColors.Red);
+
+                if (game.GameState.Players.Count == 0)
+                {
+                    _gameManager.RemoveGame(gameHash);
+                }
             }
-        }
 
-        await base.OnDisconnectedAsync(exception);
+            await base.OnDisconnectedAsync(exception);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
+        }
     }
 }

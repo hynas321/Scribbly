@@ -1,6 +1,6 @@
 namespace Dotnet.Server.Managers;
 
-class HashManager
+class HashManager : IHashManager
 {
     public string GenerateGameHash()
     {

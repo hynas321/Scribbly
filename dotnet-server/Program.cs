@@ -1,4 +1,10 @@
+using Dotnet.Server.Database;
 using Dotnet.Server.Hubs;
+using Dotnet.Server.Managers;
+using dotnet_server.Repositories;
+using dotnet_server.Repositories.Interfaces;
+using dotnet_server.Services;
+using dotnet_server.Services.Interfaces;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +14,12 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.PropertyNamingPolicy = new PascalCaseNamingPolicy();
     });
 
+builder.Services.AddTransient<IRandomWordService, RandomWordService>();
+builder.Services.AddSingleton<IAccountRepository, AccountRepository>();
+builder.Services.AddSingleton<IWordRepository, WordRepository>();
+builder.Services.AddSingleton<IGameRepository, GameRepository>();
+builder.Services.AddSingleton<IGameManager, GameManager>();
+builder.Services.AddTransient<IHashManager, HashManager>();
 builder.Services.AddSignalR(); 
 builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
