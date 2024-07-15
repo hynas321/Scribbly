@@ -5,7 +5,7 @@ import Button from "../Button";
 import DrawingTimeBar from "../bars/DrawingTimeBar";
 import { ConnectionHubContext } from "../../context/ConnectionHubContext";
 import material from 'material-colors'
-import HubEvents from "../../hub/HubEvents";
+import HubEvents from "../../hub/HubMessages";
 import * as signalR from '@microsoft/signalr';
 import { useAppSelector } from "../../redux/hooks";
 import { useDispatch } from "react-redux";
@@ -13,8 +13,8 @@ import { updatedCurrentDrawingTimeSeconds, updatedIsTimerVisible } from "../../r
 import { BsArrowReturnLeft, BsEraserFill } from "react-icons/bs";
 import Range from '../Range';
 import { animated, useSpring } from "@react-spring/web";
-import { DrawnLine } from "../../types/DrawnLine";
-import { AnnouncementMessage } from "../../types/AnnouncementMessage";
+import { DrawnLine } from "../../interfaces/DrawnLine";
+import { AnnouncementMessage } from "../../interfaces/AnnouncementMessage";
 
 function Canvas() {
   const hub = useContext(ConnectionHubContext);

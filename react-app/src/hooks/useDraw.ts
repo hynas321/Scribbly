@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react"
 import Hub from "../hub/Hub";
-import HubEvents from "../hub/HubEvents";
+import HubEvents from "../hub/HubMessages";
 import useLocalStorageState from "use-local-storage-state";
 import UrlHelper from "../utils/UrlHelper";
 import * as signalR from '@microsoft/signalr';
-import { DrawnLine } from "../types/DrawnLine";
-import { Point } from "../types/Point";
+import { DrawnLine } from "../interfaces/DrawnLine";
+import { Point } from "../interfaces/Point";
 
 export const useDraw = (onDraw: (
     canvasContext: CanvasRenderingContext2D,

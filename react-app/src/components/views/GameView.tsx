@@ -10,7 +10,7 @@ import { BsPlayCircle, BsDoorOpen } from 'react-icons/bs';
 import { PlayerScore, updatedPlayerScore } from '../../redux/slices/player-score-slice';
 import { useContext } from "react";
 import { ConnectionHubContext, LongRunningConnectionHubContext } from '../../context/ConnectionHubContext';
-import HubEvents from '../../hub/HubEvents';
+import HubEvents from '../../hub/HubMessages';
 import Canvas from '../game-view-components/Canvas';
 import { useDispatch } from 'react-redux';
 import { updatedAlert, updatedVisible } from '../../redux/slices/alert-slice';
@@ -21,8 +21,8 @@ import { GameState, clearedGameState, updatedGameState, updatedIsGameStarted } f
 import UrlHelper from '../../utils/UrlHelper';
 import ClipboardBar from '../bars/ClipboardBar';
 import ControlPanel from '../game-view-components/ControlPanel';
-import { Player } from '../../types/Player';
-import { AnnouncementMessage } from '../../types/AnnouncementMessage';
+import { Player } from '../../interfaces/Player';
+import { AnnouncementMessage } from '../../interfaces/AnnouncementMessage';
 
 function GameView() {
   const hub = useContext(ConnectionHubContext);

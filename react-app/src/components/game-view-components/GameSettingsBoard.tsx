@@ -7,7 +7,7 @@ import InputSelect from '../InputSelect';
 import { useContext, useEffect, useRef, useState } from "react";
 import { ConnectionHubContext } from '../../context/ConnectionHubContext';
 import * as signalR from '@microsoft/signalr';
-import HubEvents from '../../hub/HubEvents';
+import HubEvents from '../../hub/HubMessages';
 import useLocalStorageState from 'use-local-storage-state';
 import UrlHelper from '../../utils/UrlHelper';
 import { animated, useSpring } from '@react-spring/web';

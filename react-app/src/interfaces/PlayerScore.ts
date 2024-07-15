@@ -1,4 +1,4 @@
-export type PlayerScore = {
+export interface PlayerScore {
   username: string,
   score: number
 }

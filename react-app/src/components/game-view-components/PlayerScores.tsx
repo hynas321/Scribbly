@@ -2,12 +2,12 @@ import { useContext, useEffect } from "react";
 import { BsPaletteFill, BsShieldShaded } from "react-icons/bs";
 import { useDispatch } from "react-redux";
 import { updatedCorrectGuessPlayerUsernames, updatedCurrentRound, updatedDrawingPlayerUsername } from "../../redux/slices/game-state-slice";
-import HubEvents from "../../hub/HubEvents";
+import HubEvents from "../../hub/HubMessages";
 import { ConnectionHubContext } from "../../context/ConnectionHubContext";
 import { useAppSelector } from "../../redux/hooks";
 import * as signalR from '@microsoft/signalr';
 import { animated, useSpring } from "@react-spring/web";
-import { PlayerScore } from "../../types/PlayerScore";
+import { PlayerScore } from "../../interfaces/PlayerScore";
 
 interface PlayerScoresProps {
   title: string,

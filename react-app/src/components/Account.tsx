@@ -4,7 +4,7 @@ import GoogleLogin, { GoogleLogout } from "react-google-login";
 import HttpRequestHandler from "../http/HttpRequestHandler";
 import useLocalStorageState from "use-local-storage-state";
 import { AccountHubContext } from "../context/ConnectionHubContext";
-import HubEvents from "../hub/HubEvents";
+import HubEvents from "../hub/HubMessages";
 import * as signalR from '@microsoft/signalr';
 import { useGoogleLogout } from "react-google-login";
 import UrlHelper from "../utils/UrlHelper";

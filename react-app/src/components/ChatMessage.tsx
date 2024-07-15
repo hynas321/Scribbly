@@ -1,5 +1,5 @@
 import { useAppSelector } from "../redux/hooks";
-import { ChatMessage } from "../types/ChatMessage";
+import { ChatMessage } from "../interfaces/ChatMessage";
 
 export interface ChatMessageProps {
   chatMessage: ChatMessage

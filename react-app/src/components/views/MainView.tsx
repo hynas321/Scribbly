@@ -14,7 +14,7 @@ import MainScoreboard from '../MainScoreboard';
 import UrlHelper from '../../utils/UrlHelper';
 import Popup from '../Popup';
 import { animated, useSpring } from '@react-spring/web';
-import { MainScoreboardScore } from '../../types/MainScoreboardScore';
+import { MainScoreboardScore } from '../../interfaces/MainScoreboardScore';
 
 function MainView() {
   const httpRequestHandler = new HttpRequestHandler();

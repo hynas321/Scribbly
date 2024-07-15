@@ -1,6 +1,6 @@
 import { Point } from "./Point"
 
-export type DrawnLine = {
+export interface DrawnLine {
   currentPoint: Point,
   previousPoint: Point,
   color: string,

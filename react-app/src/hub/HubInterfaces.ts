@@ -1,4 +1,4 @@
-import { PlayerScore } from "../types/PlayerScore";
+import { PlayerScore } from "../interfaces/PlayerScore";
 
 export interface JoinGameResponse {
   gameHash: string;

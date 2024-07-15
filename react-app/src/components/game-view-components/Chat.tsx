@@ -4,14 +4,14 @@ import InputForm from '../InputForm';
 import Button from '../Button';
 import { ConnectionHubContext } from '../../context/ConnectionHubContext';
 import * as signalR from '@microsoft/signalr';
-import HubEvents from '../../hub/HubEvents';
+import HubEvents from '../../hub/HubMessages';
 import useLocalStorageState from 'use-local-storage-state';
 import { useAppSelector } from '../../redux/hooks';
 import { useDispatch } from 'react-redux';
 import { updatedHiddenSecretWord } from '../../redux/slices/game-state-slice';
 import UrlHelper from '../../utils/UrlHelper';
 import { animated, useSpring } from '@react-spring/web';
-import { ChatMessage } from '../../types/ChatMessage';
+import { ChatMessage } from '../../interfaces/ChatMessage';
 
 interface ChatProps {
   placeholderValue: string;

@@ -1,4 +1,4 @@
-export type Round = {
+export interface Round {
   currentRound: number,
   roundCount: number
 }

@@ -13,7 +13,7 @@ import MainScoreboard from "../MainScoreboard";
 import tableLoading from './../../assets/table-loading.gif'
 import Alert from "../Alert";
 import { animated, useSpring } from "@react-spring/web";
-import { MainScoreboardScore } from "../../types/MainScoreboardScore";
+import { MainScoreboardScore } from "../../interfaces/MainScoreboardScore";
 
 function JoinGameView() { 
   const httpRequestHandler = new HttpRequestHandler();

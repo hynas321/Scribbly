@@ -1,8 +1,8 @@
 import axios from 'axios';
 import ApiEndpoints from './ApiEndpoints';
 import { CreateGameBody } from './HttpInterfaces';
-import { MainScoreboardScore } from '../types/MainScoreboardScore';
-import { Account } from '../types/Account';
+import { MainScoreboardScore } from '../interfaces/MainScoreboardScore';
+import { Account } from '../interfaces/Account';
 
 class HttpRequestHandler {
   private httpServerUrl: string = import.meta.env.VITE_SERVER_URL;
