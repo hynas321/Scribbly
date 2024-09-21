@@ -25,6 +25,10 @@ The player with the highest score at the end of all the rounds wins.
 + **Dapper** ORM framework
 + **Wordnik API** to fetch a random word
 
+### Tests
++ **xUnit**
++ **Moq**
+
 **SignalR** for managing realtime client-server communication
 
 ## Running the website
