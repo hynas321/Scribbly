@@ -51,7 +51,7 @@ class HubEvents {
 
   //Account
   static createSession = "CreateSession";
-  static endSession = "EndSession";  
+  static endSession = "EndSession";
   static onSessionEnded = "OnSessionEnded";
   static onUpdateAccountScore: string = "OnUpdateAccountScore";
 }

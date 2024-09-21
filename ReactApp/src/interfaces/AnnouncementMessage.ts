@@ -1,5 +1,4 @@
-export interface ChatMessage {
-  username: string;
+export interface AnnouncementMessage {
   text: string;
   bootstrapBackgroundColor: string;
 }
