@@ -2,7 +2,7 @@ using WebApi.Application.Managers.Interfaces;
 
 namespace WebApi.Application.Managers;
 
-class HashManager : IHashManager
+public class HashManager : IHashManager
 {
     public string GenerateGameHash()
     {
