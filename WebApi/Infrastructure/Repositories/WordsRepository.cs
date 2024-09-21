@@ -1,9 +1,9 @@
 using Dapper;
-using dotnet_server.Api.Models.HttpRequest;
-using dotnet_server.Infrastructure.Repositories.Interfaces;
+using WebApi.Api.Models.HttpRequest;
+using WebApi.Infrastructure.Repositories.Interfaces;
 using Microsoft.Data.Sqlite;
 
-namespace dotnet_server.Infrastructure.Repositories;
+namespace WebApi.Infrastructure.Repositories;
 
 public class WordRepository : IWordRepository
 {

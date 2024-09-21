@@ -1,3 +1,5 @@
+namespace WebApi.Api.Utilities;
+
 public static class AppSettingsVariables
 {
     public static string EnglishWordsApiKey { get; } = "EnglishWordsApiKey";

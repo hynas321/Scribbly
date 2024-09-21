@@ -1,31 +1,30 @@
-using dotnet_server.Application.Managers.Interfaces;
-using dotnet_server.Domain.Entities;
-using dotnet_server.Repositories.Interfaces;
+using WebApi.Application.Managers.Interfaces;
+using WebApi.Domain.Entities;
+using WebApi.Repositories.Interfaces;
 
-namespace dotnet_server.Application.Managers
+namespace WebApi.Application.Managers;
+
+public class GameManager : IGameManager
 {
-    public class GameManager : IGameManager
+    private readonly IGameRepository _gameRepository;
+
+    public GameManager(IGameRepository gameRepository)
     {
-        private readonly IGameRepository _gameRepository;
+        _gameRepository = gameRepository;
+    }
 
-        public GameManager(IGameRepository gameRepository)
-        {
-            _gameRepository = gameRepository;
-        }
+    public void CreateGame(Game game, string gameHash)
+    {
+        _gameRepository.AddGame(gameHash, game);
+    }
 
-        public void CreateGame(Game game, string gameHash)
-        {
-            _gameRepository.AddGame(gameHash, game);
-        }
+    public Game GetGame(string gameHash)
+    {
+        return _gameRepository.GetGame(gameHash);
+    }
 
-        public Game GetGame(string gameHash)
-        {
-            return _gameRepository.GetGame(gameHash);
-        }
-
-        public void RemoveGame(string gameHash)
-        {
-            _gameRepository.RemoveGame(gameHash);
-        }
+    public void RemoveGame(string gameHash)
+    {
+        _gameRepository.RemoveGame(gameHash);
     }
 }

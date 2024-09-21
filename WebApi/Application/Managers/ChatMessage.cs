@@ -1,49 +1,48 @@
-﻿using dotnet_server.Application.Managers.Interfaces;
-using dotnet_server.Domain.Entities;
-using dotnet_server.Repositories.Interfaces;
+﻿using WebApi.Application.Managers.Interfaces;
+using WebApi.Domain.Entities;
+using WebApi.Repositories.Interfaces;
 
-namespace dotnet_server.Application.Managers
+namespace WebApi.Application.Managers;
+
+public class ChatManager : IChatManager
 {
-    public class ChatManager : IChatManager
+    private const int MaxChatMessageCount = 25;
+
+    private readonly IGameRepository _gameRepository;
+
+    public ChatManager(IGameRepository gameRepository)
     {
-        private const int MaxChatMessageCount = 25;
+        _gameRepository = gameRepository;
+    }
 
-        private readonly IGameRepository _gameRepository;
+    public void AddChatMessage(string gameHash, ChatMessage chatMessage)
+    {
+        Game game = _gameRepository.GetGame(gameHash);
 
-        public ChatManager(IGameRepository gameRepository)
+        if (game == null)
         {
-            _gameRepository = gameRepository;
+            throw new KeyNotFoundException("Game not found.");
         }
 
-        public void AddChatMessage(string gameHash, ChatMessage chatMessage)
+        List<ChatMessage> messages = game.ChatMessages;
+
+        if (messages.Count >= MaxChatMessageCount)
         {
-            Game game = _gameRepository.GetGame(gameHash);
-
-            if (game == null)
-            {
-                throw new KeyNotFoundException("Game not found.");
-            }
-
-            List<ChatMessage> messages = game.ChatMessages;
-
-            if (messages.Count >= MaxChatMessageCount)
-            {
-                messages.RemoveAt(0);
-            }
-
-            messages.Add(chatMessage);
+            messages.RemoveAt(0);
         }
 
-        public void AddAnnouncementMessage(string gameHash, AnnouncementMessage message)
-        {
-            ChatMessage chatMessage = new ChatMessage
-            {
-                Username = null,
-                Text = message.Text,
-                BootstrapBackgroundColor = message.BootstrapBackgroundColor
-            };
+        messages.Add(chatMessage);
+    }
 
-            AddChatMessage(gameHash, chatMessage);
-        }
+    public void AddAnnouncementMessage(string gameHash, AnnouncementMessage message)
+    {
+        ChatMessage chatMessage = new ChatMessage
+        {
+            Username = null,
+            Text = message.Text,
+            BootstrapBackgroundColor = message.BootstrapBackgroundColor
+        };
+
+        AddChatMessage(gameHash, chatMessage);
     }
 }

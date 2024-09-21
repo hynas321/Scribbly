@@ -1,11 +1,12 @@
-using dotnet_server.Api.Models.HttpResponse;
-using dotnet_server.Application.Managers.Interfaces;
-using dotnet_server.Application.Services.Interfaces;
-using dotnet_server.Domain.Entities;
-using dotnet_server.Domain.Static;
-using dotnet_server.Infrastructure.Repositories.Interfaces;
+using WebApi.Api.Models.HttpResponse;
+using WebApi.Api.Utilities;
+using WebApi.Application.Managers.Interfaces;
+using WebApi.Application.Services.Interfaces;
+using WebApi.Domain.Entities;
+using WebApi.Domain.Static;
+using WebApi.Infrastructure.Repositories.Interfaces;
 
-namespace dotnet_server.Application.Services;
+namespace WebApi.Application.Services;
 
 public class RandomWordService : IRandomWordService
 {

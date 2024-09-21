@@ -1,6 +1,6 @@
-using dotnet_server.Domain.Entities;
+using WebApi.Domain.Entities;
 
-namespace dotnet_server.Infrastructure.Repositories.Interfaces;
+namespace WebApi.Infrastructure.Repositories.Interfaces;
 
 public interface IAccountRepository
 {

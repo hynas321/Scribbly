@@ -1,4 +1,4 @@
-namespace dotnet_server.Domain.Static;
+namespace WebApi.Domain.Static;
 
 public static class Languages
 {

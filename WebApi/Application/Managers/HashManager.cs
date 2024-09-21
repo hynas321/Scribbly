@@ -1,6 +1,6 @@
-using dotnet_server.Application.Managers.Interfaces;
+using WebApi.Application.Managers.Interfaces;
 
-namespace dotnet_server.Application.Managers;
+namespace WebApi.Application.Managers;
 
 class HashManager : IHashManager
 {

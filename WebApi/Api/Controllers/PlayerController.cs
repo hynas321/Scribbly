@@ -1,9 +1,9 @@
-using dotnet_server.Api.Models.Http;
-using dotnet_server.Application.Managers.Interfaces;
-using dotnet_server.Domain.Entities;
+using WebApi.Api.Models.Http;
+using WebApi.Application.Managers.Interfaces;
+using WebApi.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
-namespace dotnet_server.Api.Controllers;
+namespace WebApi.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using dotnet_server.Domain.Entities;
+using WebApi.Domain.Entities;
 
-namespace dotnet_server.Api.Models.HttpRequest;
+namespace WebApi.Api.Models.HttpRequest;
 
 public class AddAccountBody
 {

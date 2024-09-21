@@ -1,12 +1,13 @@
-using Dotnet.Server.Hubs;
-using dotnet_server.Api.Hubs.Static;
-using dotnet_server.Api.Utilities;
-using dotnet_server.Application.Managers.Interfaces;
-using dotnet_server.Application.Services.Interfaces;
-using dotnet_server.Domain.Entities;
+using WebApi.Hubs;
+using WebApi.Api.Hubs.Static;
+using WebApi.Api.Utilities;
+using WebApi.Application.Managers.Interfaces;
+using WebApi.Application.Services.Interfaces;
+using WebApi.Domain.Entities;
 using Microsoft.AspNetCore.SignalR;
+using WebApi.Hubs;
 
-namespace dotnet_server.Api.Hubs;
+namespace WebApi.Api.Hubs;
 
 public partial class LongRunningHubConnection : Hub
 {

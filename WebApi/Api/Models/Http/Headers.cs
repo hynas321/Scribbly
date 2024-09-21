@@ -1,4 +1,4 @@
-namespace dotnet_server.Api.Models.Http;
+namespace WebApi.Api.Models.Http;
 
 public class Headers
 {

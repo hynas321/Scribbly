@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace dotnet_server.Api.Utilities;
+namespace WebApi.Api.Utilities;
 
 class JsonHelper
 {

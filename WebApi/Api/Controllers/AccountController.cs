@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using dotnet_server.Domain.Entities;
-using dotnet_server.Api.Utilities;
-using dotnet_server.Application.Managers.Interfaces;
-using dotnet_server.Api.Models.HttpRequest;
-using dotnet_server.Infrastructure.Repositories.Interfaces;
+using WebApi.Domain.Entities;
+using WebApi.Api.Utilities;
+using WebApi.Application.Managers.Interfaces;
+using WebApi.Api.Models.HttpRequest;
+using WebApi.Infrastructure.Repositories.Interfaces;
 
-namespace dotnet_server.Api.Controllers;
+namespace WebApi.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

@@ -1,4 +1,4 @@
-namespace dotnet_server.Application.Managers.Interfaces;
+namespace WebApi.Application.Managers.Interfaces;
 
 public interface IHashManager
 {

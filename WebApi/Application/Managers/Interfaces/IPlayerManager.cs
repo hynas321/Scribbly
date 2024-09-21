@@ -1,17 +1,16 @@
-﻿using dotnet_server.Domain.Entities;
+﻿using WebApi.Domain.Entities;
 
-namespace dotnet_server.Application.Managers.Interfaces
+namespace WebApi.Application.Managers.Interfaces;
+
+public interface IPlayerManager
 {
-    public interface IPlayerManager
-    {
-        void AddPlayer(string gameHash, Player player);
-        void RemovePlayer(string gameHash, string token);
-        (Player player, string gameHash) RemovePlayerByConnectionId(string connectionId);
-        Player GetPlayerByToken(string gameHash, string token);
-        List<PlayerScore> GetPlayerScores(string gameHash);
-        List<string> GetOnlinePlayersTokens(string gameHash);
-        bool CheckIfPlayerExistsByToken(string gameHash, string token);
-        bool CheckIfPlayerExistsByUsername(string gameHash, string username);
-        void UpdatePlayerScore(string gameHash, string token, int score);
-    }
+    void AddPlayer(string gameHash, Player player);
+    void RemovePlayer(string gameHash, string token);
+    (Player player, string gameHash) RemovePlayerByConnectionId(string connectionId);
+    Player GetPlayerByToken(string gameHash, string token);
+    List<PlayerScore> GetPlayerScores(string gameHash);
+    List<string> GetOnlinePlayersTokens(string gameHash);
+    bool CheckIfPlayerExistsByToken(string gameHash, string token);
+    bool CheckIfPlayerExistsByUsername(string gameHash, string username);
+    void UpdatePlayerScore(string gameHash, string token, int score);
 }

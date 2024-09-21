@@ -1,4 +1,4 @@
-namespace dotnet_server.Application.Services.Interfaces;
+namespace WebApi.Application.Services.Interfaces;
 
 public interface IRandomWordService
 {

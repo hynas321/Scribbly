@@ -1,10 +1,10 @@
-using dotnet_server.Api.Hubs.Static;
-using dotnet_server.Api.Utilities;
-using dotnet_server.Domain.Entities;
+using WebApi.Api.Hubs.Static;
+using WebApi.Api.Utilities;
+using WebApi.Domain.Entities;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 
-namespace Dotnet.Server.Hubs;
+namespace WebApi.Hubs;
 
 public partial class HubConnection : Hub
 {

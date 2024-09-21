@@ -1,9 +1,9 @@
 using Dapper;
-using dotnet_server.Domain.Entities;
-using dotnet_server.Infrastructure.Repositories.Interfaces;
+using WebApi.Domain.Entities;
+using WebApi.Infrastructure.Repositories.Interfaces;
 using Microsoft.Data.Sqlite;
 
-namespace dotnet_server.Infrastructure.Repositories;
+namespace WebApi.Infrastructure.Repositories;
 
 public class AccountRepository : IAccountRepository
 {

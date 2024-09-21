@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace dotnet_server.Api.Models.HttpRequest;
+namespace WebApi.Api.Models.HttpRequest;
 
 public class CreateGameBody
 {

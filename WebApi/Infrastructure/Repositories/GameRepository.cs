@@ -1,7 +1,7 @@
-﻿using dotnet_server.Domain.Entities;
-using dotnet_server.Repositories.Interfaces;
+﻿using WebApi.Domain.Entities;
+using WebApi.Repositories.Interfaces;
 
-namespace dotnet_server.Repositories
+namespace WebApi.Repositories
 {
     public class GameRepository : IGameRepository
     {

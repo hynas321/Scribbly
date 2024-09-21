@@ -1,13 +1,14 @@
-using Dotnet.Server.Hubs;
-using dotnet_server.Api.Hubs;
-using dotnet_server.Application.Managers;
-using dotnet_server.Application.Managers.Interfaces;
-using dotnet_server.Application.Services;
-using dotnet_server.Application.Services.Interfaces;
-using dotnet_server.Infrastructure.Repositories;
-using dotnet_server.Infrastructure.Repositories.Interfaces;
-using dotnet_server.Repositories;
-using dotnet_server.Repositories.Interfaces;
+using WebApi.Hubs;
+using WebApi.Api.Hubs;
+using WebApi.Application.Managers;
+using WebApi.Application.Managers.Interfaces;
+using WebApi.Application.Services;
+using WebApi.Application.Services.Interfaces;
+using WebApi.Infrastructure.Repositories;
+using WebApi.Infrastructure.Repositories.Interfaces;
+using WebApi.Repositories;
+using WebApi.Repositories.Interfaces;
+using WebApi.Api.Utilities;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 

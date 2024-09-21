@@ -1,4 +1,4 @@
-namespace dotnet_server.Api.Models.HttpResponse;
+namespace WebApi.Api.Models.HttpResponse;
 
 public class RandomWordApiResponse
 {

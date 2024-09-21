@@ -1,4 +1,4 @@
-namespace dotnet_server.Domain.Entities;
+namespace WebApi.Domain.Entities;
 
 public class Account
 {

@@ -1,4 +1,4 @@
-namespace dotnet_server.Api.Hubs.Static;
+namespace WebApi.Api.Hubs.Static;
 
 public static class HubMessages
 {

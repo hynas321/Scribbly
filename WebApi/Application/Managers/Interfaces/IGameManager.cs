@@ -1,6 +1,6 @@
-using dotnet_server.Domain.Entities;
+using WebApi.Domain.Entities;
 
-namespace dotnet_server.Application.Managers.Interfaces;
+namespace WebApi.Application.Managers.Interfaces;
 
 public interface IGameManager
 {

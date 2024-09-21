@@ -1,9 +1,10 @@
-using dotnet_server.Api.Models.HttpRequest;
-using dotnet_server.Domain.Static;
-using dotnet_server.Infrastructure.Repositories;
+using WebApi.Api.Models.HttpRequest;
+using WebApi.Domain.Static;
+using WebApi.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Api.Utilities;
 
-namespace dotnet_server.Api.Controllers;
+namespace WebApi.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

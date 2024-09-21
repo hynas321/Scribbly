@@ -1,6 +1,6 @@
-using dotnet_server.Api.Models.HttpRequest;
+using WebApi.Api.Models.HttpRequest;
 
-namespace dotnet_server.Infrastructure.Repositories.Interfaces;
+namespace WebApi.Infrastructure.Repositories.Interfaces;
 
 public interface IWordRepository
 {

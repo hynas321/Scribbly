@@ -1,7 +1,7 @@
-using dotnet_server.Api.Hubs.Static;
+using WebApi.Api.Hubs.Static;
 using Microsoft.AspNetCore.SignalR;
 
-namespace dotnet_server.Api.Hubs;
+namespace WebApi.Hubs;
 
 public partial class AccountHubConnection : Hub
 {
