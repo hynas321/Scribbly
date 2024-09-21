@@ -28,8 +28,8 @@ The player with the highest score at the end of all the rounds wins.
 **SignalR** for managing realtime client-server communication
 
 ## Running the website
-React application: `npm install` `npm run dev`
-Web Api: `dotnet run`
+React application: `npm install` `npm run dev`  
+Web Api: `dotnet run`  
 Tests: `dotnet test`
 
 ## Screenshots
