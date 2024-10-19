@@ -16,6 +16,9 @@ import {
 } from "../context/ConnectionHubContext";
 import GameView from "./views/GameView";
 import JoinGameView from "./views/JoinGameView";
+import { ToastContainer } from "react-toastify";
+import { ToastNotificationEnum } from "../enums/ToastNotificationEnum";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   const router = createBrowserRouter([
@@ -43,6 +46,16 @@ function App() {
         <AccountHubContext.Provider value={accountConnectionHub}>
           <Provider store={store}>
             <Header />
+            <ToastContainer
+              containerId={ToastNotificationEnum.Main}
+              position="top-left"
+              autoClose={3000}
+              closeOnClick
+              draggable
+              pauseOnHover={false}
+              theme="light"
+              style={{ opacity: 0.9 }}
+            />
             <RouterProvider router={router} />
           </Provider>
         </AccountHubContext.Provider>

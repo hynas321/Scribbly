@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import Hub from "../hub/Hub";
 import HubEvents from "../hub/HubMessages";
-import useLocalStorageState from "use-local-storage-state";
 import UrlHelper from "../utils/UrlHelper";
 import * as signalR from "@microsoft/signalr";
 import { DrawnLine } from "../interfaces/DrawnLine";
 import { Point } from "../interfaces/Point";
+import { SessionStorageService } from "../classes/SessionStorageService";
 
 export const useDraw = (
   onDraw: (canvasContext: CanvasRenderingContext2D, line: DrawnLine) => void,
@@ -21,7 +21,7 @@ export const useDraw = (
   const [currentLineNumber, setCurrentLineNumber] = useState<number>(0);
   const [isMouseDown, setIsMouseDown] = useState<boolean>(false);
 
-  const [token] = useLocalStorageState("token", { defaultValue: "" });
+  const sessionStorageService = SessionStorageService.getInstance();
 
   const onMouseDown = () => {
     if (!isPlayerDrawing) {
@@ -37,7 +37,11 @@ export const useDraw = (
       return;
     }
 
-    await hub.invoke(HubEvents.clearCanvas, gameHash, token);
+    await hub.invoke(
+      HubEvents.clearCanvas,
+      gameHash,
+      sessionStorageService.getAuthorizationToken()
+    );
   };
 
   const undoLine = async () => {
@@ -45,7 +49,7 @@ export const useDraw = (
       return;
     }
 
-    await hub.invoke(HubEvents.undoLine, gameHash, token);
+    await hub.invoke(HubEvents.undoLine, gameHash, sessionStorageService.getAuthorizationToken());
   };
 
   useEffect(() => {
@@ -88,7 +92,7 @@ export const useDraw = (
       canvasContext.clearRect(0, 0, canvas.width, canvas.height);
     });
 
-    hub.invoke(HubEvents.loadCanvas, gameHash, token);
+    hub.invoke(HubEvents.loadCanvas, gameHash, sessionStorageService.getAuthorizationToken());
 
     return () => {
       hub.off(HubEvents.onLoadCanvas);
@@ -120,7 +124,12 @@ export const useDraw = (
 
       previousRelativePoint.current = drawnLine.currentPoint;
 
-      hub.invoke(HubEvents.drawOnCanvas, gameHash, token, JSON.stringify(drawnLine));
+      hub.invoke(
+        HubEvents.drawOnCanvas,
+        gameHash,
+        sessionStorageService.getAuthorizationToken(),
+        JSON.stringify(drawnLine)
+      );
     };
 
     const determinePointRelativeCoordinates = (event: MouseEvent) => {

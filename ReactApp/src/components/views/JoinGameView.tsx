@@ -1,4 +1,3 @@
-import useLocalStorageState from "use-local-storage-state";
 import InputForm from "../InputForm";
 import Button from "../Button";
 import { useEffect, useState } from "react";
@@ -12,9 +11,9 @@ import MainScoreboard from "../MainScoreboard";
 import tableLoading from "./../../assets/table-loading.gif";
 import { animated, useSpring } from "@react-spring/web";
 import { MainScoreboardScore } from "../../interfaces/MainScoreboardScore";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
-import "react-toastify/dist/ReactToastify.css";
+import { useSessionStorageUsername } from "../../hooks/useSessionStorageUsername";
 
 function JoinGameView() {
   const httpRequestHandler = new HttpRequestHandler();
@@ -29,7 +28,7 @@ function JoinGameView() {
   const [isTableDisplayed, setIsTableDisplayed] = useState<boolean>(false);
   const [scoreboardScores, setScoreboardScores] = useState<MainScoreboardScore[]>([]);
 
-  const [username, setUsername] = useLocalStorageState("username", { defaultValue: "" });
+  const [username, setUsername] = useSessionStorageUsername();
 
   const animationSpring = useSpring({
     from: { y: 200 },
@@ -103,16 +102,6 @@ function JoinGameView() {
 
   return (
     <>
-      <ToastContainer
-        containerId={ToastNotificationEnum.Main}
-        position="top-left"
-        autoClose={3000}
-        closeOnClick
-        draggable
-        pauseOnHover={false}
-        theme="light"
-        style={{ opacity: 0.9 }}
-      />
       <div className="container">
         <div className="col-lg-4 col-sm-7 col-xs-6 mx-auto text-center">
           <InputForm
@@ -122,13 +111,19 @@ function JoinGameView() {
             onChange={handleInputFormChange}
           />
           <Button
-            text={"Join the game"}
+            text={"Join the Game"}
             active={isJoinGameButtonActive}
             onClick={handleJoinGameButtonClick}
           />
+          <Button
+            text={"To The Main Page"}
+            active={isJoinGameButtonActive}
+            type="secondary"
+            onClick={() => navigate(config.mainClientEndpoint)}
+          />
         </div>
         <animated.div
-          className="col-lg-3 col-sm-6 col-xs-6 mt-5 text-center mx-auto"
+          className="col-lg-4 col-md-8 mt-5 text-center mx-auto"
           style={{ ...animationSpring }}
         >
           {isTableDisplayed ? (

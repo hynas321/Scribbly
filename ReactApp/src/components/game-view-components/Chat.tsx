@@ -5,13 +5,13 @@ import Button from "../Button";
 import { ConnectionHubContext } from "../../context/ConnectionHubContext";
 import * as signalR from "@microsoft/signalr";
 import HubEvents from "../../hub/HubMessages";
-import useLocalStorageState from "use-local-storage-state";
 import { useAppSelector } from "../../redux/hooks";
 import { useDispatch } from "react-redux";
 import { updatedHiddenSecretWord } from "../../redux/slices/game-state-slice";
 import UrlHelper from "../../utils/UrlHelper";
 import { animated, useSpring } from "@react-spring/web";
 import { ChatMessage } from "../../interfaces/ChatMessage";
+import { SessionStorageService } from "../../classes/SessionStorageService";
 
 interface ChatProps {
   placeholderValue: string;
@@ -32,7 +32,7 @@ function Chat({ placeholderValue, displaySecretWord }: ChatProps) {
   const inputFormRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
 
-  const [token] = useLocalStorageState("token", { defaultValue: "" });
+  const sessionStorageService = SessionStorageService.getInstance();
 
   const chatAnimationSpring = useSpring({
     from: { x: 200 },
@@ -45,7 +45,12 @@ function Chat({ placeholderValue, displaySecretWord }: ChatProps) {
         return;
       }
 
-      await hub.invoke(HubEvents.sendChatMessage, gameHash, token, inputFormValue);
+      await hub.invoke(
+        HubEvents.sendChatMessage,
+        gameHash,
+        sessionStorageService.getAuthorizationToken(),
+        inputFormValue
+      );
 
       if (inputFormRef && inputFormRef.current) {
         inputFormRef.current.value = "";
@@ -91,7 +96,11 @@ function Chat({ placeholderValue, displaySecretWord }: ChatProps) {
     });
 
     hub.on(HubEvents.onRequestSecretWord, async () => {
-      await hub.invoke(HubEvents.getSecretWord, gameHash, token);
+      await hub.invoke(
+        HubEvents.getSecretWord,
+        gameHash,
+        sessionStorageService.getAuthorizationToken()
+      );
     });
 
     hub.on(HubEvents.onGetSecretWord, (secretWord: string) => {
@@ -99,7 +108,11 @@ function Chat({ placeholderValue, displaySecretWord }: ChatProps) {
     });
 
     const loadChatMessages = async () => {
-      await hub.invoke(HubEvents.loadChatMessages, gameHash, token);
+      await hub.invoke(
+        HubEvents.loadChatMessages,
+        gameHash,
+        sessionStorageService.getAuthorizationToken()
+      );
     };
 
     loadChatMessages();

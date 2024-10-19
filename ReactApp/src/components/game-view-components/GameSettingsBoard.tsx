@@ -13,9 +13,9 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { ConnectionHubContext } from "../../context/ConnectionHubContext";
 import * as signalR from "@microsoft/signalr";
 import HubEvents from "../../hub/HubMessages";
-import useLocalStorageState from "use-local-storage-state";
 import UrlHelper from "../../utils/UrlHelper";
 import { animated, useSpring } from "@react-spring/web";
+import { SessionStorageService } from "../../classes/SessionStorageService";
 
 interface GameSettingsBoardProps {
   isPlayerHost: boolean;
@@ -29,7 +29,7 @@ function GameSettingsBoard({ isPlayerHost }: GameSettingsBoardProps) {
   const [gameHash, setGameHash] = useState<string>("");
   const firstRender = useRef(true);
 
-  const [token] = useLocalStorageState("token", { defaultValue: "" });
+  const sessionStorageService = SessionStorageService.getInstance();
 
   const gameSettingsBoardAnimationSpring = useSpring({
     from: { y: 200 },
@@ -76,7 +76,11 @@ function GameSettingsBoard({ isPlayerHost }: GameSettingsBoardProps) {
 
     if (!gameSettingsLoaded) {
       const loadGameSettings = async () => {
-        await hub.invoke(HubEvents.LoadGameSettings, gameHash, token);
+        await hub.invoke(
+          HubEvents.LoadGameSettings,
+          gameHash,
+          sessionStorageService.getAuthorizationToken()
+        );
 
         gameSettingsLoaded = true;
       };
@@ -96,7 +100,12 @@ function GameSettingsBoard({ isPlayerHost }: GameSettingsBoardProps) {
       return;
     }
 
-    await hub.invoke(HubEvents.setDrawingTimeSeconds, gameHash, token, value);
+    await hub.invoke(
+      HubEvents.setDrawingTimeSeconds,
+      gameHash,
+      sessionStorageService.getAuthorizationToken(),
+      value
+    );
   };
 
   const handleCheckFormChange = async (value: number) => {
@@ -104,7 +113,12 @@ function GameSettingsBoard({ isPlayerHost }: GameSettingsBoardProps) {
       return;
     }
 
-    await hub.invoke(HubEvents.setRoundsCount, gameHash, token, Number(value));
+    await hub.invoke(
+      HubEvents.setRoundsCount,
+      gameHash,
+      sessionStorageService.getAuthorizationToken(),
+      Number(value)
+    );
   };
 
   const handleInputSelectChange = async (value: string) => {
@@ -112,7 +126,12 @@ function GameSettingsBoard({ isPlayerHost }: GameSettingsBoardProps) {
       return;
     }
 
-    await hub.invoke(HubEvents.setWordLanguage, gameHash, token, value);
+    await hub.invoke(
+      HubEvents.setWordLanguage,
+      gameHash,
+      sessionStorageService.getAuthorizationToken(),
+      value
+    );
   };
 
   return (

@@ -16,7 +16,6 @@ import {
 import HubEvents from "../../hub/HubMessages";
 import Canvas from "../game-view-components/Canvas";
 import { useDispatch } from "react-redux";
-import useLocalStorageState from "use-local-storage-state";
 import { GameSettings, updatedGameSettings } from "../../redux/slices/game-settings-slice";
 import loading from "./../../assets/loading.gif";
 import {
@@ -30,9 +29,10 @@ import ClipboardBar from "../bars/ClipboardBar";
 import ControlPanel from "../game-view-components/ControlPanel";
 import { Player } from "../../interfaces/Player";
 import { AnnouncementMessage } from "../../interfaces/AnnouncementMessage";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
 import "react-toastify/dist/ReactToastify.css";
+import { SessionStorageService } from "../../classes/SessionStorageService";
 
 function GameView() {
   const hub = useContext(ConnectionHubContext);
@@ -55,17 +55,21 @@ function GameView() {
   const [isGameFinished, setIsGameFinished] = useState<boolean>(false);
   const [isStartGameButtonActive, setIsStartGameButtonActive] = useState<boolean>(false);
 
-  const [token, setToken] = useLocalStorageState("token", { defaultValue: "" });
-  const [username] = useLocalStorageState("username", { defaultValue: "" });
+  const sessionStorageService = SessionStorageService.getInstance();
 
   const handleStartGameButtonClick = async () => {
     await longRunningHub.start();
-    await longRunningHub.send(HubEvents.startGame, gameHash, token, gameSettings);
+    await longRunningHub.send(
+      HubEvents.startGame,
+      gameHash,
+      sessionStorageService.getAuthorizationToken(),
+      gameSettings
+    );
   };
 
   const handleLeaveGameButtonClick = async () => {
-    await hub.send(HubEvents.leaveGame, gameHash, token);
-    setToken("");
+    await hub.send(HubEvents.leaveGame, gameHash, sessionStorageService.getAuthorizationToken());
+    sessionStorageService.clearAuthorizationToken();
     navigate(config.mainClientEndpoint);
   };
 
@@ -84,6 +88,8 @@ function GameView() {
     }
 
     const startHubAndJoinGame = async () => {
+      const username = sessionStorageService.getUsername();
+
       hub.on(HubEvents.onUpdatePlayerScores, (playerScoresSerialized: string) => {
         const playerScores = JSON.parse(playerScoresSerialized) as PlayerScore[];
         setPlayerScores(playerScores);
@@ -103,7 +109,7 @@ function GameView() {
           dispatch(updatedPlayerScore({ username: player.username, score: player.score }));
           dispatch(updatedGameSettings(settings));
           dispatch(updatedGameState(state));
-          setToken(player.token);
+          sessionStorageService.setAuthorizationToken(player.token);
 
           if (username == state.hostPlayerUsername) {
             setIsPlayerHost(true);
@@ -116,7 +122,8 @@ function GameView() {
       );
 
       hub.on(HubEvents.onJoinGameError, (errorMessage: string) => {
-        toast.error(errorMessage, { containerId: ToastNotificationEnum.Game });
+        toast.error(errorMessage, { containerId: ToastNotificationEnum.Main });
+        navigate(`${config.joinGameClientEndpoint}/${gameHash}`);
       });
 
       hub.on(HubEvents.onGameProblem, (announcementMessage: string) => {
@@ -136,7 +143,12 @@ function GameView() {
       const playerUsername = regex ? username : player.username;
 
       await hub.start();
-      await hub.invoke(HubEvents.joinGame, gameHash, token, playerUsername);
+      await hub.invoke(
+        HubEvents.joinGame,
+        gameHash,
+        sessionStorageService.getAuthorizationToken(),
+        playerUsername
+      );
     };
 
     const clearBeforeUnload = async () => {
@@ -147,7 +159,11 @@ function GameView() {
       hub.off(HubEvents.onGameProblem);
 
       if (!isGameFinished) {
-        await hub.send(HubEvents.leaveGame, gameHash, token);
+        await hub.send(
+          HubEvents.leaveGame,
+          gameHash,
+          sessionStorageService.getAuthorizationToken()
+        );
       }
 
       dispatch(clearedGameState());
@@ -175,16 +191,6 @@ function GameView() {
 
   return (
     <>
-      <ToastContainer
-        containerId={ToastNotificationEnum.Main}
-        position="top-left"
-        autoClose={3000}
-        closeOnClick
-        draggable
-        pauseOnHover={false}
-        theme="light"
-        style={{ opacity: 0.9 }}
-      />
       {!isGameDisplayed ? (
         <div className="d-flex justify-content-center align-items-center mt-4">
           <img src={loading} alt="Loading" className="w-30 h-30 img-fluid" />

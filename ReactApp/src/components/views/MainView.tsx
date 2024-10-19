@@ -6,16 +6,16 @@ import config from "../../../config.json";
 import { useNavigate } from "react-router-dom";
 import { updatedUsername } from "../../redux/slices/player-score-slice";
 import HttpRequestHandler from "../../http/HttpRequestHandler";
-import useLocalStorageState from "use-local-storage-state";
 import tableLoading from "./../../assets/table-loading.gif";
 import MainScoreboard from "../MainScoreboard";
 import UrlHelper from "../../utils/UrlHelper";
 import Popup from "../Popup";
 import { animated, useSpring } from "@react-spring/web";
 import { MainScoreboardScore } from "../../interfaces/MainScoreboardScore";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
-import "react-toastify/dist/ReactToastify.css";
+import { useSessionStorageUsername } from "../../hooks/useSessionStorageUsername";
+import { SessionStorageService } from "../../classes/SessionStorageService";
 
 function MainView() {
   const httpRequestHandler = new HttpRequestHandler();
@@ -32,8 +32,7 @@ function MainView() {
   const [isTableDisplayed, setIsTableDisplayed] = useState<boolean>(false);
   const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
 
-  const [, setToken] = useLocalStorageState("token", { defaultValue: "" });
-  const [username, setUsername] = useLocalStorageState("username", { defaultValue: "" });
+  const [username, setUsername] = useSessionStorageUsername();
 
   const handleInputFormChange = (value: string) => {
     setUsername(value);
@@ -54,7 +53,7 @@ function MainView() {
         return;
       }
 
-      setToken(data.hostToken);
+      SessionStorageService.getInstance().setAuthorizationToken(data.hostToken);
       dispatch(updatedUsername(username));
       navigate(`${config.gameClientEndpoint}/${data.gameHash}`, {
         state: { fromViewNavigation: true },
@@ -148,16 +147,6 @@ function MainView() {
 
   return (
     <>
-      <ToastContainer
-        containerId={ToastNotificationEnum.Main}
-        position="top-left"
-        autoClose={3000}
-        closeOnClick
-        draggable
-        pauseOnHover={false}
-        theme="light"
-        style={{ opacity: 0.9 }}
-      />
       <div className="container">
         <div className="col-lg-4 col-sm-7 col-xs-6 mx-auto text-center">
           <Popup
@@ -174,13 +163,13 @@ function MainView() {
             onChange={handleInputFormChange}
           />
           <Button
-            text={"Create the game"}
+            text={"Create the Game"}
             type="success"
             active={isCreateGameButtonActive}
             onClick={handleCreateGameButtonClick}
           />
           <Button
-            text="Join the game"
+            text="Join the Game"
             active={isJoinGameButtonActive}
             onClick={handleJoinLobbyButtonClick}
           />
