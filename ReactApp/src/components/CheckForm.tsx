@@ -7,13 +7,13 @@ interface CheckFormProps {
   onChange: (value: number) => void;
 }
 
-function CheckForm({title, radioCount, defaultValue, onChange}: CheckFormProps) {
+function CheckForm({ title, radioCount, defaultValue, onChange }: CheckFormProps) {
   const [checkedValue, setCheckedValue] = useState(defaultValue);
-  const radios = Array.from({length: radioCount}, (_, index) => index + 1);
+  const radios = Array.from({ length: radioCount }, (_, index) => index + 1);
 
   const handleChange = (event: any) => {
     setCheckedValue(event.target.value);
-  }
+  };
 
   useEffect(() => {
     onChange(checkedValue);
@@ -21,7 +21,7 @@ function CheckForm({title, radioCount, defaultValue, onChange}: CheckFormProps) 
 
   const radiosList = radios.map((num) => (
     <div className="form-check form-check-inline" key={num}>
-      <input 
+      <input
         className="form-check-input"
         type="radio"
         name="radioOption"

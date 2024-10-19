@@ -6,14 +6,14 @@ interface ControlPanelProps {
   onClick: () => void;
 }
 
-function ControlPanel({onClick}: ControlPanelProps) {
+function ControlPanel({ onClick }: ControlPanelProps) {
   const controlPanelAnimationSpring = useSpring({
     from: { x: -200 },
     to: { x: 0 },
   });
 
   return (
-    <animated.div style={{...controlPanelAnimationSpring}}>
+    <animated.div style={{ ...controlPanelAnimationSpring }}>
       <Button
         text="Leave the game"
         active={true}
@@ -22,7 +22,7 @@ function ControlPanel({onClick}: ControlPanelProps) {
         onClick={onClick}
       />
     </animated.div>
-  )
+  );
 }
 
 export default ControlPanel;

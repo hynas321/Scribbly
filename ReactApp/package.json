@@ -24,7 +24,7 @@
     "react-modal": "^3.16.1",
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.10.0",
-    "use-local-storage-state": "^18.3.2"
+    "react-toastify": "^10.0.6"
   },
   "devDependencies": {
     "@types/material-colors": "^1.2.0",

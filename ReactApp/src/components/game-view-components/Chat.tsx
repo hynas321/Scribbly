@@ -1,24 +1,24 @@
-import { useContext, useEffect, useRef, useState } from 'react';
-import ChatMessageElement from '../ChatMessage';
-import InputForm from '../InputForm';
-import Button from '../Button';
-import { ConnectionHubContext } from '../../context/ConnectionHubContext';
-import * as signalR from '@microsoft/signalr';
-import HubEvents from '../../hub/HubMessages';
-import useLocalStorageState from 'use-local-storage-state';
-import { useAppSelector } from '../../redux/hooks';
-import { useDispatch } from 'react-redux';
-import { updatedHiddenSecretWord } from '../../redux/slices/game-state-slice';
-import UrlHelper from '../../utils/UrlHelper';
-import { animated, useSpring } from '@react-spring/web';
-import { ChatMessage } from '../../interfaces/ChatMessage';
+import { useContext, useEffect, useRef, useState } from "react";
+import ChatMessageElement from "../ChatMessage";
+import InputForm from "../InputForm";
+import Button from "../Button";
+import { ConnectionHubContext } from "../../context/ConnectionHubContext";
+import * as signalR from "@microsoft/signalr";
+import HubEvents from "../../hub/HubMessages";
+import { useAppSelector } from "../../redux/hooks";
+import { useDispatch } from "react-redux";
+import { updatedHiddenSecretWord } from "../../redux/slices/game-state-slice";
+import UrlHelper from "../../utils/UrlHelper";
+import { animated, useSpring } from "@react-spring/web";
+import { ChatMessage } from "../../interfaces/ChatMessage";
+import { SessionStorageService } from "../../classes/SessionStorageService";
 
 interface ChatProps {
   placeholderValue: string;
   displaySecretWord: boolean;
 }
 
-function Chat({placeholderValue, displaySecretWord}: ChatProps) {
+function Chat({ placeholderValue, displaySecretWord }: ChatProps) {
   const hub = useContext(ConnectionHubContext);
   const dispatch = useDispatch();
   const player = useAppSelector((state) => state.player);
@@ -32,7 +32,7 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
   const inputFormRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
 
-  const [token] = useLocalStorageState("token", { defaultValue: "" });
+  const sessionStorageService = SessionStorageService.getInstance();
 
   const chatAnimationSpring = useSpring({
     from: { x: 200 },
@@ -45,26 +45,31 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
         return;
       }
 
-      await hub.invoke(HubEvents.sendChatMessage, gameHash, token, inputFormValue);
-      
+      await hub.invoke(
+        HubEvents.sendChatMessage,
+        gameHash,
+        sessionStorageService.getAuthorizationToken(),
+        inputFormValue
+      );
+
       if (inputFormRef && inputFormRef.current) {
         inputFormRef.current.value = "";
         setInputFormValue("");
       }
-    }
+    };
 
     SendChatMessage();
-  }
+  };
 
   const handleEnterPress = (value: string, key: string) => {
     if (key == "Enter") {
       handleButtonPress();
     }
-  }
+  };
 
   const handleInputFormChange = (value: string) => {
     setInputFormValue(value);
-  }
+  };
 
   useEffect(() => {
     setGameHash(UrlHelper.getGameHash(window.location.href));
@@ -82,24 +87,32 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
 
     hub.on(HubEvents.onSendChatMessage, (chatMessageSerialized: string) => {
       const chatMessage = JSON.parse(chatMessageSerialized) as ChatMessage;
-      setMessages(prevMessages => [...prevMessages, chatMessage]);
+      setMessages((prevMessages) => [...prevMessages, chatMessage]);
     });
 
     hub.on(HubEvents.onSendAnnouncement, (chatMessageSerialized: string) => {
       const chatMessage = JSON.parse(chatMessageSerialized) as ChatMessage;
-      setMessages(prevMessages => [...prevMessages, chatMessage]);
+      setMessages((prevMessages) => [...prevMessages, chatMessage]);
     });
 
     hub.on(HubEvents.onRequestSecretWord, async () => {
-      await hub.invoke(HubEvents.getSecretWord, gameHash, token);
+      await hub.invoke(
+        HubEvents.getSecretWord,
+        gameHash,
+        sessionStorageService.getAuthorizationToken()
+      );
     });
 
     hub.on(HubEvents.onGetSecretWord, (secretWord: string) => {
       dispatch(updatedHiddenSecretWord(secretWord));
-    })
+    });
 
     const loadChatMessages = async () => {
-      await hub.invoke(HubEvents.loadChatMessages, gameHash, token);
+      await hub.invoke(
+        HubEvents.loadChatMessages,
+        gameHash,
+        sessionStorageService.getAuthorizationToken()
+      );
     };
 
     loadChatMessages();
@@ -110,14 +123,13 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
       hub.off(HubEvents.onSendAnnouncement);
       hub.off(HubEvents.onRequestSecretWord);
       hub.off(HubEvents.onGetSecretWord);
-    }
-    }, [hub.getState(), gameHash]);
+    };
+  }, [hub.getState(), gameHash]);
 
   useEffect(() => {
     if (inputFormValue.length > 0) {
       setIsSendButtonActive(true);
-    } 
-    else {
+    } else {
       setIsSendButtonActive(false);
     }
   }, [inputFormValue]);
@@ -132,26 +144,18 @@ function Chat({placeholderValue, displaySecretWord}: ChatProps) {
 
   return (
     <animated.div style={{ ...chatAnimationSpring }}>
-      <h5>
-        {displaySecretWord && `${gameState.hiddenSecretWord}`}
-      </h5>
+      <h5>{displaySecretWord && `${gameState.hiddenSecretWord}`}</h5>
       <div id="messages" className="rounded-5 p-3 bg-light">
         <div ref={messagesRef} style={{ height: "450px", overflowY: "auto" }}>
           {messages.map((chatMessage, index) => (
-            <ChatMessageElement
-              key={index}
-              chatMessage={chatMessage}
-            />
+            <ChatMessageElement key={index} chatMessage={chatMessage} />
           ))}
         </div>
       </div>
-      {(player.username !== gameState.drawingPlayerUsername || gameState.drawingPlayerUsername === "") && (
+      {(player.username !== gameState.drawingPlayerUsername ||
+        gameState.drawingPlayerUsername === "") && (
         <div className="d-flex justify-content-center align-items-center">
-          <Button
-            text={"Send"}
-            active={isSendButtonActive}
-            onClick={handleButtonPress}
-          />
+          <Button text={"Send"} active={isSendButtonActive} onClick={handleButtonPress} />
           <InputForm
             defaultValue={""}
             placeholderValue={placeholderValue}

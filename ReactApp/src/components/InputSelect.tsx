@@ -1,22 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 
 interface InputSelectProps {
-    title: string;
-    defaultValue: string;
-    onChange: (value: string) => void;
+  title: string;
+  defaultValue: string;
+  onChange: (value: string) => void;
 }
 
-function InputSelect({title, defaultValue, onChange}: InputSelectProps) {
+function InputSelect({ title, defaultValue, onChange }: InputSelectProps) {
   const [selectedValue, setSelectedValue] = useState(defaultValue);
 
   const handleChange = (event: any) => {
     setSelectedValue(event.target.value);
-  }
+  };
 
   useEffect(() => {
-    onChange(selectedValue)
+    onChange(selectedValue);
   }, [selectedValue]);
-  
+
   return (
     <>
       <label className="form-label">{title}</label>
@@ -25,7 +25,7 @@ function InputSelect({title, defaultValue, onChange}: InputSelectProps) {
         <option value="pl">Polish</option>
       </select>
     </>
-  )
+  );
 }
 
 export default InputSelect;

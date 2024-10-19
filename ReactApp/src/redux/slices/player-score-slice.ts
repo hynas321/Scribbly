@@ -1,9 +1,9 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface PlayerScore {
   username: string;
   score: number;
-};
+}
 
 const randomNumber = Math.floor(Math.random() * 10000);
 
@@ -25,9 +25,9 @@ const playerScoreSlice = createSlice({
     updatedPlayerScore(state, action: PayloadAction<PlayerScore>) {
       state.username = action.payload.username;
       state.score = action.payload.score;
-    }
-  }
-})
+    },
+  },
+});
 
 export const { updatedUsername, updatedScore, updatedPlayerScore } = playerScoreSlice.actions;
 export default playerScoreSlice.reducer;

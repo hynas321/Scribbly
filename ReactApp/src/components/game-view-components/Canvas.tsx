@@ -1,17 +1,20 @@
 import { useContext, useEffect, useState } from "react";
 import { useDraw } from "../../hooks/useDraw";
-import { CirclePicker } from "react-color"
+import { CirclePicker } from "react-color";
 import Button from "../Button";
 import DrawingTimeBar from "../bars/DrawingTimeBar";
 import { ConnectionHubContext } from "../../context/ConnectionHubContext";
-import material from 'material-colors'
+import material from "material-colors";
 import HubEvents from "../../hub/HubMessages";
-import * as signalR from '@microsoft/signalr';
+import * as signalR from "@microsoft/signalr";
 import { useAppSelector } from "../../redux/hooks";
 import { useDispatch } from "react-redux";
-import { updatedCurrentDrawingTimeSeconds, updatedIsTimerVisible } from "../../redux/slices/game-state-slice";
+import {
+  updatedCurrentDrawingTimeSeconds,
+  updatedIsTimerVisible,
+} from "../../redux/slices/game-state-slice";
 import { BsArrowReturnLeft, BsEraserFill } from "react-icons/bs";
-import Range from '../Range';
+import Range from "../Range";
 import { animated, useSpring } from "@react-spring/web";
 import { DrawnLine } from "../../interfaces/DrawnLine";
 import { AnnouncementMessage } from "../../interfaces/AnnouncementMessage";
@@ -29,29 +32,52 @@ function Canvas() {
   const [canvasTitle, setCanvasTitle] = useState<AnnouncementMessage | null>(null);
   const [isPlayerDrawing, setIsPlayerDrawing] = useState<boolean>(false);
 
-  const { canvasRef, onMouseDown, clearCanvas, undoLine } = useDraw(draw, hub, color, thickness, isPlayerDrawing);
+  const { canvasRef, onMouseDown, clearCanvas, undoLine } = useDraw(
+    draw,
+    hub,
+    color,
+    thickness,
+    isPlayerDrawing
+  );
 
   const canvasAnimationSpring = useSpring({
     from: { y: 200 },
     to: { y: 0 },
   });
 
-  const [canvasTitleAnimationSpring, setCanvasTitleAnimationSpring] = useSpring(() => ({ opacity: 0 }));
-  const [, setCanvasToolsAnimationSpring] = useSpring(() => {{ 0 }});
+  const [canvasTitleAnimationSpring, setCanvasTitleAnimationSpring] = useSpring(() => ({
+    opacity: 0,
+  }));
+  const [, setCanvasToolsAnimationSpring] = useSpring(() => {
+    {
+      0;
+    }
+  });
 
-  const circlePickerColors = [material.black, material.red['500'],
-    material.pink['500'], material.purple['500'], material.deepPurple['500'],
-    material.indigo['500'], material.blue['500'], material.green['500'],
-    material.lightGreen['500'], material.yellow['500'], material.amber['500'],
-    material.orange['500'], material.deepOrange['500'], material.brown['500'],
-    material.blueGrey['500'], material.white
-  ]
+  const circlePickerColors = [
+    material.black,
+    material.red["500"],
+    material.pink["500"],
+    material.purple["500"],
+    material.deepPurple["500"],
+    material.indigo["500"],
+    material.blue["500"],
+    material.green["500"],
+    material.lightGreen["500"],
+    material.yellow["500"],
+    material.amber["500"],
+    material.orange["500"],
+    material.deepOrange["500"],
+    material.brown["500"],
+    material.blueGrey["500"],
+    material.white,
+  ];
 
   function draw(canvasContext: CanvasRenderingContext2D, drawnLine: DrawnLine) {
-    const {x: currentRelativeX, y: currentRelativeY} = drawnLine.currentPoint;
+    const { x: currentRelativeX, y: currentRelativeY } = drawnLine.currentPoint;
 
     let relativeStartPoint = drawnLine.previousPoint ?? drawnLine.currentPoint;
-      
+
     canvasContext.beginPath();
     canvasContext.lineWidth = drawnLine.thickness;
     canvasContext.lineCap = "round";
@@ -71,18 +97,17 @@ function Canvas() {
     }
 
     hub.on(HubEvents.onUpdateTimer, (time: number) => {
-      dispatch((updatedCurrentDrawingTimeSeconds(time)));
-    })
+      dispatch(updatedCurrentDrawingTimeSeconds(time));
+    });
 
     hub.on(HubEvents.onUpdateTimerVisibility, (visible: boolean) => {
-      dispatch((updatedIsTimerVisible(visible)));
+      dispatch(updatedIsTimerVisible(visible));
     });
 
     hub.on(HubEvents.onUpdateDrawingPlayer, (drawingPlayerUsername: string) => {
       if (drawingPlayerUsername == player.username) {
         setIsPlayerDrawing(true);
-      }
-      else {
+      } else {
         setIsPlayerDrawing(false);
       }
     });
@@ -98,14 +123,14 @@ function Canvas() {
       hub.off(HubEvents.onUpdateTimerVisibility);
       hub.off(HubEvents.onUpdateDrawingPlayer);
       hub.off(HubEvents.OnSetCanvasText);
-    }
+    };
   }, [hub.getState()]);
 
   useEffect(() => {
     setCanvasTitleAnimationSpring({
       opacity: 1,
       from: { opacity: 0 },
-      config: { duration: 500 }
+      config: { duration: 500 },
     });
   }, [canvasTitle]);
 
@@ -113,10 +138,9 @@ function Canvas() {
     if (player.username !== gameState.drawingPlayerUsername) {
       setCanvasToolsAnimationSpring({
         opacity: 1,
-        from: { opacity: 0 }
+        from: { opacity: 0 },
       });
     }
-
   }, [gameState.drawingPlayerUsername]);
 
   return (
@@ -163,12 +187,7 @@ function Canvas() {
             />
           </div>
           <div className="d-flex justify-content-center">
-            <Button
-              text={"Undo"}
-              active={true}
-              icon={<BsArrowReturnLeft />}
-              onClick={undoLine}
-            />
+            <Button text={"Undo"} active={true} icon={<BsArrowReturnLeft />} onClick={undoLine} />
             <Button
               text={"Clear canvas"}
               active={true}

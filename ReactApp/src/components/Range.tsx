@@ -10,21 +10,21 @@ interface RangeProps {
   onChange: (value: number) => void;
 }
 
-function Range({title, suffix, minValue, maxValue, step, defaultValue, onChange}: RangeProps) {
+function Range({ title, suffix, minValue, maxValue, step, defaultValue, onChange }: RangeProps) {
   const [value, setValue] = useState(defaultValue);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValue(parseInt(event.target.value));
-  }
+  };
 
   useEffect(() => {
     onChange(value);
   }, [value]);
-  
+
   return (
     <>
       <label className="form-label">{`${title}: ${value} ${suffix}`}</label>
-      <input 
+      <input
         className="form-range"
         type="range"
         value={value}
@@ -32,7 +32,7 @@ function Range({title, suffix, minValue, maxValue, step, defaultValue, onChange}
         max={maxValue}
         step={step}
         onChange={handleChange}
-      /> 
+      />
     </>
   );
 }

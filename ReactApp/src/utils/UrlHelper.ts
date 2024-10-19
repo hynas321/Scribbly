@@ -1,6 +1,6 @@
 class UrlHelper {
   static getGameHash(url: string) {
-    const lastSlashIndex = url.lastIndexOf('/');
+    const lastSlashIndex = url.lastIndexOf("/");
     return url.substring(lastSlashIndex + 1);
   }
 }

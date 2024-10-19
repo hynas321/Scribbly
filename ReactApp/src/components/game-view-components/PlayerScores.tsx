@@ -1,29 +1,39 @@
 import { useContext, useEffect } from "react";
 import { BsPaletteFill, BsShieldShaded } from "react-icons/bs";
 import { useDispatch } from "react-redux";
-import { updatedCorrectGuessPlayerUsernames, updatedCurrentRound, updatedDrawingPlayerUsername } from "../../redux/slices/game-state-slice";
+import {
+  updatedCorrectGuessPlayerUsernames,
+  updatedCurrentRound,
+  updatedDrawingPlayerUsername,
+} from "../../redux/slices/game-state-slice";
 import HubEvents from "../../hub/HubMessages";
 import { ConnectionHubContext } from "../../context/ConnectionHubContext";
 import { useAppSelector } from "../../redux/hooks";
-import * as signalR from '@microsoft/signalr';
+import * as signalR from "@microsoft/signalr";
 import { animated, useSpring } from "@react-spring/web";
 import { PlayerScore } from "../../interfaces/PlayerScore";
 
 interface PlayerScoresProps {
-  title: string,
-  playerScores: PlayerScore[],
-  displayPoints: boolean,
-  displayIndex: boolean,
-  displayRound: boolean
+  title: string;
+  playerScores: PlayerScore[];
+  displayPoints: boolean;
+  displayIndex: boolean;
+  displayRound: boolean;
 }
 
-function PlayerScores({title, playerScores, displayPoints, displayIndex, displayRound}: PlayerScoresProps) {
+function PlayerScores({
+  title,
+  playerScores,
+  displayPoints,
+  displayIndex,
+  displayRound,
+}: PlayerScoresProps) {
   const hub = useContext(ConnectionHubContext);
   const dispatch = useDispatch();
   const player = useAppSelector((state) => state.player);
   const gameState = useAppSelector((state) => state.gameState);
   const gameSettings = useAppSelector((state) => state.gameSettings);
-  
+
   useEffect(() => {
     if (hub.getState() !== signalR.HubConnectionState.Connected) {
       return;
@@ -34,20 +44,20 @@ function PlayerScores({title, playerScores, displayPoints, displayIndex, display
     });
 
     hub.on(HubEvents.onUpdateDrawingPlayer, (drawingPlayerUsername: string) => {
-      dispatch((updatedDrawingPlayerUsername(drawingPlayerUsername)));
+      dispatch(updatedDrawingPlayerUsername(drawingPlayerUsername));
     });
 
     hub.on(HubEvents.onUpdateCorrectGuessPlayerUsernames, (usernamesSerialized: string) => {
       const usernames = JSON.parse(usernamesSerialized) as string[];
-  
-      dispatch((updatedCorrectGuessPlayerUsernames(usernames)));
+
+      dispatch(updatedCorrectGuessPlayerUsernames(usernames));
     });
 
     return () => {
       hub.off(HubEvents.onUpdateCurrentRound);
       hub.off(HubEvents.onUpdateDrawingPlayer);
       hub.off(HubEvents.onUpdateCorrectGuessPlayerUsernames);
-    }
+    };
   }, [hub.getState()]);
 
   const playerScoresAnimationSpring = useSpring({
@@ -57,7 +67,11 @@ function PlayerScores({title, playerScores, displayPoints, displayIndex, display
 
   return (
     <animated.div style={{ ...playerScoresAnimationSpring }}>
-      {displayRound && <h5>Round {gameState.currentRound}/{gameSettings.roundsCount}</h5>}
+      {displayRound && (
+        <h5>
+          Round {gameState.currentRound}/{gameSettings.roundsCount}
+        </h5>
+      )}
       <ul className="list-group">
         <li className="list-group-item justify-content-between align-items-center">
           <b>{title}</b>
@@ -77,7 +91,9 @@ function PlayerScores({title, playerScores, displayPoints, displayIndex, display
           >
             {displayIndex && "#" + (index + 1)}
             <div className="d-flex flex-column align-items-center">
-              <span className={player.username === playerScore.username ? "text-warning" : "text-dark"}>
+              <span
+                className={player.username === playerScore.username ? "text-warning" : "text-dark"}
+              >
                 <b>{playerScore.username} </b>
                 {gameState.hostPlayerUsername === playerScore.username && <BsShieldShaded />}
                 {gameState.drawingPlayerUsername === playerScore.username && <BsPaletteFill />}
