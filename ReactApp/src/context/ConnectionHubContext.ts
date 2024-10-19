@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import Hub from '../hub/Hub';
+import Hub from "../hub/Hub";
 import ApiEndpoints from "../http/ApiEndpoints";
 
 export const connectionHub: Hub = new Hub(ApiEndpoints.hubConnectionEndpoint);

@@ -5,7 +5,7 @@ import HttpRequestHandler from "../http/HttpRequestHandler";
 import useLocalStorageState from "use-local-storage-state";
 import { AccountHubContext } from "../context/ConnectionHubContext";
 import HubEvents from "../hub/HubMessages";
-import * as signalR from '@microsoft/signalr';
+import * as signalR from "@microsoft/signalr";
 import { useGoogleLogout } from "react-google-login";
 import UrlHelper from "../utils/UrlHelper";
 
@@ -22,8 +22,8 @@ function Account() {
   const [isScoreToBeUpdated, setIsScoreToBeUpdated] = useState<boolean>(false);
 
   const [token] = useLocalStorageState("token", { defaultValue: "" });
-  const [oAuthToken, setOAuthToken] = useLocalStorageState("oAuthToken", { defaultValue: ""});
-  const [accountId, setAccountId] = useLocalStorageState("accountId", { defaultValue: ""});
+  const [oAuthToken, setOAuthToken] = useLocalStorageState("oAuthToken", { defaultValue: "" });
+  const [accountId, setAccountId] = useLocalStorageState("accountId", { defaultValue: "" });
 
   useEffect(() => {
     setGameHash(UrlHelper.getGameHash(window.location.href));
@@ -31,22 +31,22 @@ function Account() {
     const start = () => {
       gapi.client.init({
         clientId: clientId,
-        scope: ""
+        scope: "",
       });
-    }
+    };
 
     gapi.load("client:auth2", start);
 
     return () => {
       accountHub.off(HubEvents.onUpdateAccountScore);
-    }
+    };
   }, []);
 
   useEffect(() => {
     if (accountHub.getState() !== signalR.HubConnectionState.Connected) {
       return;
     }
-    
+
     accountHub.on(HubEvents.onUpdateAccountScore, async (gameHash: string) => {
       if (!isUserLoggedIn) {
         return;
@@ -71,13 +71,16 @@ function Account() {
       await accountHub.send(HubEvents.endSession, currentAccountId);
       await accountHub.stop();
     });
-
   }, [accountHub.getState()]);
 
   useEffect(() => {
     const updateScore = async () => {
       if (isScoreToBeUpdated) {
-        const updatedScore = await httpRequestHandler.updateAccountScore(gameHash, token, oAuthToken);
+        const updatedScore = await httpRequestHandler.updateAccountScore(
+          gameHash,
+          token,
+          oAuthToken
+        );
 
         if (typeof updatedScore == "number") {
           setScore(updatedScore);
@@ -85,7 +88,7 @@ function Account() {
 
         setIsScoreToBeUpdated(false);
       }
-    }
+    };
 
     updateScore();
   }, [isScoreToBeUpdated]);
@@ -101,7 +104,7 @@ function Account() {
       }
 
       setScore(score);
-    }
+    };
 
     await setScoreState();
     setOAuthToken(res.accessToken);
@@ -111,7 +114,7 @@ function Account() {
 
     await accountHub.start();
     await accountHub.send(HubEvents.createSession, res.profileObj.googleId);
-  }
+  };
 
   const onLogoutSuccess = async () => {
     await accountHub.send(HubEvents.endSession, accountId);
@@ -121,26 +124,24 @@ function Account() {
     setOAuthToken("");
     setGivenName("");
     setAccountId("");
-  }
+  };
 
   const { signOut } = useGoogleLogout({
     clientId: accountId,
-    onLogoutSuccess: onLogoutSuccess
+    onLogoutSuccess: onLogoutSuccess,
   });
 
   return (
     <div className="d-flex justify-content-end">
       <h6 className="mt-2">
         {isUserLoggedIn && `${givenName} `}
-        {isUserLoggedIn && <span className="badge rounded-pill bg-success mt-2">{score} points</span>}
+        {isUserLoggedIn && (
+          <span className="badge rounded-pill bg-success mt-2">{score} points</span>
+        )}
       </h6>
       <div className="mx-3">
         {isUserLoggedIn ? (
-          <GoogleLogout
-            clientId={clientId}
-            buttonText="Logout"
-            onLogoutSuccess={onLogoutSuccess}
-          />
+          <GoogleLogout clientId={clientId} buttonText="Logout" onLogoutSuccess={onLogoutSuccess} />
         ) : (
           <GoogleLogin
             clientId={clientId}

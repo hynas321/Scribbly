@@ -1,20 +1,21 @@
-import { useEffect, useState } from 'react';
-import Button from '../Button';
-import InputForm from '../InputForm';
-import { useAppDispatch } from '../../redux/hooks';
-import config from '../../../config.json';
-import Alert from '../Alert';
-import { useNavigate } from 'react-router-dom';
-import { updatedUsername, } from '../../redux/slices/player-score-slice';
-import HttpRequestHandler from '../../http/HttpRequestHandler';
-import { updatedAlert, updatedVisible } from '../../redux/slices/alert-slice';
-import useLocalStorageState from 'use-local-storage-state';
-import tableLoading from './../../assets/table-loading.gif';
-import MainScoreboard from '../MainScoreboard';
-import UrlHelper from '../../utils/UrlHelper';
-import Popup from '../Popup';
-import { animated, useSpring } from '@react-spring/web';
-import { MainScoreboardScore } from '../../interfaces/MainScoreboardScore';
+import { useEffect, useState } from "react";
+import Button from "../Button";
+import InputForm from "../InputForm";
+import { useAppDispatch } from "../../redux/hooks";
+import config from "../../../config.json";
+import { useNavigate } from "react-router-dom";
+import { updatedUsername } from "../../redux/slices/player-score-slice";
+import HttpRequestHandler from "../../http/HttpRequestHandler";
+import useLocalStorageState from "use-local-storage-state";
+import tableLoading from "./../../assets/table-loading.gif";
+import MainScoreboard from "../MainScoreboard";
+import UrlHelper from "../../utils/UrlHelper";
+import Popup from "../Popup";
+import { animated, useSpring } from "@react-spring/web";
+import { MainScoreboardScore } from "../../interfaces/MainScoreboardScore";
+import { toast, ToastContainer } from "react-toastify";
+import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
+import "react-toastify/dist/ReactToastify.css";
 
 function MainView() {
   const httpRequestHandler = new HttpRequestHandler();
@@ -32,35 +33,36 @@ function MainView() {
   const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
 
   const [, setToken] = useLocalStorageState("token", { defaultValue: "" });
-  const [username, setUsername] = useLocalStorageState("username", { defaultValue: ""});
+  const [username, setUsername] = useLocalStorageState("username", { defaultValue: "" });
 
   const handleInputFormChange = (value: string) => {
     setUsername(value);
-  }
+  };
 
   const handleCreateGameButtonClick = async () => {
-    if (username.length < minUsernameLength ||
-        username.length > maxUsernameLength) {
+    if (username.length < minUsernameLength || username.length > maxUsernameLength) {
       return;
     }
-  
+
     try {
       const data = await httpRequestHandler.createGame(username);
 
-      if (!("gameHash" || "hostToken" in data) || data.gameHash == undefined) {
-        displayAlert("Could not create the game, try again.", "primary");
+      if (!("hostToken" in data) || data.gameHash == undefined) {
+        toast.error("Could not create the game, try again", {
+          containerId: ToastNotificationEnum.Main,
+        });
         return;
       }
 
       setToken(data.hostToken);
       dispatch(updatedUsername(username));
-      navigate(`${config.gameClientEndpoint}/${data.gameHash}`, { state: { fromViewNavigation: true } });
-
+      navigate(`${config.gameClientEndpoint}/${data.gameHash}`, {
+        state: { fromViewNavigation: true },
+      });
+    } catch (error) {
+      toast.error("Unexpected error", { containerId: ToastNotificationEnum.Main });
     }
-    catch (error) {
-      displayAlert("Error", "danger");
-    }
-  }
+  };
 
   const handleJoinLobbyButtonClick = () => {
     if (username.length < minUsernameLength) {
@@ -68,11 +70,11 @@ function MainView() {
     }
 
     setIsPopupVisible(true);
-  }
+  };
 
   const handleClosePopup = () => {
     setIsPopupVisible(false);
-  }
+  };
 
   const handleOnSubmitPopup = async (value: string) => {
     const gameHash = UrlHelper.getGameHash(value);
@@ -80,31 +82,30 @@ function MainView() {
     const checkIfGameExists = async () => {
       try {
         const data = await httpRequestHandler.checkIfGameExists(gameHash);
-    
+
         if (typeof data != "boolean") {
           setIsPopupVisible(false);
-          displayAlert("Unexpected error, try again", "danger");
+          toast.error("Unexpected error, try again", { containerId: ToastNotificationEnum.Main });
           return;
         }
-    
+
         if (data === true) {
           dispatch(updatedUsername(username));
-          navigate(`${config.gameClientEndpoint}/${gameHash}`, { state: { fromViewNavigation: true } });
-        }
-        else {
+          navigate(`${config.gameClientEndpoint}/${gameHash}`, {
+            state: { fromViewNavigation: true },
+          });
+        } else {
           setIsPopupVisible(false);
-          displayAlert("Game does not exist", "danger");
+          toast.error("Game does not exist", { containerId: ToastNotificationEnum.Main });
         }
-      
-      }
-      catch (error) {
+      } catch (error) {
         setIsPopupVisible(false);
-        displayAlert("Unexpected error, try again", "danger");
+        toast.error("Unexpected error, try again", { containerId: ToastNotificationEnum.Main });
       }
     };
 
     await checkIfGameExists();
-  }
+  };
 
   useEffect(() => {
     const fetchPlayerScores = async () => {
@@ -112,19 +113,17 @@ function MainView() {
 
       try {
         const data = await httpRequestHandler.fetchTopAccountScores();
-        
+
         if (!Array.isArray(data)) {
           setIsTableDisplayed(false);
           return;
         }
-      
+
         setScoreboardScores(data);
         setTimeout(() => {
           setIsTableDisplayed(true);
         }, 1000);
-
-      }
-      catch (error) {
+      } catch (error) {
         console.error(error);
       }
     };
@@ -133,76 +132,73 @@ function MainView() {
   }, []);
 
   useEffect(() => {
-    if (username.length < minUsernameLength ||
-        username.length > maxUsernameLength) {
+    if (username.length < minUsernameLength || username.length > maxUsernameLength) {
       setIsJoinGameButtonActive(false);
       setIsCreateGameButtonActive(false);
-    } 
-    else {
+    } else {
       setIsJoinGameButtonActive(true);
       setIsCreateGameButtonActive(true);
     }
   }, [username]);
 
-  const displayAlert = (message: string, type: string) => {
-    dispatch(updatedAlert({
-      text: message,
-      visible: true,
-      type: type
-    }));
-
-    setTimeout(() => {
-      dispatch(updatedVisible(false));
-    }, 3000);
-  }
-
   const springs = useSpring({
     from: { y: 200 },
     to: { y: 0 },
-  })
+  });
 
   return (
-    <div className="container">
-      <div className="col-lg-4 col-sm-7 col-xs-6 mx-auto text-center">
-        <Popup 
-          title={"Join the game"}
-          inputFormPlaceholderText={"Paste the invitation URL here"}
-          visible={isPopupVisible}
-          onSubmit={handleOnSubmitPopup}
-          onClose={handleClosePopup}
-        />
-        <Alert />
-        <InputForm
-          defaultValue={username}
-          placeholderValue="Enter username"
-          smallTextValue={`Allowed username length ${minUsernameLength}-${maxUsernameLength}`}
-          onChange={handleInputFormChange}
-        />
-        <Button
-          text={"Create the game"}
-          type="success"
-          active={isCreateGameButtonActive}
-          onClick={handleCreateGameButtonClick}
-        />
-        <Button
-          text="Join the game"
-          active={isJoinGameButtonActive}
-          onClick={handleJoinLobbyButtonClick}
-        />
+    <>
+      <ToastContainer
+        containerId={ToastNotificationEnum.Main}
+        position="top-left"
+        autoClose={3000}
+        closeOnClick
+        draggable
+        pauseOnHover={false}
+        theme="light"
+        style={{ opacity: 0.9 }}
+      />
+      <div className="container">
+        <div className="col-lg-4 col-sm-7 col-xs-6 mx-auto text-center">
+          <Popup
+            title={"Join the game"}
+            inputFormPlaceholderText={"Paste the invitation URL here"}
+            visible={isPopupVisible}
+            onSubmit={handleOnSubmitPopup}
+            onClose={handleClosePopup}
+          />
+          <InputForm
+            defaultValue={username}
+            placeholderValue="Enter username"
+            smallTextValue={`Allowed username length ${minUsernameLength}-${maxUsernameLength}`}
+            onChange={handleInputFormChange}
+          />
+          <Button
+            text={"Create the game"}
+            type="success"
+            active={isCreateGameButtonActive}
+            onClick={handleCreateGameButtonClick}
+          />
+          <Button
+            text="Join the game"
+            active={isJoinGameButtonActive}
+            onClick={handleJoinLobbyButtonClick}
+          />
+        </div>
+        <animated.div className="col-lg-4 col-md-8 mt-5 text-center mx-auto" style={{ ...springs }}>
+          {isTableDisplayed ? (
+            <MainScoreboard
+              title="Top 5 players"
+              scoreboardScores={scoreboardScores}
+              displayPoints={true}
+              displayIndex={true}
+            />
+          ) : (
+            <img src={tableLoading} alt="Table loading" className="img-fluid" />
+          )}
+        </animated.div>
       </div>
-      <animated.div className="col-lg-4 col-md-8 mt-5 text-center mx-auto" style={{...springs}}>
-        { isTableDisplayed ?
-          <MainScoreboard
-            title="Top 5 players"
-            scoreboardScores={scoreboardScores}
-            displayPoints={true}
-            displayIndex={true}
-          /> 
-          :
-          <img src={tableLoading} alt="Table loading" className="img-fluid" />
-        }
-      </animated.div>
-    </div>
+    </>
   );
 }
 

@@ -1,22 +1,27 @@
-import Range from '../Range';
-import CheckForm from '../CheckForm';
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { GameSettings, updatedDrawingTimeSeconds, updatedRoundsCount, updatedWordLanguage } from '../../redux/slices/game-settings-slice';
-import { BsGearFill } from 'react-icons/bs';
-import InputSelect from '../InputSelect';
+import Range from "../Range";
+import CheckForm from "../CheckForm";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import {
+  GameSettings,
+  updatedDrawingTimeSeconds,
+  updatedRoundsCount,
+  updatedWordLanguage,
+} from "../../redux/slices/game-settings-slice";
+import { BsGearFill } from "react-icons/bs";
+import InputSelect from "../InputSelect";
 import { useContext, useEffect, useRef, useState } from "react";
-import { ConnectionHubContext } from '../../context/ConnectionHubContext';
-import * as signalR from '@microsoft/signalr';
-import HubEvents from '../../hub/HubMessages';
-import useLocalStorageState from 'use-local-storage-state';
-import UrlHelper from '../../utils/UrlHelper';
-import { animated, useSpring } from '@react-spring/web';
+import { ConnectionHubContext } from "../../context/ConnectionHubContext";
+import * as signalR from "@microsoft/signalr";
+import HubEvents from "../../hub/HubMessages";
+import useLocalStorageState from "use-local-storage-state";
+import UrlHelper from "../../utils/UrlHelper";
+import { animated, useSpring } from "@react-spring/web";
 
 interface GameSettingsBoardProps {
   isPlayerHost: boolean;
 }
 
-function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
+function GameSettingsBoard({ isPlayerHost }: GameSettingsBoardProps) {
   const hub = useContext(ConnectionHubContext);
   const dispatch = useAppDispatch();
   const settings = useAppSelector((state) => state.gameSettings);
@@ -70,11 +75,11 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
     });
 
     if (!gameSettingsLoaded) {
-      const loadGameSettings = async() => {
+      const loadGameSettings = async () => {
         await hub.invoke(HubEvents.LoadGameSettings, gameHash, token);
 
         gameSettingsLoaded = true;
-      }
+      };
 
       loadGameSettings();
     }
@@ -83,8 +88,8 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
       hub.off(HubEvents.onSetDrawingTimeSeconds);
       hub.off(HubEvents.onSetRoundsCount);
       hub.off(HubEvents.onSetWordLanguage);
-    }
-  }, [hub.getState(), gameHash])
+    };
+  }, [hub.getState(), gameHash]);
 
   const handleRangeChange = async (value: number) => {
     if (!gameHash) {
@@ -92,7 +97,7 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
     }
 
     await hub.invoke(HubEvents.setDrawingTimeSeconds, gameHash, token, value);
-  }
+  };
 
   const handleCheckFormChange = async (value: number) => {
     if (!gameHash) {
@@ -100,7 +105,7 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
     }
 
     await hub.invoke(HubEvents.setRoundsCount, gameHash, token, Number(value));
-  }
+  };
 
   const handleInputSelectChange = async (value: string) => {
     if (!gameHash) {
@@ -108,11 +113,16 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
     }
 
     await hub.invoke(HubEvents.setWordLanguage, gameHash, token, value);
-  }
+  };
 
   return (
-    <animated.div className="bg-light rounded-5 px-5 pt-3 pb-3" style={{ ...gameSettingsBoardAnimationSpring }}>
-      <h4 className="text-center">Game Settings <BsGearFill /></h4>
+    <animated.div
+      className="bg-light rounded-5 px-5 pt-3 pb-3"
+      style={{ ...gameSettingsBoardAnimationSpring }}
+    >
+      <h4 className="text-center">
+        Game Settings <BsGearFill />
+      </h4>
       <div className="mt-4">
         {isPlayerHost ? (
           <Range
@@ -153,12 +163,13 @@ function GameSettingsBoard({isPlayerHost}: GameSettingsBoardProps) {
           />
         ) : (
           <label className="form-check-label">
-            {chooseLanguageText}: 
+            {chooseLanguageText}:
             <b>
-              {
-                settings.wordLanguage.valueOf().toString() === "en" ? " English" :
-                settings.wordLanguage.valueOf().toString() === "pl" ? " Polish" : "?"
-              }
+              {settings.wordLanguage.valueOf().toString() === "en"
+                ? " English"
+                : settings.wordLanguage.valueOf().toString() === "pl"
+                ? " Polish"
+                : "?"}
             </b>
           </label>
         )}
