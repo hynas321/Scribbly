@@ -44,18 +44,18 @@ function MainView() {
     }
 
     try {
-      const data = await httpRequestHandler.createGame(username);
+      const createGameOutput = await httpRequestHandler.createGame(username);
 
-      if (!("hostToken" in data) || data.gameHash == undefined) {
+      if (!("hostToken" in createGameOutput) || createGameOutput.gameHash == undefined) {
         toast.error("Could not create the game, try again", {
           containerId: ToastNotificationEnum.Main,
         });
         return;
       }
 
-      SessionStorageService.getInstance().setAuthorizationToken(data.hostToken);
+      SessionStorageService.getInstance().setAuthorizationToken(createGameOutput.hostToken);
       dispatch(updatedUsername(username));
-      navigate(`${config.gameClientEndpoint}/${data.gameHash}`, {
+      navigate(`${config.gameClientEndpoint}/${createGameOutput.gameHash}`, {
         state: { fromViewNavigation: true },
       });
     } catch (error) {
@@ -80,15 +80,15 @@ function MainView() {
 
     const checkIfGameExists = async () => {
       try {
-        const data = await httpRequestHandler.checkIfGameExists(gameHash);
+        const gameExists = await httpRequestHandler.checkIfGameExists(gameHash);
 
-        if (typeof data != "boolean") {
+        if (typeof gameExists != "boolean") {
           setIsPopupVisible(false);
           toast.error("Unexpected error, try again", { containerId: ToastNotificationEnum.Main });
           return;
         }
 
-        if (data === true) {
+        if (gameExists === true) {
           dispatch(updatedUsername(username));
           navigate(`${config.gameClientEndpoint}/${gameHash}`, {
             state: { fromViewNavigation: true },

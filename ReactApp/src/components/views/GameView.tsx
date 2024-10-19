@@ -126,8 +126,8 @@ function GameView() {
         navigate(`${config.joinGameClientEndpoint}/${gameHash}`);
       });
 
-      hub.on(HubEvents.onGameProblem, (announcementMessage: string) => {
-        const problemMessage = JSON.parse(announcementMessage) as AnnouncementMessage;
+      hub.on(HubEvents.onGameProblem, (message: string) => {
+        const problemMessage = JSON.parse(message) as AnnouncementMessage;
 
         toast.warning(problemMessage.text, { containerId: ToastNotificationEnum.Main });
         navigate(config.mainClientEndpoint);

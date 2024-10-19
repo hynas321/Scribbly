@@ -73,14 +73,14 @@ function JoinGameView() {
       setGameHash(UrlHelper.getGameHash(window.location.href));
 
       try {
-        const data = await httpRequestHandler.fetchTopAccountScores();
+        const topScores = await httpRequestHandler.fetchTopAccountScores();
 
-        if (!Array.isArray(data)) {
+        if (!Array.isArray(topScores)) {
           setIsTableDisplayed(false);
           return;
         }
 
-        setScoreboardScores(data);
+        setScoreboardScores(topScores);
         setTimeout(() => {
           setIsTableDisplayed(true);
         }, 1000);
