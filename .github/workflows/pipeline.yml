@@ -39,7 +39,7 @@ jobs:
           cd WebApi
           dotnet build
 
-      - name: Run Unit Tests
+      - name: Run Web API Unit Tests
         run: |
           cd WebApiUnitTests
           dotnet test --filter "Category=Unit"
