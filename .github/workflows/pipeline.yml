@@ -37,9 +37,9 @@ jobs:
       - name: Build .NET Web API
         run: |
           cd WebApi
-          dotnet build
+          dotnet build WebApi.csproj
 
       - name: Run Web API Unit Tests
         run: |
           cd WebApiUnitTests
-          dotnet test --filter "Category=Unit"
+          dotnet test WebApiUnitTests.csproj --filter "Category=Unit"
