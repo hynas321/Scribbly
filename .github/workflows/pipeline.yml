@@ -21,13 +21,13 @@ jobs:
       - name: Install React dependencies
         run: |
           cd ReactApp
-          npm install
+          npm install --legacy-peer-deps
 
       - name: Build React App
         id: react-build
         run: |
           cd ReactApp
-          npm run build
+          npm run build 
 
       - name: Set up .NET SDK
         uses: actions/setup-dotnet@v3
