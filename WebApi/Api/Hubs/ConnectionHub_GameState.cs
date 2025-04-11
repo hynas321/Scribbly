@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace WebApi.Hubs;
 
-public partial class HubConnection : Hub
+public partial class HubConnection
 {
     [HubMethodName(HubMessages.GetSecretWord)]
     public async Task GetSecretWord(string gameHash, string token)
@@ -27,7 +27,7 @@ public partial class HubConnection : Hub
                 return;
             }
 
-            string secretWordMessage = "";
+            string secretWordMessage;
 
             if (player.Token == game.GameState.DrawingToken)
             {
@@ -69,7 +69,7 @@ public partial class HubConnection : Hub
             double timeLeftPercentage =
                 (double)game.GameState.CurrentDrawingTimeSeconds / game.GameSettings.DrawingTimeSeconds * 100;
 
-            int score = 0;
+            int score;
 
             if (timeLeftPercentage > 80)
             {

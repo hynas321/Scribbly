@@ -1,8 +1,8 @@
 using WebApi.Api.Models.HttpRequest;
 using WebApi.Domain.Static;
-using WebApi.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Api.Utilities;
+using WebApi.Infrastructure.Repositories;
 
 namespace WebApi.Api.Controllers;
 

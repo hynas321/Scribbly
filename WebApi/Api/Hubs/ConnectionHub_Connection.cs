@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace WebApi.Hubs;
 
-public partial class HubConnection : Hub
+public partial class HubConnection
 {
     private readonly IGameManager _gameManager;
     private readonly IPlayerManager _playerManager;

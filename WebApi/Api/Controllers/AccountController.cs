@@ -12,19 +12,16 @@ namespace WebApi.Api.Controllers;
 public class AccountController : ControllerBase
 {
     private readonly IAccountRepository _accountRepository;
-    private readonly IGameManager _gameManager;
     private readonly IPlayerManager _playerManager;
     private readonly ILogger<AccountController> _logger;
 
     public AccountController(
         IAccountRepository accountRepository,
-        IGameManager gameManager,
         IPlayerManager playerManager,
         ILogger<AccountController> logger
     )
     {
         _accountRepository = accountRepository;
-        _gameManager = gameManager;
         _playerManager = playerManager;
         _logger = logger;
     }
