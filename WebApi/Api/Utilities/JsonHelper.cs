@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace WebApi.Api.Utilities;
 
-class JsonHelper
+public class JsonHelper
 {
     public static string Serialize(object o)
     {

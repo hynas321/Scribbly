@@ -1,7 +1,7 @@
+using Microsoft.AspNetCore.Mvc;
 using WebApi.Api.Models.Http;
 using WebApi.Application.Managers.Interfaces;
 using WebApi.Domain.Entities;
-using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Api.Controllers;
 

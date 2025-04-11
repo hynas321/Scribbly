@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace WebApi.Hubs;
 
-public partial class HubConnection : Hub
+public partial class HubConnection
 {
     [HubMethodName(HubMessages.SendChatMessage)]
     public async Task SendChatMessage(string gameHash, string token, string text)
@@ -63,7 +63,7 @@ public partial class HubConnection : Hub
                 game.GameState.CorrectGuessPlayerUsernames.Add(player.Username);
                 
                 await Clients.Group(gameHash).SendAsync(HubMessages.OnUpdatePlayerScores, JsonHelper.Serialize(playerScores));
-                await Clients.Group(gameHash).SendAsync(HubMessages.onUpdateCorrectGuessPlayerUsernames, JsonHelper.Serialize(correctguessPlayerUsernames));
+                await Clients.Group(gameHash).SendAsync(HubMessages.OnUpdateCorrectGuessPlayerUsernames, JsonHelper.Serialize(correctguessPlayerUsernames));
                 return;
             }
 
@@ -114,7 +114,7 @@ public partial class HubConnection : Hub
     {
         try 
         {
-            Game game = new Game();
+            Game game = _gameManager.GetGame(gameHash);
 
             if (game == null)
             {
@@ -127,8 +127,6 @@ public partial class HubConnection : Hub
                 Text = text,
                 BootstrapBackgroundColor = backgroundColor
             };
-
-            //gameManager.AddChatMessage(message);
 
             await Clients.Group(gameHash).SendAsync(HubMessages.OnSendAnnouncement, JsonHelper.Serialize(message));
         }

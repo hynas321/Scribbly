@@ -1,10 +1,10 @@
+using Newtonsoft.Json;
 using WebApi.Api.Models.HttpResponse;
-using WebApi.Api.Utilities;
-using WebApi.Application.Managers.Interfaces;
-using WebApi.Application.Services.Interfaces;
-using WebApi.Domain.Entities;
 using WebApi.Domain.Static;
 using WebApi.Infrastructure.Repositories.Interfaces;
+using WebApi.Application.Managers.Interfaces;
+using WebApi.Application.Services.Interfaces;
+using WebApi.Api.Utilities;
 
 namespace WebApi.Application.Services;
 
@@ -26,42 +26,35 @@ public class RandomWordService : IRandomWordService
 
     public async Task<string> FetchWordAsync(string gameHash)
     {
-        Game game = _gameManager.GetGame(gameHash);
-
-        switch (game.GameSettings.WordLanguage)
+        var game = _gameManager.GetGame(gameHash);
+        return game.GameSettings.WordLanguage switch
         {
-            case Languages.EN:
-                return await FetchEnglishWord();
-            case Languages.PL:
-                return await FetchPolishWord();
-            default:
-                return await FetchEnglishWord();
-        }
+            Languages.PL => await FetchPolishWordAsync(),
+            Languages.EN => await FetchEnglishWordAsync(),
+            _ => await FetchEnglishWordAsync()
+        };
     }
 
-    public async Task<string> FetchEnglishWord()
+    private async Task<string> FetchEnglishWordAsync()
     {
+        string apiKey = _configuration[AppSettingsVariables.EnglishWordsApiKey];
+        string apiUrl = $"https://api.wordnik.com/v4/words.json/randomWord" +
+                        $"?hasDictionaryDef=true&includePartOfSpeech=noun&minCorpusCount=10000" +
+                        $"&minDictionaryCount=1&minLength=5&includeTags=false&api_key={apiKey}";
+
         try
         {
-            string englishWordApiKey = _configuration[AppSettingsVariables.EnglishWordsApiKey];
-            string apiUrl = $"https://api.wordnik.com/v4/words.json/randomWord?hasDictionaryDef=true&includePartOfSpeech=noun&minCorpusCount=10000&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=-1&includeTags=false&api_key=" + englishWordApiKey;
+            using var client = new HttpClient();
+            var response = await client.GetAsync(apiUrl);
 
-            using HttpClient client = new HttpClient();
-
-            HttpResponseMessage response = await client.GetAsync(apiUrl);
-
-            if (response.IsSuccessStatusCode)
-            {
-                string json = await response.Content.ReadAsStringAsync();
-                RandomWordApiResponse randomWordResponse =
-                    Newtonsoft.Json.JsonConvert.DeserializeObject<RandomWordApiResponse>(json);
-
-                return randomWordResponse.Word.ToLower();
-            }
-            else
+            if (!response.IsSuccessStatusCode)
             {
                 return _wordRepository.GetRandomWord(Languages.EN);
             }
+
+            var json = await response.Content.ReadAsStringAsync();
+            var wordResponse = JsonConvert.DeserializeObject<RandomWordApiResponse>(json);
+            return wordResponse?.Word?.ToLower();
         }
         catch
         {
@@ -69,36 +62,28 @@ public class RandomWordService : IRandomWordService
         }
     }
 
-    //Api does not work (Status code 503)
-    public async Task<string> FetchPolishWord()
+    private async Task<string> FetchPolishWordAsync()
     {
+        string apiKey = _configuration[AppSettingsVariables.PolishWordsApiKey];
+        int wordLength = new Random().Next(5, 20);
+        string apiUrl = $"https://polish-words.p.rapidapi.com/noun/random/{wordLength}";
+
         try
         {
-            Random random = new Random();
-            int wordLength = random.Next(5, 20);
-
-            string polishWordApiKey = _configuration[AppSettingsVariables.PolishWordsApiKey];
-            string apiUrl = $"https://polish-words.p.rapidapi.com/noun/random/{wordLength}";
-
-            using HttpClient client = new HttpClient();
-
-            client.DefaultRequestHeaders.Add("X-RapidAPI-Key", polishWordApiKey);
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.Add("X-RapidAPI-Key", apiKey);
             client.DefaultRequestHeaders.Add("X-RapidAPI-Host", "polish-words.p.rapidapi.com");
 
-            HttpResponseMessage response = await client.GetAsync(apiUrl);
+            var response = await client.GetAsync(apiUrl);
 
-            if (response.IsSuccessStatusCode)
-            {
-                string json = await response.Content.ReadAsStringAsync();
-                RandomWordApiResponse randomWordResponse =
-                    Newtonsoft.Json.JsonConvert.DeserializeObject<RandomWordApiResponse>(json);
-
-                return randomWordResponse.Word.ToLower();
-            }
-            else
+            if (!response.IsSuccessStatusCode)
             {
                 return _wordRepository.GetRandomWord(Languages.PL);
             }
+
+            var json = await response.Content.ReadAsStringAsync();
+            var wordResponse = JsonConvert.DeserializeObject<RandomWordApiResponse>(json);
+            return wordResponse?.Word?.ToLower();
         }
         catch
         {

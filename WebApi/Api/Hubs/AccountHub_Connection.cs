@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace WebApi.Hubs;
 
-public partial class AccountHubConnection : Hub
+public class AccountHubConnection : Hub
 {
     private readonly ILogger<AccountHubConnection> _logger;
 

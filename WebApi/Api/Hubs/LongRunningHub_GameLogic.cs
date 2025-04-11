@@ -1,15 +1,14 @@
-using WebApi.Hubs;
-using WebApi.Api.Hubs.Static;
+using Microsoft.AspNetCore.SignalR;
 using WebApi.Api.Utilities;
 using WebApi.Application.Managers.Interfaces;
 using WebApi.Application.Services.Interfaces;
 using WebApi.Domain.Entities;
-using Microsoft.AspNetCore.SignalR;
+using WebApi.Api.Hubs.Static;
 using WebApi.Hubs;
 
 namespace WebApi.Api.Hubs;
 
-public partial class LongRunningHubConnection : Hub
+public class LongRunningHubConnection : Hub
 {
     private readonly IGameManager _gameManager;
     private readonly IPlayerManager _playerManager;
@@ -138,7 +137,7 @@ public partial class LongRunningHubConnection : Hub
                     game.GameState.IsTimerVisible = true;
                     game.GameState.HiddenSecretWord = "? ? ?";
 
-                    await _connectionHubContext.Clients.Group(gameHash).SendAsync(HubMessages.onUpdateCorrectGuessPlayerUsernames, JsonHelper.Serialize(game.GameState.CorrectGuessPlayerUsernames));
+                    await _connectionHubContext.Clients.Group(gameHash).SendAsync(HubMessages.OnUpdateCorrectGuessPlayerUsernames, JsonHelper.Serialize(game.GameState.CorrectGuessPlayerUsernames));
                     await _connectionHubContext.Clients.Group(gameHash).SendAsync(HubMessages.OnUpdateDrawingPlayer, drawingPlayerUsername);
                     await _connectionHubContext.Clients.Group(gameHash).SendAsync(HubMessages.OnRequestSecretWord);
                     await SetCanvasText(gameHash, $"{drawingPlayerUsername} is going to draw in 5s", BootstrapColors.Green);
@@ -210,7 +209,6 @@ public partial class LongRunningHubConnection : Hub
                     await SetCanvasText(gameHash, $"Thank you for playing! You may leave the game :)", BootstrapColors.Green);
                     await Task.Delay(10000);
                     _gameManager.RemoveGame(gameHash);
-                    //await hubContext.Clients.Group(gameHash).SendAsync(HubEvents.OnEndGame);
                     break;
                 }
 
@@ -281,7 +279,7 @@ public partial class LongRunningHubConnection : Hub
     {
         try
         {
-            Game game = new Game();
+            Game game = _gameManager.GetGame(gameHash);
 
             if (game == null)
             {
@@ -306,7 +304,7 @@ public partial class LongRunningHubConnection : Hub
     {
         try
         {
-            Game game = new Game();
+            Game game = _gameManager.GetGame(gameHash);
 
             if (game == null)
             {
@@ -319,8 +317,6 @@ public partial class LongRunningHubConnection : Hub
                 Text = text,
                 BootstrapBackgroundColor = backgroundColor
             };
-
-            //gameManager.AddChatMessage(message);
 
             await _connectionHubContext.Clients.Group(gameHash).SendAsync(HubMessages.OnSendAnnouncement, JsonHelper.Serialize(message));
         }
