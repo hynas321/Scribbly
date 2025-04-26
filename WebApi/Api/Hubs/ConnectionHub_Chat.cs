@@ -61,7 +61,7 @@ public partial class HubConnection : Hub
             game.GameState.CorrectGuessPlayerUsernames.Add(player.Username);
                 
             await Clients.Group(gameHash).SendAsync(HubMessages.OnUpdatePlayerScores, JsonHelper.Serialize(playerScores));
-            await Clients.Group(gameHash).SendAsync(HubMessages.onUpdateCorrectGuessPlayerUsernames, JsonHelper.Serialize(correctguessPlayerUsernames));
+            await Clients.Group(gameHash).SendAsync(HubMessages.OnUpdateCorrectGuessPlayerUsernames, JsonHelper.Serialize(correctguessPlayerUsernames));
             return;
         }
 
