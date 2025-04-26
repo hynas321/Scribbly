@@ -128,7 +128,7 @@ public partial class LongRunningHubConnection : Hub
                 game.GameState.IsTimerVisible = true;
                 game.GameState.HiddenSecretWord = "? ? ?";
 
-                await _connectionHubContext.Clients.Group(gameHash).SendAsync(HubMessages.onUpdateCorrectGuessPlayerUsernames, JsonHelper.Serialize(game.GameState.CorrectGuessPlayerUsernames));
+                await _connectionHubContext.Clients.Group(gameHash).SendAsync(HubMessages.OnUpdateCorrectGuessPlayerUsernames, JsonHelper.Serialize(game.GameState.CorrectGuessPlayerUsernames));
                 await _connectionHubContext.Clients.Group(gameHash).SendAsync(HubMessages.OnUpdateDrawingPlayer, drawingPlayerUsername);
                 await _connectionHubContext.Clients.Group(gameHash).SendAsync(HubMessages.OnRequestSecretWord);
                 await SetCanvasText(gameHash, $"{drawingPlayerUsername} is going to draw in 5s", BootstrapColors.Green);

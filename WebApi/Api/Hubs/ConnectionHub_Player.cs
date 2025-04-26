@@ -2,6 +2,7 @@ using WebApi.Api.Hubs.Static;
 using WebApi.Api.Utilities;
 using WebApi.Domain.Entities;
 using Microsoft.AspNetCore.SignalR;
+using WebApi.Api.Models.DTO;
 
 namespace WebApi.Hubs;
 
@@ -84,7 +85,7 @@ public partial class HubConnection : Hub
             WordLanguage = game.GameSettings.WordLanguage
         };
 
-        GameState stateClient = new GameState()
+        GameStateDTO stateClient = new GameStateDTO()
         {
             CurrentDrawingTimeSeconds = game.GameState.CurrentDrawingTimeSeconds,
             CurrentRound = game.GameState.CurrentRound,
