@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace WebApi.Hubs;
 
-public partial class HubConnection : Hub
+public partial class HubConnection
 {
     [HubMethodName(HubMessages.SetDrawingTimeSeconds)]
     public async Task SetDrawingTimeSeconds(string gameHash, string token, int setting)
