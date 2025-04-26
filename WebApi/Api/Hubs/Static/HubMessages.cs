@@ -4,12 +4,10 @@ public static class HubMessages
 {
     //GameSettings
     public const string LoadGameSettings = "LoadGameSettings";
-    public const string SetAbstractNouns = "SetAbstractNouns";
     public const string SetDrawingTimeSeconds = "SetDrawingTimeSeconds";
     public const string SetRoundsCount = "SetRoundsCount";
     public const string SetWordLanguage = "SetWordLanguage";
     public const string OnLoadGameSettings = "OnLoadGameSettings";
-    public const string OnSetAbstractNouns = "OnSetAbstractNouns";
     public const string OnSetDrawingTimeSeconds = "OnSetDrawingTimeSeconds";
     public const string OnSetRoundsCount = "OnSetRoundsCount";
     public const string OnSetWordLanguage = "OnSetWordLanguage";
@@ -24,7 +22,6 @@ public static class HubMessages
     //Game
     public const string JoinGame = "JoinGame";
     public const string LeaveGame = "LeaveGame";
-    public const string FindPlayerHost = "FindPlayerHost";
     public const string OnJoinGame = "OnJoinGame";
     public const string OnJoinGameError = "OnJoinGameError";
     public const string OnGameProblem = "OnGameProblem";
@@ -41,7 +38,7 @@ public static class HubMessages
     public const string OnUpdateTimerVisibility = "OnUpdateTimerVisibility";
     public const string OnUpdateDrawingPlayer = "OnUpdateDrawingPlayer";
     public const string OnUpdateCurrentRound = "OnUpdateCurrentRound";
-    public const string onUpdateCorrectGuessPlayerUsernames = "OnUpdateCorrectGuessPlayerUsernames";
+    public const string OnUpdateCorrectGuessPlayerUsernames = "OnUpdateCorrectGuessPlayerUsernames";
 
     // Canvas
     public const string LoadCanvas = "LoadCanvas";
