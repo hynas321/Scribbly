@@ -78,69 +78,55 @@ public partial class HubConnection
     [HubMethodName(HubMessages.SetWordLanguage)]
     public async Task SetWordLanguageSetting(string gameHash, string token, string setting)
     {
-        try
+        Game game = _gameManager.GetGame(gameHash);
+
+        if (game == null)
         {
-            Game game = _gameManager.GetGame(gameHash);
-
-            if (game == null)
-            {
-                _logger.LogError($"Game #{gameHash} SetWordLanguageSetting: Game does not exist");
-                return;
-            }
-
-            if (token != game.HostToken)
-            {
-                _logger.LogError($"Game #{gameHash} SetWordLanguageSetting: Player with the token {token} is not a host");
-                return;
-            }
-
-            GameSettings settings = game.GameSettings;
-
-            settings.WordLanguage = setting;
-            game.GameSettings = settings;
-
-            await Clients.Group(gameHash).SendAsync(HubMessages.OnSetWordLanguage, setting);
-
-            _logger.LogInformation($"Game #{gameHash} SetWordLanguageSetting: Setting set to {setting}");
+            _logger.LogError($"Game #{gameHash} SetWordLanguageSetting: Game does not exist");
+            return;
         }
-        catch (Exception ex)
+
+        if (token != game.HostToken)
         {
-            _logger.LogError(Convert.ToString(ex));
+            _logger.LogError($"Game #{gameHash} SetWordLanguageSetting: Player with the token {token} is not a host");
+            return;
         }
+
+        GameSettings settings = game.GameSettings;
+
+        settings.WordLanguage = setting;
+        game.GameSettings = settings;
+
+        await Clients.Group(gameHash).SendAsync(HubMessages.OnSetWordLanguage, setting);
+
+        _logger.LogInformation($"Game #{gameHash} SetWordLanguageSetting: Setting set to {setting}");
     }
 
     [HubMethodName(HubMessages.LoadGameSettings)]
     public async Task LoadGameSettings(string gameHash, string token)
     {
-        try
+        Game game = _gameManager.GetGame(gameHash);
+
+        if (game == null)
         {
-            Game game = _gameManager.GetGame(gameHash);
-
-            if (game == null)
-            {
-                _logger.LogError($"Game #{gameHash} LoadGameSettings: Game does not exist");
-                return;
-            }
-
-            bool playerExists = _playerManager.CheckIfPlayerExistsByToken(gameHash, token);
-
-            if (!playerExists)
-            {
-                _logger.LogError($"Game #{gameHash} LoadGameSettings: Player with the token {token} does not exist");
-                return;
-            }
-
-            GameSettings settings = game.GameSettings;
-
-            await Clients
-                .Client(Context.ConnectionId)
-                .SendAsync(HubMessages.OnLoadGameSettings, JsonHelper.Serialize(settings));
-
-            _logger.LogInformation($"Game #{gameHash} LoadGameSettings: Settings loaded");
+            _logger.LogError($"Game #{gameHash} LoadGameSettings: Game does not exist");
+            return;
         }
-        catch (Exception ex)
+
+        bool playerExists = _playerManager.CheckIfPlayerExistsByToken(gameHash, token);
+
+        if (!playerExists)
         {
-            _logger.LogError(Convert.ToString(ex));
+            _logger.LogError($"Game #{gameHash} LoadGameSettings: Player with the token {token} does not exist");
+            return;
         }
+
+        GameSettings settings = game.GameSettings;
+
+        await Clients
+            .Client(Context.ConnectionId)
+            .SendAsync(HubMessages.OnLoadGameSettings, JsonHelper.Serialize(settings));
+
+        _logger.LogInformation($"Game #{gameHash} LoadGameSettings: Settings loaded");
     }
 }

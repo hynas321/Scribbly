@@ -25,47 +25,33 @@ public class AccountHubConnection : Hub
     [HubMethodName(HubMessages.CreateSession)]
     public async Task CreateSession(string accountId)
     {
-        try
+        if (AccountHubState.AccountConnections.TryGetValue(accountId, out string value))
         {
-            if (AccountHubState.AccountConnections.ContainsKey(accountId))
-            {
-                string connectionId = AccountHubState.AccountConnections[accountId];
-                AccountHubState.AccountConnections.Remove(accountId);
-                await Clients.Client(connectionId).SendAsync(HubMessages.OnSessionEnded);
+            string connectionId = value;
+            AccountHubState.AccountConnections.Remove(accountId);
+            await Clients.Client(connectionId).SendAsync(HubMessages.OnSessionEnded);
 
-                _logger.LogInformation($"Session {connectionId} ended for the account ID {accountId}");
-            }
-
-            _logger.LogInformation($"New Session {Context.ConnectionId} for the account ID {accountId}");
-
-            AccountHubState.AccountConnections.Add(accountId, Context.ConnectionId);
+            _logger.LogInformation($"Session {connectionId} ended for the account ID {accountId}");
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(Convert.ToString(ex));
-        }
+
+        _logger.LogInformation($"New Session {Context.ConnectionId} for the account ID {accountId}");
+
+        AccountHubState.AccountConnections.Add(accountId, Context.ConnectionId);
     }
 
     [HubMethodName(HubMessages.EndSession)]
     public void EndSession(string accountId)
     {
-        try
+        if (AccountHubState.AccountConnections.TryGetValue(accountId, out string value))
         {
-            if (AccountHubState.AccountConnections.ContainsKey(accountId))
+            string connectionId = value;
+
+            if (connectionId == Context.ConnectionId)
             {
-                string connectionId = AccountHubState.AccountConnections[accountId];
+                AccountHubState.AccountConnections.Remove(accountId);
 
-                if (connectionId == Context.ConnectionId)
-                {
-                    AccountHubState.AccountConnections.Remove(accountId);
-
-                    _logger.LogInformation($"Session {connectionId} ended for the account ID {accountId}");
-                }
+                _logger.LogInformation($"Session {connectionId} ended for the account ID {accountId}");
             }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(Convert.ToString(ex));
         }
     }
 

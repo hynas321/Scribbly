@@ -4,8 +4,8 @@ namespace WebApi.Infrastructure.Repositories.Interfaces;
 
 public interface IWordRepository
 {
-    public bool AddWord(string text, string language);
-    public bool DeleteWord(string text, string language);
-    public List<WordBody> GetWords();
-    public string GetRandomWord(string language);
+    public Task<bool> AddWordAsync(string text, string language, CancellationToken cancellationToken);
+    public Task<bool> DeleteWordAsync(string text, string language, CancellationToken cancellationToken);
+    public Task<List<WordBody>> GetWordsAsync(CancellationToken cancellationToken);
+    public Task<string> GetRandomWordAsync(string language, CancellationToken cancellationToken);
 }

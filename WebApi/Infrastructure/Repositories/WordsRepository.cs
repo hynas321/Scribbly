@@ -7,75 +7,115 @@ namespace WebApi.Infrastructure.Repositories;
 
 public class WordRepository : IWordRepository
 {
-    private readonly string connectionString;
+    private readonly string _connectionString;
 
     public WordRepository(IConfiguration configuration)
     {
-        connectionString = configuration.GetConnectionString("DatabaseConnectionString");
+        _connectionString = configuration.GetConnectionString("DatabaseConnectionString");
 
-        using (SqliteConnection db = new SqliteConnection(connectionString))
+        using (SqliteConnection db = new SqliteConnection(_connectionString))
         {
-            string createTableQuery = @"CREATE TABLE IF NOT EXISTS Word (Text TEXT, Language TEXT);";
-
             db.Open();
+            const string createTableQuery = @"CREATE TABLE IF NOT EXISTS Word (
+                            Text TEXT,
+                            Language TEXT
+                          );";
             db.Execute(createTableQuery);
         }
     }
 
-    public bool AddWord(string text, string language)
+    public async Task<bool> AddWordAsync(string text, string language, CancellationToken cancellationToken)
     {
-        using (SqliteConnection db = new SqliteConnection(connectionString))
+        using (SqliteConnection db = new SqliteConnection(_connectionString))
         {
-            string insertQuery = "INSERT INTO Word (Text, Language) VALUES (@Text, @Language)";
+            await db.OpenAsync(cancellationToken);
+
+            const string insertQuery = @"
+                INSERT INTO Word (Text, Language)
+                VALUES (@Text, @Language);
+            ";
+
             object parameters = new { Text = text, Language = language };
+            CommandDefinition command = new CommandDefinition(
+                commandText: insertQuery,
+                parameters: parameters,
+                cancellationToken: cancellationToken
+            );
 
-            db.Open();
-
-            int rowsAffected = db.Execute(insertQuery, parameters);
-
-            return rowsAffected > 0;
+            int rows = await db.ExecuteAsync(command);
+            return rows > 0;
         }
     }
 
-    public bool DeleteWord(string text, string language)
+    public async Task<bool> DeleteWordAsync(string text, string language, CancellationToken cancellationToken)
     {
-        using (SqliteConnection db = new SqliteConnection(connectionString))
+        using (SqliteConnection db = new SqliteConnection(_connectionString))
         {
-            string deleteQuery = "DELETE FROM Word WHERE Text = @Text AND Language = @Language";
+            await db.OpenAsync(cancellationToken);
+
+            const string deleteQuery = @"
+                DELETE FROM Word
+                WHERE Text = @Text
+                  AND Language = @Language;
+            ";
+
             object parameters = new { Text = text, Language = language };
+            CommandDefinition command = new CommandDefinition(
+                commandText: deleteQuery,
+                parameters: parameters,
+                cancellationToken: cancellationToken
+            );
 
-            db.Open();
-
-            int rowsAffected = db.Execute(deleteQuery, parameters);
-
-            return rowsAffected > 0;
+            int rows = await db.ExecuteAsync(command);
+            return rows > 0;
         }
     }
 
-    public List<WordBody> GetWords()
+    public async Task<List<WordBody>> GetWordsAsync(CancellationToken cancellationToken)
     {
-        using (SqliteConnection db = new SqliteConnection(connectionString))
+        using (SqliteConnection db = new SqliteConnection(_connectionString))
         {
-            string query = "SELECT Text, Language FROM Word";
+            await db.OpenAsync(cancellationToken);
 
-            db.Open();
+            const string query = @"
+                SELECT Text, Language
+                FROM Word;
+            ";
 
-            var words = db.Query<WordBody>(query).ToList();
+            CommandDefinition command = new CommandDefinition(
+                commandText: query,
+                cancellationToken: cancellationToken
+            );
 
+            IEnumerable<WordBody> result = await db.QueryAsync<WordBody>(command);
+            List<WordBody> words = result.ToList();
             return words;
         }
     }
 
-    public string GetRandomWord(string language)
+    public async Task<string> GetRandomWordAsync(string language, CancellationToken cancellationToken)
     {
-        using (SqliteConnection db = new SqliteConnection(connectionString))
+        using (SqliteConnection db = new SqliteConnection(_connectionString))
         {
-            string query = "SELECT Text From Word Where Language = @Language ORDER BY RANDOM() LIMIT 1";
+            await db.OpenAsync(cancellationToken);
+
+            const string query = @"
+                SELECT Text
+                FROM Word
+                WHERE Language = @Language
+                ORDER BY RANDOM()
+                LIMIT 1;
+            ";
+
             object parameters = new { Language = language };
+            CommandDefinition command = new CommandDefinition(
+                commandText: query,
+                parameters: parameters,
+                cancellationToken: cancellationToken
+            );
 
-            db.Open();
-
-            return db.QueryFirstOrDefault<string>(query, parameters);
+            string randomWord = await db.QueryFirstOrDefaultAsync<string>(command);
+            return randomWord;
         }
     }
 }

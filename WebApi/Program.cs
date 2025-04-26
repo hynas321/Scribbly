@@ -9,6 +9,9 @@ using WebApi.Infrastructure.Repositories.Interfaces;
 using WebApi.Repositories;
 using WebApi.Repositories.Interfaces;
 using WebApi.Api.Utilities;
+using WebApi.Api.Hubs.Filters;
+using Microsoft.AspNetCore.SignalR;
+using WebApi.Api.Middleware;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -26,7 +29,13 @@ builder.Services.AddTransient<IRandomWordService, RandomWordService>();
 builder.Services.AddSingleton<IAccountRepository, AccountRepository>();
 builder.Services.AddSingleton<IWordRepository, WordRepository>();
 builder.Services.AddSingleton<IGameRepository, GameRepository>();
-builder.Services.AddSignalR(); 
+
+builder.Services.AddSignalR(options =>
+{
+    options.AddFilter<HubExceptionFilter>();
+    options.EnableDetailedErrors = false;
+});
+
 builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -40,6 +49,9 @@ builder.Services.AddCors(options =>
 });
 
 WebApplication app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
