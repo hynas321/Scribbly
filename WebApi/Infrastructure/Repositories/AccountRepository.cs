@@ -1,99 +1,118 @@
 using Dapper;
+using Microsoft.Data.Sqlite;
 using WebApi.Domain.Entities;
 using WebApi.Infrastructure.Repositories.Interfaces;
-using Microsoft.Data.Sqlite;
 
-namespace WebApi.Infrastructure.Repositories;
-
-public class AccountRepository : IAccountRepository
+namespace WebApi.Infrastructure.Repositories
 {
-    private readonly string connectionString;
-
-    public AccountRepository(IConfiguration configuration)
+    public class AccountRepository : IAccountRepository
     {
-        connectionString = configuration.GetConnectionString("DatabaseConnectionString");
+        private readonly string _connectionString;
 
-        using (SqliteConnection db = new SqliteConnection(connectionString))
+        public AccountRepository(IConfiguration configuration)
         {
-            string createTableQuery = $"CREATE TABLE IF NOT EXISTS Account" +
-                "(Id TEXT PRIMARY KEY, AccessToken TEXT, Email TEXT, Name TEXT, GivenName TEXT, FamilyName TEXT, Score INTEGER)";
+            _connectionString = configuration.GetConnectionString("DatabaseConnectionString");
 
+            using SqliteConnection db = new SqliteConnection(_connectionString);
             db.Open();
-            db.Execute(createTableQuery);
+            db.Execute(@"
+                CREATE TABLE IF NOT EXISTS Account (
+                    Id TEXT PRIMARY KEY,
+                    AccessToken TEXT,
+                    Email TEXT,
+                    Name TEXT,
+                    GivenName TEXT,
+                    FamilyName TEXT,
+                    Score INTEGER
+                )");
         }
-    }
 
-    public bool AddAccount(Account account)
-    {
-        using (SqliteConnection db = new SqliteConnection(connectionString))
+        public async Task<bool> AddAccountAsync(Account account, CancellationToken cancellationToken)
         {
-            string insertQuery = "INSERT OR IGNORE INTO Account (Id, AccessToken, Email, Name, GivenName, FamilyName, Score) " +
-                "VALUES (@Id, @AccessToken, @Email, @Name, @GivenName, @FamilyName, 0)";
+            await using SqliteConnection db = new SqliteConnection(_connectionString);
+            await db.OpenAsync(cancellationToken);
 
-            db.Open();
+            CommandDefinition insertCommand = new CommandDefinition(
+                commandText: @"
+                    INSERT OR IGNORE INTO Account 
+                        (Id, AccessToken, Email, Name, GivenName, FamilyName, Score)
+                    VALUES 
+                        (@Id, @AccessToken, @Email, @Name, @GivenName, @FamilyName, 0)",
+                parameters: account,
+                cancellationToken: cancellationToken
+            );
 
-            int rowsAffected = db.Execute(insertQuery, account);
-
-            if (rowsAffected == 0)
+            int rows = await db.ExecuteAsync(insertCommand);
+            if (rows == 0)
             {
-                string updateQuery = "UPDATE Account SET AccessToken = @AccessToken WHERE ID = @Id";
-                object parameters = new { account.Id, account.AccessToken };
-
-                db.Execute(updateQuery, parameters);
+                CommandDefinition updateCommand = new CommandDefinition(
+                    commandText: @"
+                        UPDATE Account 
+                        SET AccessToken = @AccessToken 
+                        WHERE Id = @Id",
+                    parameters: new { account.Id, account.AccessToken },
+                    cancellationToken: cancellationToken
+                );
+                await db.ExecuteAsync(updateCommand);
                 return false;
             }
 
             return true;
         }
-    }
 
-    public void IncrementAccountScore(string accessToken, int number)
-    {
-        using (SqliteConnection db = new SqliteConnection(connectionString))
+        public async Task IncrementAccountScoreAsync(string accessToken, int number, CancellationToken cancellationToken)
         {
-            string query = "UPDATE Account SET Score = Score + @Number WHERE AccessToken = @AccessToken";
-            object parameters = new { AccessToken = accessToken, Number = number };
+            await using SqliteConnection db = new SqliteConnection(_connectionString);
+            await db.OpenAsync(cancellationToken);
 
-            db.Open();
-            db.Execute(query, parameters);
+            CommandDefinition command = new CommandDefinition(
+                commandText: "UPDATE Account SET Score = Score + @Number WHERE AccessToken = @AccessToken",
+                parameters: new { AccessToken = accessToken, Number = number },
+                cancellationToken: cancellationToken
+            );
+
+            await db.ExecuteAsync(command);
         }
-    }
 
-    public int GetAccountScore(string accessToken)
-    {
-        using (SqliteConnection db = new SqliteConnection(connectionString))
+        public async Task<int> GetAccountScoreAsync(string accessToken, CancellationToken cancellationToken)
         {
-            string query = "SELECT Score From Account Where AccessToken = @AccessToken";
-            object parameters = new { AccessToken = accessToken };
+            await using SqliteConnection db = new SqliteConnection(_connectionString);
+            await db.OpenAsync(cancellationToken);
 
-            db.Open();
+            CommandDefinition query = new CommandDefinition(
+                commandText: "SELECT Score FROM Account WHERE AccessToken = @AccessToken",
+                parameters: new { AccessToken = accessToken },
+                cancellationToken: cancellationToken
+            );
 
-            return db.QueryFirstOrDefault<int>(query, parameters);
+            return await db.QueryFirstOrDefaultAsync<int>(query);
         }
-    }
 
-    public Account GetAccount(string id)
-    {
-        using (SqliteConnection db = new SqliteConnection(connectionString))
+        public async Task<Account> GetAccountAsync(string id, CancellationToken cancellationToken)
         {
-            string query = "SELECT * FROM Account WHERE Id = @Id";
-            object parameters = new { Id = id };
+            await using SqliteConnection db = new SqliteConnection(_connectionString);
+            await db.OpenAsync(cancellationToken);
 
-            db.Open();
+            CommandDefinition query = new CommandDefinition(
+                commandText: "SELECT * FROM Account WHERE Id = @Id",
+                parameters: new { Id = id },
+                cancellationToken: cancellationToken
+            );
 
-            return db.QueryFirstOrDefault<Account>(query, parameters);
+            return await db.QueryFirstOrDefaultAsync<Account>(query);
         }
-    }
 
-    public IEnumerable<MainScoreboardScore> GetTopAccountPlayerScores()
-    {
-        using (SqliteConnection db = new SqliteConnection(connectionString))
+        public async Task<IEnumerable<MainScoreboardScore>> GetTopAccountPlayerScoresAsync(CancellationToken cancellationToken)
         {
-            string query = "SELECT GivenName, Email, Score FROM Account ORDER BY Score DESC LIMIT 5";
+            await using SqliteConnection db = new SqliteConnection(_connectionString);
+            await db.OpenAsync(cancellationToken);
 
-            db.Open();
+            CommandDefinition query = new CommandDefinition(
+                commandText: "SELECT GivenName, Email, Score FROM Account ORDER BY Score DESC LIMIT 5",
+                cancellationToken: cancellationToken
+            );
 
-            return db.Query<MainScoreboardScore>(query);
+            return await db.QueryAsync<MainScoreboardScore>(query);
         }
     }
 }
