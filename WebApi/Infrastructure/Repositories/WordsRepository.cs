@@ -1,34 +1,22 @@
 using Dapper;
 using WebApi.Api.Models.HttpRequest;
 using WebApi.Infrastructure.Repositories.Interfaces;
-using Microsoft.Data.Sqlite;
+using System.Data.SqlClient;
 
 namespace WebApi.Infrastructure.Repositories;
 
 public class WordRepository : IWordRepository
 {
     private readonly string _connectionString;
-    private readonly string _databasePassword;
 
     public WordRepository(IConfiguration configuration)
     {
         _connectionString = configuration.GetConnectionString("DatabaseConnectionString");
-        _databasePassword = configuration["DatabasePassword"];
-
-        using (SqliteConnection db = new SqliteConnection(_connectionString))
-        {
-            db.Open();
-            db.Execute($"PRAGMA key = '{_databasePassword}';");
-            db.Execute(@"CREATE TABLE IF NOT EXISTS Word (
-                            Text TEXT,
-                            Language TEXT
-                          );");
-        }
     }
 
     public async Task<bool> AddWordAsync(string text, string language, CancellationToken cancellationToken)
     {
-        using (SqliteConnection db = new SqliteConnection(_connectionString))
+        using (SqlConnection db = new SqlConnection(_connectionString))
         {
             await db.OpenAsync(cancellationToken);
 
@@ -51,7 +39,7 @@ public class WordRepository : IWordRepository
 
     public async Task<bool> DeleteWordAsync(string text, string language, CancellationToken cancellationToken)
     {
-        using (SqliteConnection db = new SqliteConnection(_connectionString))
+        using (SqlConnection db = new SqlConnection(_connectionString))
         {
             await db.OpenAsync(cancellationToken);
 
@@ -75,7 +63,7 @@ public class WordRepository : IWordRepository
 
     public async Task<List<WordBody>> GetWordsAsync(CancellationToken cancellationToken)
     {
-        using (SqliteConnection db = new SqliteConnection(_connectionString))
+        using (SqlConnection db = new SqlConnection(_connectionString))
         {
             await db.OpenAsync(cancellationToken);
 
@@ -97,16 +85,15 @@ public class WordRepository : IWordRepository
 
     public async Task<string> GetRandomWordAsync(string language, CancellationToken cancellationToken)
     {
-        using (SqliteConnection db = new SqliteConnection(_connectionString))
+        using (SqlConnection db = new SqlConnection(_connectionString))
         {
             await db.OpenAsync(cancellationToken);
 
             const string query = @"
-                SELECT Text
+                SELECT TOP 1 Text
                 FROM Word
                 WHERE Language = @Language
-                ORDER BY RANDOM()
-                LIMIT 1;
+                ORDER BY NEWID();
             ";
 
             object parameters = new { Language = language };

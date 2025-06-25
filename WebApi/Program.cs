@@ -12,10 +12,8 @@ using WebApi.Api.Utilities;
 using WebApi.Api.Hubs.Filters;
 using Microsoft.AspNetCore.SignalR;
 using WebApi.Api.Middleware;
-using SQLitePCL;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-Batteries_V2.Init();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options => 
