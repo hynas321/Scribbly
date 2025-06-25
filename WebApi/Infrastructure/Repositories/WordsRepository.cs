@@ -8,19 +8,21 @@ namespace WebApi.Infrastructure.Repositories;
 public class WordRepository : IWordRepository
 {
     private readonly string _connectionString;
+    private readonly string _databasePassword;
 
     public WordRepository(IConfiguration configuration)
     {
         _connectionString = configuration.GetConnectionString("DatabaseConnectionString");
+        _databasePassword = configuration["DatabasePassword"];
 
         using (SqliteConnection db = new SqliteConnection(_connectionString))
         {
             db.Open();
-            const string createTableQuery = @"CREATE TABLE IF NOT EXISTS Word (
+            db.Execute($"PRAGMA key = '{_databasePassword}';");
+            db.Execute(@"CREATE TABLE IF NOT EXISTS Word (
                             Text TEXT,
                             Language TEXT
-                          );";
-            db.Execute(createTableQuery);
+                          );");
         }
     }
 

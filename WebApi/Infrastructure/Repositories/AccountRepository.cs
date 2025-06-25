@@ -8,13 +8,16 @@ namespace WebApi.Infrastructure.Repositories
     public class AccountRepository : IAccountRepository
     {
         private readonly string _connectionString;
+        private readonly string _databasePassword;
 
         public AccountRepository(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("DatabaseConnectionString");
+            _databasePassword = configuration["DatabasePassword"];
 
             using SqliteConnection db = new SqliteConnection(_connectionString);
             db.Open();
+            db.Execute($"PRAGMA key = '{_databasePassword}';");
             db.Execute(@"
                 CREATE TABLE IF NOT EXISTS Account (
                     Id TEXT PRIMARY KEY,
@@ -24,7 +27,7 @@ namespace WebApi.Infrastructure.Repositories
                     GivenName TEXT,
                     FamilyName TEXT,
                     Score INTEGER
-                )");
+                );");
         }
 
         public async Task<bool> AddAccountAsync(Account account, CancellationToken cancellationToken)
