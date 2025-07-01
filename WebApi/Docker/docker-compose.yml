@@ -10,39 +10,30 @@ services:
     ports:
       - "1433:1433"
     volumes:
-      - mssql_data:/var/opt/mssql
-    networks:
-      - sql_network
-
-  adminer:
-    image: adminer
-    container_name: adminer
-    ports:
-      - 8080:8080
-    networks:
-      - sql_network
-    depends_on:
-      - mssql
+      - mssqldata:/var/opt/mssql
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "P@ssw0rd123!", "-Q", "SELECT 1"]
+      interval: 10s
+      retries: 10
+      start_period: 20s
 
   initdb:
     image: mcr.microsoft.com/mssql-tools
     container_name: initdb
     depends_on:
-      - mssql
+      mssql:
+        condition: service_healthy
     volumes:
       - ./init.sql:/init.sql
-    entrypoint: /bin/bash
-    command: >
-      -c "
-      sleep 20;
-      /opt/mssql-tools/bin/sqlcmd -S mssql -U sa -P P@ssw0rd123! -i /init.sql
-      "
-    networks:
-      - sql_network
+    entrypoint: >
+      sh -c "
+        echo 'Waiting for SQL Server to accept connections...';
+        sleep 10;
+        echo 'Converting SQL file to UTF-16LE for Unicode support...';
+        iconv -f utf-8 -t utf-16le /init.sql > /converted.sql;
+        echo 'Running init.sql via sqlcmd...';
+        /opt/mssql-tools/bin/sqlcmd -S mssql -U sa -P P@ssw0rd123! -i /converted.sql;
+        echo 'Database initialized with Polish data'"
 
 volumes:
-  mssql_data:
-
-networks:
-  sql_network:
-    driver: bridge
+  mssqldata:
