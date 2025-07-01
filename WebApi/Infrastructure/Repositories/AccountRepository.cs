@@ -1,5 +1,5 @@
 using Dapper;
-using Microsoft.Data.Sqlite;
+using System.Data.SqlClient;
 using WebApi.Domain.Entities;
 using WebApi.Infrastructure.Repositories.Interfaces;
 
@@ -12,38 +12,36 @@ namespace WebApi.Infrastructure.Repositories
         public AccountRepository(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("DatabaseConnectionString");
-
-            using SqliteConnection db = new SqliteConnection(_connectionString);
-            db.Open();
-            db.Execute(@"
-                CREATE TABLE IF NOT EXISTS Account (
-                    Id TEXT PRIMARY KEY,
-                    AccessToken TEXT,
-                    Email TEXT,
-                    Name TEXT,
-                    GivenName TEXT,
-                    FamilyName TEXT,
-                    Score INTEGER
-                )");
         }
 
         public async Task<bool> AddAccountAsync(Account account, CancellationToken cancellationToken)
         {
-            await using SqliteConnection db = new SqliteConnection(_connectionString);
+            await using SqlConnection db = new SqlConnection(_connectionString);
             await db.OpenAsync(cancellationToken);
 
-            CommandDefinition insertCommand = new CommandDefinition(
-                commandText: @"
-                    INSERT OR IGNORE INTO Account 
-                        (Id, AccessToken, Email, Name, GivenName, FamilyName, Score)
-                    VALUES 
-                        (@Id, @AccessToken, @Email, @Name, @GivenName, @FamilyName, 0)",
-                parameters: account,
-                cancellationToken: cancellationToken
+            var exists = await db.QueryFirstOrDefaultAsync<int>(
+                new CommandDefinition(
+                    "SELECT COUNT(1) FROM Account WHERE Id = @Id",
+                    new { account.Id },
+                    cancellationToken: cancellationToken
+                )
             );
 
-            int rows = await db.ExecuteAsync(insertCommand);
-            if (rows == 0)
+            if (exists == 0)
+            {
+                CommandDefinition insertCommand = new CommandDefinition(
+                    commandText: @"
+                        INSERT INTO Account 
+                            (Id, AccessToken, Email, Name, GivenName, FamilyName, Score)
+                        VALUES 
+                            (@Id, @AccessToken, @Email, @Name, @GivenName, @FamilyName, 0)",
+                    parameters: account,
+                    cancellationToken: cancellationToken
+                );
+                await db.ExecuteAsync(insertCommand);
+                return true;
+            }
+            else
             {
                 CommandDefinition updateCommand = new CommandDefinition(
                     commandText: @"
@@ -56,13 +54,11 @@ namespace WebApi.Infrastructure.Repositories
                 await db.ExecuteAsync(updateCommand);
                 return false;
             }
-
-            return true;
         }
 
         public async Task IncrementAccountScoreAsync(string accessToken, int number, CancellationToken cancellationToken)
         {
-            await using SqliteConnection db = new SqliteConnection(_connectionString);
+            await using SqlConnection db = new SqlConnection(_connectionString);
             await db.OpenAsync(cancellationToken);
 
             CommandDefinition command = new CommandDefinition(
@@ -76,7 +72,7 @@ namespace WebApi.Infrastructure.Repositories
 
         public async Task<int> GetAccountScoreAsync(string accessToken, CancellationToken cancellationToken)
         {
-            await using SqliteConnection db = new SqliteConnection(_connectionString);
+            await using SqlConnection db = new SqlConnection(_connectionString);
             await db.OpenAsync(cancellationToken);
 
             CommandDefinition query = new CommandDefinition(
@@ -90,7 +86,7 @@ namespace WebApi.Infrastructure.Repositories
 
         public async Task<Account> GetAccountAsync(string id, CancellationToken cancellationToken)
         {
-            await using SqliteConnection db = new SqliteConnection(_connectionString);
+            await using SqlConnection db = new SqlConnection(_connectionString);
             await db.OpenAsync(cancellationToken);
 
             CommandDefinition query = new CommandDefinition(
@@ -104,11 +100,11 @@ namespace WebApi.Infrastructure.Repositories
 
         public async Task<IEnumerable<MainScoreboardScore>> GetTopAccountPlayerScoresAsync(CancellationToken cancellationToken)
         {
-            await using SqliteConnection db = new SqliteConnection(_connectionString);
+            await using SqlConnection db = new SqlConnection(_connectionString);
             await db.OpenAsync(cancellationToken);
 
             CommandDefinition query = new CommandDefinition(
-                commandText: "SELECT GivenName, Email, Score FROM Account ORDER BY Score DESC LIMIT 5",
+                commandText: "SELECT GivenName, Email, Score FROM Account ORDER BY Score DESC OFFSET 0 ROWS FETCH NEXT 5 ROWS ONLY",
                 cancellationToken: cancellationToken
             );
 
