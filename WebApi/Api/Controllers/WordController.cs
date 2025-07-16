@@ -35,17 +35,15 @@ public class WordController : ControllerBase
             return BadRequest();
         }
 
-        WordRepository wordsRepository = new WordRepository(_configuration);
+        WordRepository wordsRepository = new(_configuration);
         bool isWordAdded = await wordsRepository.AddWordAsync(body.Text, body.Language, cancellationToken);
 
         if (isWordAdded)
         {
             return CreatedAtAction(nameof(Add), new { body.Text, body.Language });
         }
-        else
-        {
-            return Ok();
-        }
+
+        return Ok();
     }
 
     [HttpDelete("Delete")]
@@ -56,7 +54,7 @@ public class WordController : ControllerBase
             return BadRequest();
         }
 
-        WordRepository wordsRepository = new WordRepository(_configuration);
+        WordRepository wordsRepository = new(_configuration);
 
         if (adminToken != _configuration[AppSettingsVariables.AdminToken])
         {
@@ -74,10 +72,8 @@ public class WordController : ControllerBase
         {
             return Ok();
         }
-        else
-        {
-            return NotFound();
-        }
+
+        return NotFound();
     }
 
     [HttpGet("GetWords")]
@@ -88,7 +84,7 @@ public class WordController : ControllerBase
             return BadRequest();
         }
 
-        WordRepository wordsRepository = new WordRepository(_configuration);
+        WordRepository wordsRepository = new(_configuration);
 
         if (adminToken != _configuration[AppSettingsVariables.AdminToken])
         {

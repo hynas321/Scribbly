@@ -14,7 +14,7 @@ import {
   longRunningConnectionHub,
   accountConnectionHub,
 } from "../context/ConnectionHubContext";
-import GameView from "./views/GameView";
+import GameView from "./views/game-and-lobby/GameView";
 import JoinGameView from "./views/JoinGameView";
 import { ToastContainer } from "react-toastify";
 import { ToastNotificationEnum } from "../enums/ToastNotificationEnum";

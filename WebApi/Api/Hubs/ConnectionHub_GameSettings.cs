@@ -14,7 +14,7 @@ public partial class HubConnection
         {
             Game game = _gameManager.GetGame(gameHash);
 
-            if (game == null)
+            if (game is null)
             {
                 _logger.LogError($"Game #{gameHash} SetDrawingTimeSeconds: Game does not exist");
                 return;
@@ -48,7 +48,7 @@ public partial class HubConnection
         {
             Game game = _gameManager.GetGame(gameHash);
 
-            if (game == null)
+            if (game is null)
             {
                 _logger.LogError($"Game #{gameHash} SetRoundsCount: Game does not exist");
                 return;
@@ -80,7 +80,7 @@ public partial class HubConnection
     {
         Game game = _gameManager.GetGame(gameHash);
 
-        if (game == null)
+        if (game is null)
         {
             _logger.LogError($"Game #{gameHash} SetWordLanguageSetting: Game does not exist");
             return;
@@ -107,7 +107,7 @@ public partial class HubConnection
     {
         Game game = _gameManager.GetGame(gameHash);
 
-        if (game == null)
+        if (game is null)
         {
             _logger.LogError($"Game #{gameHash} LoadGameSettings: Game does not exist");
             return;

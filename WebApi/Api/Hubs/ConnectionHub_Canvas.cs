@@ -13,7 +13,7 @@ public partial class HubConnection : Hub
     {   
         Game game = _gameManager.GetGame(gameHash);
 
-        if (game == null)
+        if (game is null)
         {
             _logger.LogError($"Game #{gameHash} DrawOnCanvas: Game does not exist");
             return;
@@ -27,7 +27,7 @@ public partial class HubConnection : Hub
 
         DrawnLine drawnLine = JsonConvert.DeserializeObject<DrawnLine>(drawnLineSerialized);
 
-        if (drawnLine == null)
+        if (drawnLine is null)
         {
             _logger.LogError($"Game #{gameHash} DrawOnCanvas: Serialized drawnline {drawnLineSerialized} has an incorrect format");
             return;
@@ -39,11 +39,11 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubMessages.LoadCanvas)]
-    public async Task LoadCanvas(string gameHash, string token)
+    public async Task LoadCanvas(string gameHash)
     {
         Game game = _gameManager.GetGame(gameHash);
 
-        if (game == null)
+        if (game is null)
         {
             _logger.LogError($"Game #{gameHash} LoadCanvas: Game does not exist");
             return;
@@ -61,7 +61,7 @@ public partial class HubConnection : Hub
     {   
         Game game = _gameManager.GetGame(gameHash);
 
-        if (game == null)
+        if (game is null)
         {
             _logger.LogError($"Game #{gameHash} ClearCanvas: Game does not exist");
             return;
@@ -83,7 +83,7 @@ public partial class HubConnection : Hub
     {
         Game game = _gameManager.GetGame(gameHash);
 
-        if (game == null)
+        if (game is null)
         {
             _logger.LogError($"Game #{gameHash} UndoLine: Game does not exist");
             return;

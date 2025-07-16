@@ -1,38 +1,31 @@
-import { gapi } from "gapi-script";
 import { useContext, useEffect, useState } from "react";
-import GoogleLogin, { GoogleLogout } from "react-google-login";
-import HttpRequestHandler from "../http/HttpRequestHandler";
+import { gapi } from "gapi-script";
 import { AccountHubContext } from "../context/ConnectionHubContext";
 import HubEvents from "../hub/HubMessages";
-import * as signalR from "@microsoft/signalr";
-import { useGoogleLogout } from "react-google-login";
+import api from "../http/Api";
 import UrlHelper from "../utils/UrlHelper";
-import { SessionStorageService } from "../classes/SessionStorageService";
+import GoogleLogin, { GoogleLogout } from "react-google-login";
+import { useGoogleAccount } from "../hooks/useGoogleAccount";
+import { useAccountHubEvents } from "../hooks/hub-events/useAccountHubEvents";
 
 function Account() {
-  const httpRequestHandler = new HttpRequestHandler();
   const clientId = "468363525055-d5ul5o6le0298njn348po0td776it110.apps.googleusercontent.com";
-
   const accountHub = useContext(AccountHubContext);
 
-  const [gameHash, setGameHash] = useState<string>("");
-  const [givenName, setGivenName] = useState<string>("");
-  const [score, setScore] = useState<number>(-1);
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(false);
-  const [isScoreToBeUpdated, setIsScoreToBeUpdated] = useState<boolean>(false);
+  const {
+    givenName, score, authOToken, authOAccountId, isUserLoggedIn,
+    setScore, onSuccess, onLogoutSuccess
+  } = useGoogleAccount(clientId);
 
-  const sessionStorageService = SessionStorageService.getInstance();
+  const [isScoreToBeUpdated, setIsScoreToBeUpdated] = useState(false);
+  const [gameHash, setGameHash] = useState("");
 
   useEffect(() => {
     setGameHash(UrlHelper.getGameHash(window.location.href));
 
     const start = () => {
-      gapi.client.init({
-        clientId: clientId,
-        scope: "",
-      });
+      gapi.client.init({ clientId: clientId, scope: "" });
     };
-
     gapi.load("client:auth2", start);
 
     return () => {
@@ -40,94 +33,34 @@ function Account() {
     };
   }, []);
 
-  useEffect(() => {
-    if (accountHub.getState() !== signalR.HubConnectionState.Connected) {
-      return;
-    }
-
-    accountHub.on(HubEvents.onUpdateAccountScore, async (gameHash: string) => {
-      if (!isUserLoggedIn) {
-        return;
-      }
-
-      if (gameHash !== UrlHelper.getGameHash(window.location.href)) {
-        return;
-      }
-
-      setGameHash(UrlHelper.getGameHash(window.location.href));
-      setIsScoreToBeUpdated(true);
-    });
-
-    accountHub.on(HubEvents.onSessionEnded, async () => {
-      const currentAccountId = sessionStorageService.getAuthOAccountId();
-
-      setIsUserLoggedIn(false);
-      sessionStorageService.setAuthOToken("");
-      setGivenName("");
-      signOut();
-
-      await accountHub.send(HubEvents.endSession, currentAccountId);
-      await accountHub.stop();
-    });
-  }, [accountHub.getState()]);
+  useAccountHubEvents(accountHub, authOAccountId, isUserLoggedIn, setIsScoreToBeUpdated);
 
   useEffect(() => {
     const updateScore = async () => {
       if (isScoreToBeUpdated) {
-        const updatedScore = await httpRequestHandler.updateAccountScore(
-          gameHash,
-          sessionStorageService.getAuthorizationToken(),
-          sessionStorageService.getAuthOToken()
-        );
-
-        if (typeof updatedScore == "number") {
+        const updatedScore = await api.updateAccountScore(gameHash, "", authOToken);
+        if (typeof updatedScore === "number") {
           setScore(updatedScore);
         }
-
         setIsScoreToBeUpdated(false);
       }
     };
-
     updateScore();
   }, [isScoreToBeUpdated]);
 
-  const onSuccess = async (response: any) => {
-    await httpRequestHandler.addAccountIfNotExists(response.profileObj, response.accessToken);
-
-    const setScoreState = async () => {
-      let score = await httpRequestHandler.fetchAccountScore(response.profileObj.googleId);
-
-      if (typeof score != "number") {
-        return;
-      }
-
-      setScore(score);
-    };
-
-    await setScoreState();
-    sessionStorageService.setAuthOToken(response.accessToken);
-    setGivenName(response.profileObj.givenName);
-    sessionStorageService.setAuthOAccountId(response.profileObj.googleId);
-    setIsUserLoggedIn(true);
-
-    await accountHub.start();
-    await accountHub.send(HubEvents.createSession, response.profileObj.googleId);
+  const handleSuccess = async (response: any) => {
+    await onSuccess(response, async (googleId: string) => {
+      await accountHub.start();
+      await accountHub.send(HubEvents.createSession, googleId);
+    });
   };
 
-  const onLogoutSuccess = async () => {
-    await accountHub.send(HubEvents.endSession, sessionStorageService.getAuthOAccountId());
-    await accountHub.stop();
-
-    setIsUserLoggedIn(false);
-    sessionStorageService.setAuthOToken("");
-    setGivenName("");
-    sessionStorageService.setAuthOAccountId("");
+  const handleLogout = async () => {
+    await onLogoutSuccess(async (googleId: string) => {
+      await accountHub.send(HubEvents.endSession, googleId);
+      await accountHub.stop();
+    });
   };
-
-  const { signOut } = useGoogleLogout({
-    clientId: sessionStorageService.getAuthOAccountId(),
-    onLogoutSuccess: onLogoutSuccess,
-  });
 
   return (
     <div className="d-flex justify-content-end">
@@ -139,12 +72,12 @@ function Account() {
       </h6>
       <div className="mx-3">
         {isUserLoggedIn ? (
-          <GoogleLogout clientId={clientId} buttonText="Logout" onLogoutSuccess={onLogoutSuccess} />
+          <GoogleLogout clientId={clientId} buttonText="Logout" onLogoutSuccess={handleLogout} />
         ) : (
           <GoogleLogin
             clientId={clientId}
             buttonText="Login"
-            onSuccess={onSuccess}
+            onSuccess={handleSuccess}
             cookiePolicy={"single_host_origin"}
             isSignedIn={true}
           />

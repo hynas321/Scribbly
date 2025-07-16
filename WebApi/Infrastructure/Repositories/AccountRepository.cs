@@ -13,7 +13,7 @@ namespace WebApi.Infrastructure.Repositories
         {
             _connectionString = configuration.GetConnectionString("DatabaseConnectionString");
 
-            using SqliteConnection db = new SqliteConnection(_connectionString);
+            using SqliteConnection db = new(_connectionString);
             db.Open();
             db.Execute(@"
                 CREATE TABLE IF NOT EXISTS Account (
@@ -29,10 +29,10 @@ namespace WebApi.Infrastructure.Repositories
 
         public async Task<bool> AddAccountAsync(Account account, CancellationToken cancellationToken)
         {
-            await using SqliteConnection db = new SqliteConnection(_connectionString);
+            await using SqliteConnection db = new(_connectionString);
             await db.OpenAsync(cancellationToken);
 
-            CommandDefinition insertCommand = new CommandDefinition(
+            CommandDefinition insertCommand = new(
                 commandText: @"
                     INSERT OR IGNORE INTO Account 
                         (Id, AccessToken, Email, Name, GivenName, FamilyName, Score)
@@ -45,7 +45,7 @@ namespace WebApi.Infrastructure.Repositories
             int rows = await db.ExecuteAsync(insertCommand);
             if (rows == 0)
             {
-                CommandDefinition updateCommand = new CommandDefinition(
+                CommandDefinition updateCommand = new(
                     commandText: @"
                         UPDATE Account 
                         SET AccessToken = @AccessToken 
@@ -62,10 +62,10 @@ namespace WebApi.Infrastructure.Repositories
 
         public async Task IncrementAccountScoreAsync(string accessToken, int number, CancellationToken cancellationToken)
         {
-            await using SqliteConnection db = new SqliteConnection(_connectionString);
+            await using SqliteConnection db = new(_connectionString);
             await db.OpenAsync(cancellationToken);
 
-            CommandDefinition command = new CommandDefinition(
+            CommandDefinition command = new(
                 commandText: "UPDATE Account SET Score = Score + @Number WHERE AccessToken = @AccessToken",
                 parameters: new { AccessToken = accessToken, Number = number },
                 cancellationToken: cancellationToken
@@ -76,10 +76,10 @@ namespace WebApi.Infrastructure.Repositories
 
         public async Task<int> GetAccountScoreAsync(string accessToken, CancellationToken cancellationToken)
         {
-            await using SqliteConnection db = new SqliteConnection(_connectionString);
+            await using SqliteConnection db = new(_connectionString);
             await db.OpenAsync(cancellationToken);
 
-            CommandDefinition query = new CommandDefinition(
+            CommandDefinition query = new(
                 commandText: "SELECT Score FROM Account WHERE AccessToken = @AccessToken",
                 parameters: new { AccessToken = accessToken },
                 cancellationToken: cancellationToken
@@ -90,10 +90,10 @@ namespace WebApi.Infrastructure.Repositories
 
         public async Task<Account> GetAccountAsync(string id, CancellationToken cancellationToken)
         {
-            await using SqliteConnection db = new SqliteConnection(_connectionString);
+            await using SqliteConnection db = new(_connectionString);
             await db.OpenAsync(cancellationToken);
 
-            CommandDefinition query = new CommandDefinition(
+            CommandDefinition query = new(
                 commandText: "SELECT * FROM Account WHERE Id = @Id",
                 parameters: new { Id = id },
                 cancellationToken: cancellationToken
@@ -104,7 +104,7 @@ namespace WebApi.Infrastructure.Repositories
 
         public async Task<IEnumerable<MainScoreboardScore>> GetTopAccountPlayerScoresAsync(CancellationToken cancellationToken)
         {
-            await using SqliteConnection db = new SqliteConnection(_connectionString);
+            await using SqliteConnection db = new(_connectionString);
             await db.OpenAsync(cancellationToken);
 
             CommandDefinition query = new CommandDefinition(

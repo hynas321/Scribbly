@@ -3,7 +3,7 @@ import Button from "./Button";
 import InputForm from "./InputForm";
 import { useEffect, useState } from "react";
 
-interface Popup {
+interface PopupProps {
   title: string;
   inputFormPlaceholderText: string;
   visible: boolean;
@@ -11,7 +11,7 @@ interface Popup {
   onClose: () => void;
 }
 
-function Popup({ title, inputFormPlaceholderText, visible, onSubmit, onClose }: Popup) {
+function Popup({ title, inputFormPlaceholderText, visible, onSubmit, onClose }: PopupProps) {
   const customStyles = {
     content: {
       top: "25%",

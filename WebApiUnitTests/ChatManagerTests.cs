@@ -22,7 +22,7 @@ public class ChatManagerTests
     public void AddChatMessage_ShouldThrowException_WhenGameNotFound()
     {
         // Arrange
-        ChatMessage chatMessage = new ChatMessage { Username = "user1", Text = "Hello!" };
+        ChatMessage chatMessage = new() { Username = "user1", Text = "Hello!" };
 
         _mockGameRepository.Setup(repo => repo.GetGame(It.IsAny<string>())).Returns((Game)null);
 
@@ -36,7 +36,7 @@ public class ChatManagerTests
         // Arrange
         Game game = new Game { ChatMessages = new List<ChatMessage>() };
         _mockGameRepository.Setup(repo => repo.GetGame(_gameHash)).Returns(game);
-        ChatMessage chatMessage = new ChatMessage { Username = "user1", Text = "Hello!" };
+        ChatMessage chatMessage = new() { Username = "user1", Text = "Hello!" };
 
         // Act
         _chatManager.AddChatMessage(_gameHash, chatMessage);
@@ -48,7 +48,7 @@ public class ChatManagerTests
     [Fact]
     public void AddChatMessage_ShouldRemoveOldestMessage_WhenMaxCountExceeded()
     {
-        Game game = new Game { ChatMessages = new List<ChatMessage>() };
+        Game game = new() { ChatMessages = [] };
 
         for (int i = 0; i < 25; i++)
         {
@@ -57,7 +57,7 @@ public class ChatManagerTests
 
         _mockGameRepository.Setup(repo => repo.GetGame(_gameHash)).Returns(game);
 
-        ChatMessage newMessage = new ChatMessage { Username = "user1", Text = "New Message" };
+        ChatMessage newMessage = new() { Username = "user1", Text = "New Message" };
 
         // Act
         _chatManager.AddChatMessage(_gameHash, newMessage);
@@ -72,10 +72,10 @@ public class ChatManagerTests
     public void AddAnnouncementMessage_ShouldAddMessage_WithNullUsername()
     {
         // Arrange
-        Game game = new Game { ChatMessages = new List<ChatMessage>() };
+        Game game = new() { ChatMessages = [] };
         _mockGameRepository.Setup(repo => repo.GetGame(_gameHash)).Returns(game);
 
-        AnnouncementMessage announcementMessage = new AnnouncementMessage
+        AnnouncementMessage announcementMessage = new()
         {
             Text = "Game starting soon!",
             BootstrapBackgroundColor = "alert-info"

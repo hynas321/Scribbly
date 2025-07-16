@@ -10,7 +10,7 @@ interface InputFormProps {
 
 const InputForm = forwardRef(
   (
-    { defaultValue, placeholderValue, smallTextValue, onChange, onKeyDown }: InputFormProps,
+    { defaultValue = "", placeholderValue, smallTextValue, onChange, onKeyDown }: InputFormProps,
     ref: ForwardedRef<HTMLInputElement>
   ) => {
     const [value, setValue] = useState(defaultValue ?? "");

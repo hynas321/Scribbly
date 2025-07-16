@@ -1,12 +1,12 @@
 import { animated, useSpring } from "@react-spring/web";
-import Button from "../Button";
+import Button from "../../Button";
 import { BsDoorOpen } from "react-icons/bs";
 
 interface ControlPanelProps {
   onClick: () => void;
 }
 
-function ControlPanel({ onClick }: ControlPanelProps) {
+const ControlPanel = ({ onClick }: ControlPanelProps) => {
   const controlPanelAnimationSpring = useSpring({
     from: { x: -200 },
     to: { x: 0 },

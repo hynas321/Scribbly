@@ -5,15 +5,15 @@ import UrlHelper from "../utils/UrlHelper";
 import * as signalR from "@microsoft/signalr";
 import { DrawnLine } from "../interfaces/DrawnLine";
 import { Point } from "../interfaces/Point";
-import { SessionStorageService } from "../classes/SessionStorageService";
+import { useSessionStorage } from "./useSessionStorage";
 
 export const useDraw = (
   onDraw: (canvasContext: CanvasRenderingContext2D, line: DrawnLine) => void,
-  hub: Hub,
-  color: string,
-  thickness: number,
-  isPlayerDrawing: boolean
-) => {
+    hub: Hub,
+    color: string,
+    thickness: number,
+    isPlayerDrawing: boolean
+  ) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previousRelativePoint = useRef<Point | null>(null);
 
@@ -21,7 +21,7 @@ export const useDraw = (
   const [currentLineNumber, setCurrentLineNumber] = useState<number>(0);
   const [isMouseDown, setIsMouseDown] = useState<boolean>(false);
 
-  const sessionStorageService = SessionStorageService.getInstance();
+  const { authorizationToken } = useSessionStorage();
 
   const onMouseDown = () => {
     if (!isPlayerDrawing) {
@@ -37,11 +37,7 @@ export const useDraw = (
       return;
     }
 
-    await hub.invoke(
-      HubEvents.clearCanvas,
-      gameHash,
-      sessionStorageService.getAuthorizationToken()
-    );
+    await hub.invoke(HubEvents.clearCanvas, gameHash, authorizationToken);
   };
 
   const undoLine = async () => {
@@ -49,7 +45,7 @@ export const useDraw = (
       return;
     }
 
-    await hub.invoke(HubEvents.undoLine, gameHash, sessionStorageService.getAuthorizationToken());
+    await hub.invoke(HubEvents.undoLine, gameHash, authorizationToken);
   };
 
   useEffect(() => {
@@ -92,7 +88,7 @@ export const useDraw = (
       canvasContext.clearRect(0, 0, canvas.width, canvas.height);
     });
 
-    hub.invoke(HubEvents.loadCanvas, gameHash, sessionStorageService.getAuthorizationToken());
+    hub.invoke(HubEvents.loadCanvas, gameHash);
 
     return () => {
       hub.off(HubEvents.onLoadCanvas);
@@ -127,7 +123,7 @@ export const useDraw = (
       hub.invoke(
         HubEvents.drawOnCanvas,
         gameHash,
-        sessionStorageService.getAuthorizationToken(),
+        authorizationToken,
         JSON.stringify(drawnLine)
       );
     };

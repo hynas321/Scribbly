@@ -22,7 +22,7 @@ public class GameManagerTests
     public void CreateGame_ShouldCallAddGame_OnRepository()
     {
         // Arrange
-        Game game = new Game();
+        Game game = new();
 
         // Act
         _gameManager.CreateGame(game, _gameHash);
@@ -35,7 +35,7 @@ public class GameManagerTests
     public void GetGame_ShouldReturnGame_WhenGameExists()
     {
         // Arrange
-        Game game = new Game { HostToken = "abc"};
+        Game game = new() { HostToken = "abc"};
 
         _mockGameRepository.Setup(repo => repo.GetGame(_gameHash)).Returns(game);
 

@@ -30,13 +30,13 @@ public class GameController : ControllerBase
             return BadRequest();
         }
 
-        Game game = new Game();
+        Game game = new();
         string gameHash = _hashManager.GenerateGameHash();
 
         game.GameState.HostPlayerUsername = body.Username;
         _gameManager.CreateGame(game, gameHash);
 
-        CreateGameResponse response = new CreateGameResponse()
+        CreateGameResponse response = new()
         {
             GameHash = gameHash,
             HostToken = game.HostToken

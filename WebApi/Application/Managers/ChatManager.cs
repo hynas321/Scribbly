@@ -19,7 +19,7 @@ public class ChatManager : IChatManager
     {
         Game game = _gameRepository.GetGame(gameHash);
 
-        if (game == null)
+        if (game is null)
         {
             throw new KeyNotFoundException("Game not found.");
         }
@@ -36,7 +36,7 @@ public class ChatManager : IChatManager
 
     public void AddAnnouncementMessage(string gameHash, AnnouncementMessage message)
     {
-        ChatMessage chatMessage = new ChatMessage
+        ChatMessage chatMessage = new()
         {
             Username = null,
             Text = message.Text,

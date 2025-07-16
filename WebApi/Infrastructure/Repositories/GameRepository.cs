@@ -5,7 +5,7 @@ namespace WebApi.Repositories
 {
     public class GameRepository : IGameRepository
     {
-        private readonly Dictionary<string, Game> _games = new Dictionary<string, Game>();
+        private readonly Dictionary<string, Game> _games = new();
 
         public void AddGame(string gameHash, Game game)
         {

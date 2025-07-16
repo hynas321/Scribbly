@@ -30,7 +30,7 @@ public class PlayerController : ControllerBase
 
         Game game = _gameManager.GetGame(gameHash);
 
-        if (game == null)
+        if (game is null)
         {
             return NotFound();
         }

@@ -13,7 +13,7 @@ public class WordRepository : IWordRepository
     {
         _connectionString = configuration.GetConnectionString("DatabaseConnectionString");
 
-        using (SqliteConnection db = new SqliteConnection(_connectionString))
+        using (SqliteConnection db = new(_connectionString))
         {
             db.Open();
             const string createTableQuery = @"CREATE TABLE IF NOT EXISTS Word (
@@ -26,7 +26,7 @@ public class WordRepository : IWordRepository
 
     public async Task<bool> AddWordAsync(string text, string language, CancellationToken cancellationToken)
     {
-        using (SqliteConnection db = new SqliteConnection(_connectionString))
+        using (SqliteConnection db = new(_connectionString))
         {
             await db.OpenAsync(cancellationToken);
 
@@ -36,7 +36,7 @@ public class WordRepository : IWordRepository
             ";
 
             object parameters = new { Text = text, Language = language };
-            CommandDefinition command = new CommandDefinition(
+            CommandDefinition command = new(
                 commandText: insertQuery,
                 parameters: parameters,
                 cancellationToken: cancellationToken
@@ -49,7 +49,7 @@ public class WordRepository : IWordRepository
 
     public async Task<bool> DeleteWordAsync(string text, string language, CancellationToken cancellationToken)
     {
-        using (SqliteConnection db = new SqliteConnection(_connectionString))
+        using (SqliteConnection db = new(_connectionString))
         {
             await db.OpenAsync(cancellationToken);
 
@@ -60,7 +60,7 @@ public class WordRepository : IWordRepository
             ";
 
             object parameters = new { Text = text, Language = language };
-            CommandDefinition command = new CommandDefinition(
+            CommandDefinition command = new(
                 commandText: deleteQuery,
                 parameters: parameters,
                 cancellationToken: cancellationToken
@@ -73,7 +73,7 @@ public class WordRepository : IWordRepository
 
     public async Task<List<WordBody>> GetWordsAsync(CancellationToken cancellationToken)
     {
-        using (SqliteConnection db = new SqliteConnection(_connectionString))
+        using (SqliteConnection db = new(_connectionString))
         {
             await db.OpenAsync(cancellationToken);
 
@@ -82,7 +82,7 @@ public class WordRepository : IWordRepository
                 FROM Word;
             ";
 
-            CommandDefinition command = new CommandDefinition(
+            CommandDefinition command = new(
                 commandText: query,
                 cancellationToken: cancellationToken
             );
@@ -95,7 +95,7 @@ public class WordRepository : IWordRepository
 
     public async Task<string> GetRandomWordAsync(string language, CancellationToken cancellationToken)
     {
-        using (SqliteConnection db = new SqliteConnection(_connectionString))
+        using (SqliteConnection db = new(_connectionString))
         {
             await db.OpenAsync(cancellationToken);
 
@@ -108,7 +108,7 @@ public class WordRepository : IWordRepository
             ";
 
             object parameters = new { Language = language };
-            CommandDefinition command = new CommandDefinition(
+            CommandDefinition command = new(
                 commandText: query,
                 parameters: parameters,
                 cancellationToken: cancellationToken
