@@ -21,9 +21,8 @@ The player with the highest score at the end of all the rounds wins.
 
 ### Backend
 + **ASP.NET Core** (REST API)
-+ **Sqlite** database
++ **MS SQL** database
 + **Dapper** ORM framework
-+ **Wordnik API** to fetch a random word
 
 ### Tests
 + **xUnit**
@@ -35,6 +34,7 @@ The player with the highest score at the end of all the rounds wins.
 React application: `npm install` `npm run dev`  
 Web Api: `dotnet run`  
 Tests: `dotnet test`
+MS SQL Docker Image: `docker-compose up`
 
 ## Screenshots
 
