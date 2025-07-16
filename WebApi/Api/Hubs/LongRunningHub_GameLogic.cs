@@ -39,7 +39,7 @@ public partial class LongRunningHubConnection : Hub
     {
         Game game = _gameManager.GetGame(gameHash);
 
-        if (game == null)
+        if (game is null)
         {
             _logger.LogError($"Game #{gameHash} StartGame: Game does not exist");
             return;
@@ -115,7 +115,7 @@ public partial class LongRunningHubConnection : Hub
 
                 await _connectionHubContext.Clients.Group(gameHash).SendAsync(HubMessages.OnClearCanvas);
 
-                Random random = new Random();
+                Random random = new();
 
                 int randomTokenIndex = random.Next(game.GameState.DrawingPlayersTokens.Count);
                 string drawingToken = game.GameState.DrawingPlayersTokens[randomTokenIndex];
@@ -200,7 +200,6 @@ public partial class LongRunningHubConnection : Hub
                 await SetCanvasText(gameHash, $"Thank you for playing! You may leave the game :)", BootstrapColors.Green);
                 await Task.Delay(10000);
                 _gameManager.RemoveGame(gameHash);
-                //await hubContext.Clients.Group(gameHash).SendAsync(HubEvents.OnEndGame);
                 break;
             }
 
@@ -212,7 +211,7 @@ public partial class LongRunningHubConnection : Hub
     {
         Game game = _gameManager.GetGame(gameHash);
 
-        if (game == null)
+        if (game is null)
         {
             return false;
         }
@@ -220,11 +219,11 @@ public partial class LongRunningHubConnection : Hub
         game.GameState.CurrentDrawingTimeSeconds = game.GameSettings.DrawingTimeSeconds;
 
         int initialTime = game.GameState.CurrentDrawingTimeSeconds;
-        CancellationTokenSource cancellationToken = new CancellationTokenSource();
+        CancellationTokenSource cancellationToken = new();
 
         for (int i = 0; i < initialTime; i++)
         {
-            if (_gameManager.GetGame(gameHash) == null)
+            if (_gameManager.GetGame(gameHash) is null)
             {
                 cancellationToken.Cancel();
                 return false;
@@ -254,14 +253,14 @@ public partial class LongRunningHubConnection : Hub
 
     public async Task SetCanvasText(string gameHash, string text, string color)
     {
-        Game game = new Game();
+        Game game = new();
 
-        if (game == null)
+        if (game is null)
         {
             return;
         }
 
-        AnnouncementMessage message = new AnnouncementMessage()
+        AnnouncementMessage message = new()
         {
             Text = text,
             BootstrapBackgroundColor = color
@@ -272,21 +271,19 @@ public partial class LongRunningHubConnection : Hub
 
     public async Task SendAnnouncement(string gameHash, string text, string backgroundColor)
     {
-        Game game = new Game();
+        Game game = new();
 
-        if (game == null)
+        if (game is null)
         {
             _logger.LogError($"Game #{gameHash} SendAnnouncement: Game does not exist");
             return;
         }
 
-        AnnouncementMessage message = new AnnouncementMessage()
+        AnnouncementMessage message = new()
         {
             Text = text,
             BootstrapBackgroundColor = backgroundColor
         };
-
-        //gameManager.AddChatMessage(message);
 
         await _connectionHubContext.Clients.Group(gameHash).SendAsync(HubMessages.OnSendAnnouncement, JsonHelper.Serialize(message));
     }

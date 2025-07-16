@@ -22,7 +22,7 @@ public class RequestResponseLoggingMiddleware
         ControllerActionDescriptor descriptor =
             endpoint?.Metadata.GetMetadata<ControllerActionDescriptor>();
 
-        if (descriptor == null)
+        if (descriptor is null)
         {
             await _next(context);
             return;
@@ -47,7 +47,7 @@ public class RequestResponseLoggingMiddleware
             requestBody);
 
         Stream originalResponseBody = context.Response.Body;
-        MemoryStream responseBuffer = new MemoryStream();
+        MemoryStream responseBuffer = new();
         context.Response.Body = responseBuffer;
 
         await _next(context);
@@ -70,7 +70,7 @@ public class RequestResponseLoggingMiddleware
 
     private static async Task<string> ReadStreamAsync(Stream stream)
     {
-        StreamReader reader = new StreamReader(
+        StreamReader reader = new(
             stream,
             Encoding.UTF8,
             detectEncodingFromByteOrderMarks: false,

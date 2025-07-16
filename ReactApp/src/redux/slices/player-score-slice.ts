@@ -5,7 +5,7 @@ export interface PlayerScore {
   score: number;
 }
 
-const randomNumber = Math.floor(Math.random() * 10000);
+const randomNumber = Math.floor(Math.random() * 100000);
 
 const initialState: PlayerScore = {
   username: `Player ${randomNumber}`,

@@ -4,70 +4,66 @@ import { CreateGameBody } from "./HttpInterfaces";
 import { MainScoreboardScore } from "../interfaces/MainScoreboardScore";
 import { Account } from "../interfaces/Account";
 
-class HttpRequestHandler {
-  private httpServerUrl: string = import.meta.env.VITE_SERVER_URL;
+const httpServerUrl: string = import.meta.env.VITE_SERVER_URL;
 
+const api = {
   async createGame(username: string): Promise<any> {
-    const requestBody: CreateGameBody = {
-      username: username,
-    };
+    const requestBody: CreateGameBody = { username };
 
     try {
       const response = await axios.post(
-        `${this.httpServerUrl}${ApiEndpoints.gameCreate}`,
+        `${httpServerUrl}${ApiEndpoints.gameCreate}`,
         requestBody,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        { headers: { "Content-Type": "application/json" } }
       );
 
       if (response.status !== 201) {
-        throw new Error("Error");
+        throw new Error("Error creating game");
       }
 
-      return response.data as object;
+      return response.data;
     } catch (error: any) {
       return error;
     }
-  }
+  },
 
   async checkIfGameExists(gameHash: string): Promise<any> {
     try {
       const response = await axios.get(
-        `${this.httpServerUrl}${ApiEndpoints.gameExists}/${gameHash}`
+        `${httpServerUrl}${ApiEndpoints.gameExists}/${gameHash}`
       );
 
       if (response.status !== 200) {
-        throw new Error("Error");
+        throw new Error("Error checking game existence");
       }
 
-      return response.data as boolean;
+      return response.data;
     } catch (error: any) {
       return error;
     }
-  }
+  },
 
   async fetchTopAccountScores(): Promise<MainScoreboardScore[]> {
     try {
-      const response = await axios.get(`${this.httpServerUrl}${ApiEndpoints.accountGetTopScores}`);
+      const response = await axios.get(
+        `${httpServerUrl}${ApiEndpoints.accountGetTopScores}`
+      );
 
       if (response.status !== 200) {
-        throw new Error("Error");
+        throw new Error("Error fetching top scores");
       }
 
-      return response.data as MainScoreboardScore[];
+      return response.data;
     } catch (error: any) {
       return error;
     }
-  }
+  },
 
   async addAccountIfNotExists(profileObj: any, accessToken: string): Promise<any> {
     try {
       const account: Account = {
         id: profileObj.googleId,
-        accessToken: accessToken,
+        accessToken,
         email: profileObj.email,
         name: profileObj.name,
         givenName: profileObj.givenName,
@@ -75,50 +71,42 @@ class HttpRequestHandler {
         score: 0,
       };
 
-      const requestBody = {
-        account: account,
-      };
-
       const response = await axios.post(
-        `${this.httpServerUrl}${ApiEndpoints.accountAddIfNotExists}`,
-        requestBody,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        `${httpServerUrl}${ApiEndpoints.accountAddIfNotExists}`,
+        { account },
+        { headers: { "Content-Type": "application/json" } }
       );
 
       if (response.status !== 200) {
-        throw new Error("Error");
+        throw new Error("Error adding account");
       }
 
-      return response.status as number;
+      return response.status;
     } catch (error: any) {
       return error;
     }
-  }
+  },
 
   async fetchAccountScore(id: string): Promise<number> {
     try {
       const response = await axios.get(
-        `${this.httpServerUrl}${ApiEndpoints.accountGetScore}/${id}`
+        `${httpServerUrl}${ApiEndpoints.accountGetScore}/${id}`
       );
 
       if (response.status !== 200) {
-        throw new Error("Error");
+        throw new Error("Error fetching account score");
       }
 
-      return response.data as number;
+      return response.data;
     } catch (error: any) {
       return error;
     }
-  }
+  },
 
   async updateAccountScore(gameHash: string, token: string, accessToken: string): Promise<number> {
     try {
       const response = await axios.put(
-        `${this.httpServerUrl}${ApiEndpoints.accountIncrementScore}/${gameHash}`,
+        `${httpServerUrl}${ApiEndpoints.accountIncrementScore}/${gameHash}`,
         undefined,
         {
           headers: {
@@ -129,14 +117,14 @@ class HttpRequestHandler {
       );
 
       if (response.status !== 200) {
-        throw new Error("Error");
+        throw new Error("Error updating account score");
       }
 
-      return response.data as number;
+      return response.data;
     } catch (error: any) {
       return error;
     }
-  }
-}
+  },
+};
 
-export default HttpRequestHandler;
+export default api;

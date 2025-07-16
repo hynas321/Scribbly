@@ -26,7 +26,7 @@ public class WordRepository : IWordRepository
             ";
 
             object parameters = new { Text = text, Language = language };
-            CommandDefinition command = new CommandDefinition(
+            CommandDefinition command = new(
                 commandText: insertQuery,
                 parameters: parameters,
                 cancellationToken: cancellationToken
@@ -50,7 +50,7 @@ public class WordRepository : IWordRepository
             ";
 
             object parameters = new { Text = text, Language = language };
-            CommandDefinition command = new CommandDefinition(
+            CommandDefinition command = new(
                 commandText: deleteQuery,
                 parameters: parameters,
                 cancellationToken: cancellationToken
@@ -72,7 +72,7 @@ public class WordRepository : IWordRepository
                 FROM Word;
             ";
 
-            CommandDefinition command = new CommandDefinition(
+            CommandDefinition command = new(
                 commandText: query,
                 cancellationToken: cancellationToken
             );
@@ -97,7 +97,7 @@ public class WordRepository : IWordRepository
             ";
 
             object parameters = new { Language = language };
-            CommandDefinition command = new CommandDefinition(
+            CommandDefinition command = new(
                 commandText: query,
                 parameters: parameters,
                 cancellationToken: cancellationToken

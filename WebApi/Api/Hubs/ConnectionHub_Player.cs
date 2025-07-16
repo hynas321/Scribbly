@@ -23,7 +23,7 @@ public partial class HubConnection : Hub
 
         Game game = _gameManager.GetGame(gameHash);
 
-        if (game == null)
+        if (game is null)
         {
             string errorMessage = "Game does not exist";
 
@@ -78,14 +78,14 @@ public partial class HubConnection : Hub
 
         List<PlayerScore> playerScores = _playerManager.GetPlayerScores(gameHash);
 
-        GameSettings settingsClient = new GameSettings()
+        GameSettings settingsClient = new()
         {
             DrawingTimeSeconds = game.GameSettings.DrawingTimeSeconds,
             RoundsCount = game.GameSettings.RoundsCount,
             WordLanguage = game.GameSettings.WordLanguage
         };
 
-        GameStateDTO stateClient = new GameStateDTO()
+        GameStateDTO stateClient = new()
         {
             CurrentDrawingTimeSeconds = game.GameState.CurrentDrawingTimeSeconds,
             CurrentRound = game.GameState.CurrentRound,
@@ -117,7 +117,7 @@ public partial class HubConnection : Hub
     {
         Game game = _gameManager.GetGame(gameHash);
             
-        if (game == null)
+        if (game is null)
         {
             _logger.LogInformation($"Game #{gameHash} LeaveGame: Game does not exist");
             return;
@@ -125,7 +125,7 @@ public partial class HubConnection : Hub
 
         Player player = _playerManager.GetPlayerByToken(gameHash, token);
 
-        if (player == null)
+        if (player is null)
         {
             _logger.LogError($"Game #{gameHash} LeaveGame: Player with the token {token} does not exist");
             return;
@@ -144,7 +144,7 @@ public partial class HubConnection : Hub
         {
             _gameManager.RemoveGame(gameHash);
 
-            AnnouncementMessage message = new AnnouncementMessage()
+            AnnouncementMessage message = new()
             {
                 Text = "Host left the lobby",
                 BootstrapBackgroundColor = BootstrapColors.Red
@@ -160,7 +160,7 @@ public partial class HubConnection : Hub
         {
             _gameManager.RemoveGame(gameHash);
 
-            AnnouncementMessage message = new AnnouncementMessage()
+            AnnouncementMessage message = new()
             {
                 Text = "Not enough players to continue the game",
                 BootstrapBackgroundColor = BootstrapColors.Red

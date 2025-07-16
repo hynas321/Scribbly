@@ -40,10 +40,8 @@ public class AccountController : ControllerBase
         {
             return CreatedAtAction(nameof(Add), body.Account);
         }
-        else
-        {
-            return Ok();
-        }
+
+        return Ok();
     }
 
     [HttpPut("IncrementScore/{gameHash}")]
@@ -57,7 +55,7 @@ public class AccountController : ControllerBase
 
         Player player = _playerManager.GetPlayerByToken(gameHash, token);
 
-        if (player == null)
+        if (player is null)
         {
             return NotFound();
         }
@@ -77,7 +75,7 @@ public class AccountController : ControllerBase
 
         Account account = await _accountRepository.GetAccountAsync(id, cancellationToken);
 
-        if (account == null)
+        if (account is null)
         {
             return NotFound();
         }
@@ -86,7 +84,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpGet("GetTop")]
-    public async Task<IActionResult> GetTop(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetTopAccounts(CancellationToken cancellationToken)
     {
         IEnumerable<MainScoreboardScore> topPlayerScores = await _accountRepository.GetTopAccountPlayerScoresAsync(cancellationToken);
         string topPlayerScoresSerialized = JsonHelper.Serialize(topPlayerScores);

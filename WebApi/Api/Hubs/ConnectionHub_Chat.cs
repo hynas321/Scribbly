@@ -18,7 +18,7 @@ public partial class HubConnection : Hub
 
         Game game = _gameManager.GetGame(gameHash);
 
-        if (game == null)
+        if (game is null)
         {
             _logger.LogError($"Game #{gameHash} SendChatMessage: Game does not exist");
             return;
@@ -26,7 +26,7 @@ public partial class HubConnection : Hub
 
         Player player = _playerManager.GetPlayerByToken(gameHash, token);
 
-        if (player == null)
+        if (player is null)
         {
             _logger.LogError($"Game #{gameHash} SendChatMessage: Player with the token {token} does not exist");
             return;
@@ -44,7 +44,7 @@ public partial class HubConnection : Hub
             return;
         }
 
-        ChatMessage message = new ChatMessage()
+        ChatMessage message = new()
         {
             Username = player.Username,
             Text = text
@@ -77,7 +77,7 @@ public partial class HubConnection : Hub
     {
         Game game = _gameManager.GetGame(gameHash);
 
-        if (game == null)
+        if (game is null)
         {
             _logger.LogError($"Game #{gameHash} LoadChatMessages: Game does not exist");
             return;
@@ -85,7 +85,7 @@ public partial class HubConnection : Hub
 
         Player player = _playerManager.GetPlayerByToken(gameHash, token);
 
-        if (player == null)
+        if (player is null)
         {
             _logger.LogError($"Game #{gameHash} LoadChatMessages: Player with the token {token} does not exist");
             return;
@@ -98,21 +98,11 @@ public partial class HubConnection : Hub
 
     public async Task SendAnnouncement(string gameHash, string text, string backgroundColor)
     {
-        Game game = new Game();
-
-        if (game == null)
-        {
-            _logger.LogError($"Game #{gameHash} SendAnnouncement: Game does not exist");
-            return;
-        }
-
-        AnnouncementMessage message = new AnnouncementMessage()
+        AnnouncementMessage message = new()
         {
             Text = text,
             BootstrapBackgroundColor = backgroundColor
         };
-
-        //gameManager.AddChatMessage(message);
 
         await Clients.Group(gameHash).SendAsync(HubMessages.OnSendAnnouncement, JsonHelper.Serialize(message));
     }

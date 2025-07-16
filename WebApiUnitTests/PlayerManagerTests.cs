@@ -21,7 +21,7 @@ public class PlayerManagerTests
     public void AddPlayer_ShouldThrowException_WhenGameDoesNotExist()
     {
         // Arrange
-        Player player = new Player { Token = "playerToken1" };
+        Player player = new() { Token = "playerToken1" };
 
         _mockGameRepository.Setup(repo => repo.GetGame(It.IsAny<string>())).Returns((Game)null);
 
@@ -33,12 +33,12 @@ public class PlayerManagerTests
     public void AddPlayer_ShouldThrowException_WhenPlayerAlreadyExists()
     {
         // Arrange
-        Player existingPlayer = new Player { Token = "playerToken1" };
-        Game game = new Game { GameState = new GameState { Players = new List<Player> { existingPlayer } } };
+        Player existingPlayer = new() { Token = "playerToken1" };
+        Game game = new() { GameState = new GameState { Players = [existingPlayer] } };
 
         _mockGameRepository.Setup(repo => repo.GetGame(_gameHash)).Returns(game);
 
-        Player newPlayer = new Player { Token = "playerToken1" };
+        Player newPlayer = new() { Token = "playerToken1" };
 
         // Act and Assert
         Assert.Throws<ArgumentException>(() => _playerManager.AddPlayer(_gameHash, newPlayer));
@@ -48,8 +48,8 @@ public class PlayerManagerTests
     public void AddPlayer_ShouldAddPlayer_WhenGameExists()
     {
         // Arrange
-        Game game = new Game { GameState = new GameState { Players = new List<Player>() } };
-        Player newPlayer = new Player { Token = "playerToken1" };
+        Game game = new() { GameState = new GameState { Players = [] } };
+        Player newPlayer = new() { Token = "playerToken1" };
 
         _mockGameRepository.Setup(repo => repo.GetGame(_gameHash)).Returns(game);
 
@@ -74,7 +74,7 @@ public class PlayerManagerTests
     public void RemovePlayer_ShouldThrowException_WhenPlayerNotFound()
     {
         // Arrange
-        Game game = new Game { GameState = new GameState { Players = new List<Player>() } };
+        Game game = new() { GameState = new GameState { Players = [] } };
         _mockGameRepository.Setup(repo => repo.GetGame(_gameHash)).Returns(game);
 
         // Act and Assert
@@ -85,8 +85,8 @@ public class PlayerManagerTests
     public void RemovePlayer_ShouldRemovePlayer_WhenPlayerExists()
     {
         // Arrange
-        Player player = new Player { Token = "playerToken1" };
-        Game game = new Game { GameState = new GameState { Players = new List<Player> { player } } };
+        Player player = new() { Token = "playerToken1" };
+        Game game = new() { GameState = new GameState { Players = [player] } };
 
         _mockGameRepository.Setup(repo => repo.GetGame(_gameHash)).Returns(game);
 
@@ -102,7 +102,7 @@ public class PlayerManagerTests
     {
         // Arrange
         Player player = new Player { Token = "playerToken1" };
-        Game game = new Game { GameState = new GameState { Players = new List<Player> { player } } };
+        Game game = new() { GameState = new GameState { Players = [player] } };
 
         _mockGameRepository.Setup(repo => repo.GetGame(_gameHash)).Returns(game);
 
@@ -117,7 +117,7 @@ public class PlayerManagerTests
     public void GetPlayerByToken_ShouldReturnNull_WhenPlayerDoesNotExist()
     {
         // Arrange
-        Game game = new Game { GameState = new GameState { Players = new List<Player>() } };
+        Game game = new() { GameState = new GameState { Players = [] } };
 
         _mockGameRepository.Setup(repo => repo.GetGame(_gameHash)).Returns(game);
 
@@ -142,7 +142,7 @@ public class PlayerManagerTests
     public void UpdatePlayerScore_ShouldThrowException_WhenPlayerNotFound()
     {
         // Arrange
-        Game game = new Game { GameState = new GameState { Players = new List<Player>() } };
+        Game game = new() { GameState = new GameState { Players = [] } };
 
         _mockGameRepository.Setup(repo => repo.GetGame(_gameHash)).Returns(game);
 
@@ -154,8 +154,8 @@ public class PlayerManagerTests
     public void UpdatePlayerScore_ShouldUpdateScore_WhenPlayerExists()
     {
         // Arrange
-        Player player = new Player { Token = "player1", Score = 10 };
-        Game game = new Game { GameState = new GameState { Players = new List<Player> { player } } };
+        Player player = new() { Token = "player1", Score = 10 };
+        Game game = new() { GameState = new GameState { Players = [player] } };
 
         _mockGameRepository.Setup(repo => repo.GetGame(_gameHash)).Returns(game);
 

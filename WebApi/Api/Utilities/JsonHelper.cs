@@ -6,7 +6,7 @@ public class JsonHelper
 {
     public static string Serialize(object o)
     {
-        JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
+        JsonSerializerOptions jsonSerializerOptions = new()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };

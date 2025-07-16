@@ -43,7 +43,7 @@ namespace WebApi.Infrastructure.Repositories
             }
             else
             {
-                CommandDefinition updateCommand = new CommandDefinition(
+                CommandDefinition updateCommand = new(
                     commandText: @"
                         UPDATE Account 
                         SET AccessToken = @AccessToken 
@@ -61,7 +61,7 @@ namespace WebApi.Infrastructure.Repositories
             await using SqlConnection db = new SqlConnection(_connectionString);
             await db.OpenAsync(cancellationToken);
 
-            CommandDefinition command = new CommandDefinition(
+            CommandDefinition command = new(
                 commandText: "UPDATE Account SET Score = Score + @Number WHERE AccessToken = @AccessToken",
                 parameters: new { AccessToken = accessToken, Number = number },
                 cancellationToken: cancellationToken
@@ -75,7 +75,7 @@ namespace WebApi.Infrastructure.Repositories
             await using SqlConnection db = new SqlConnection(_connectionString);
             await db.OpenAsync(cancellationToken);
 
-            CommandDefinition query = new CommandDefinition(
+            CommandDefinition query = new(
                 commandText: "SELECT Score FROM Account WHERE AccessToken = @AccessToken",
                 parameters: new { AccessToken = accessToken },
                 cancellationToken: cancellationToken
@@ -89,7 +89,7 @@ namespace WebApi.Infrastructure.Repositories
             await using SqlConnection db = new SqlConnection(_connectionString);
             await db.OpenAsync(cancellationToken);
 
-            CommandDefinition query = new CommandDefinition(
+            CommandDefinition query = new(
                 commandText: "SELECT * FROM Account WHERE Id = @Id",
                 parameters: new { Id = id },
                 cancellationToken: cancellationToken
