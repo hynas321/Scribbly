@@ -21,9 +21,8 @@ public class HubExceptionFilter : IHubFilter
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in Hub: '{Hub}', method: '{Method}'",
-                invocationContext.Hub.GetType().Name,
-                invocationContext.HubMethodName);
+            _logger.LogError(ex, $"Error in Hub: '{invocationContext.Hub.GetType().Name}'," +
+                $"method: '{invocationContext.HubMethodName}'");
 
             throw new HubException("An internal server error occurred");
         }

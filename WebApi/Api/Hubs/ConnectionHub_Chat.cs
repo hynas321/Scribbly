@@ -2,45 +2,35 @@ using WebApi.Api.Hubs.Static;
 using WebApi.Api.Utilities;
 using WebApi.Domain.Entities;
 using Microsoft.AspNetCore.SignalR;
+using WebApi.Api.Hubs.Attributes;
 
 namespace WebApi.Hubs;
 
 public partial class HubConnection : Hub
 {
     [HubMethodName(HubMessages.SendChatMessage)]
+    [ValidateHubArgument("gameHash", ValidationType.GameHash)]
+    [ValidateHubArgument("token", ValidationType.PlayerToken)]
     public async Task SendChatMessage(string gameHash, string token, string text)
     {
+        Game game = Context.Items["Game"] as Game;
+        Player player = Context.Items["Player"] as Player;
+
         if (text.Length < 1)
         {
             _logger.LogError($"Game #{gameHash} SendChatMessage: Text is too short {text}");
             return;
         }
 
-        Game game = _gameManager.GetGame(gameHash);
-
-        if (game is null)
+        if (game.GameState.NoChatPermissionTokens.Contains(token))
         {
-            _logger.LogError($"Game #{gameHash} SendChatMessage: Game does not exist");
-            return;
-        }
-
-        Player player = _playerManager.GetPlayerByToken(gameHash, token);
-
-        if (player is null)
-        {
-            _logger.LogError($"Game #{gameHash} SendChatMessage: Player with the token {token} does not exist");
+            _logger.LogError($"Game #{gameHash} SendChatMessage: Player with the token {token} cannot send a message");
             return;
         }
 
         if (token == game.GameState.DrawingToken)
         {
             _logger.LogError($"Game #{gameHash} SendChatMessage: Player with the drawing token {token} cannot send a message");
-            return;
-        }
-
-        if (game.GameState.NoChatPermissionTokens.Contains(token))
-        {
-            _logger.LogError($"Game #{gameHash} SendChatMessage: Player with the token {token} cannot send a message");
             return;
         }
 
@@ -73,23 +63,11 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubMessages.LoadChatMessages)]
+    [ValidateHubArgument("gameHash", ValidationType.GameHash)]
+    [ValidateHubArgument("token", ValidationType.PlayerToken)]
     public async Task LoadChatMessages(string gameHash, string token)
     {
-        Game game = _gameManager.GetGame(gameHash);
-
-        if (game is null)
-        {
-            _logger.LogError($"Game #{gameHash} LoadChatMessages: Game does not exist");
-            return;
-        }
-
-        Player player = _playerManager.GetPlayerByToken(gameHash, token);
-
-        if (player is null)
-        {
-            _logger.LogError($"Game #{gameHash} LoadChatMessages: Player with the token {token} does not exist");
-            return;
-        }
+        Game game = Context.Items["Game"] as Game;
 
         await Clients
             .Client(Context.ConnectionId)
