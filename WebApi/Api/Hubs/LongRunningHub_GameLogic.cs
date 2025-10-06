@@ -5,6 +5,7 @@ using WebApi.Application.Managers.Interfaces;
 using WebApi.Application.Services.Interfaces;
 using WebApi.Domain.Entities;
 using Microsoft.AspNetCore.SignalR;
+using WebApi.Api.Hubs.Attributes;
 
 namespace WebApi.Api.Hubs;
 
@@ -35,21 +36,11 @@ public partial class LongRunningHubConnection : Hub
     }
 
     [HubMethodName(HubMessages.StartGame)]
+    [ValidateHubArgument("gameHash", ValidationType.GameHash)]
+    [ValidateHubArgument("token", ValidationType.HostToken)]
     public async Task StartGame(string gameHash, string token, GameSettings settings)
     {
-        Game game = _gameManager.GetGame(gameHash);
-
-        if (game is null)
-        {
-            _logger.LogError($"Game #{gameHash} StartGame: Game does not exist");
-            return;
-        }
-
-        if (token != game.HostToken)
-        {
-            _logger.LogError($"Game #{gameHash} StartGame: Token is not a host token");
-            return;
-        }
+        Game game = (Game)Context.Items["Game"]!;
 
         if (game.GameState.Players.Count < 2)
         {
@@ -119,7 +110,7 @@ public partial class LongRunningHubConnection : Hub
 
                 int randomTokenIndex = random.Next(game.GameState.DrawingPlayersTokens.Count);
                 string drawingToken = game.GameState.DrawingPlayersTokens[randomTokenIndex];
-                string drawingPlayerUsername = _playerManager.GetPlayerByToken(gameHash, drawingToken).Username;
+                string drawingPlayerUsername = _playerManager.GetPlayerByToken(gameHash, drawingToken)?.Username ?? throw new NullReferenceException();
                 string actualSecretWord = await _randomWordService.FetchWordAsync(gameHash, default) ?? throw new NullReferenceException();
                 string hiddenSecretWord = Convert.ToString(actualSecretWord.Length);
 

@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
@@ -27,7 +30,7 @@ jobs:
         id: react-build
         run: |
           cd ReactApp
-          npm run build 
+          npm run build
 
       - name: Set up .NET SDK
         uses: actions/setup-dotnet@v3
@@ -37,9 +40,9 @@ jobs:
       - name: Build .NET Web API
         run: |
           cd WebApi
-          dotnet build WebApi.csproj
+          dotnet build WebApi.csproj --configuration Release
 
       - name: Run Web API Unit Tests
         run: |
           cd WebApiUnitTests
-          dotnet test WebApiUnitTests.csproj --filter "Category=Unit"
+          dotnet test WebApiUnitTests.csproj --configuration Release --filter "Category=Unit"

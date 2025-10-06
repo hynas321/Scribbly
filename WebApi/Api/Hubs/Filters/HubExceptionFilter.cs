@@ -11,17 +11,28 @@ public class HubExceptionFilter : IHubFilter
         _logger = logger;
     }
 
-    public async ValueTask<object> InvokeMethodAsync(
+    public async ValueTask<object?> InvokeMethodAsync(
         HubInvocationContext invocationContext,
-        Func<HubInvocationContext, ValueTask<object>> next)
+        Func<HubInvocationContext, ValueTask<object?>> next)
     {
         try
         {
             return await next(invocationContext);
         }
+        catch (HubException hubException)
+        {
+            _logger.LogWarning(hubException,
+                "Hub validation or client-related error in {Hub}.{Method}: {Message}",
+                invocationContext.Hub.GetType().Name,
+                invocationContext.HubMethodName,
+                hubException.Message);
+
+            return null;
+        }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in Hub: '{Hub}', method: '{Method}'",
+            _logger.LogError(ex,
+                "Unexpected error in Hub {Hub}.{Method}",
                 invocationContext.Hub.GetType().Name,
                 invocationContext.HubMethodName);
 
@@ -29,4 +40,3 @@ public class HubExceptionFilter : IHubFilter
         }
     }
 }
-

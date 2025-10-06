@@ -3,6 +3,7 @@ using WebApi.Api.Utilities;
 using WebApi.Domain.Entities;
 using Microsoft.AspNetCore.SignalR;
 using WebApi.Api.Models.DTO;
+using WebApi.Api.Hubs.Attributes;
 
 namespace WebApi.Hubs;
 
@@ -45,6 +46,7 @@ public partial class HubConnection : Hub
             };
 
             game.GameState.HostPlayerUsername = player.Username;
+            game.GameHash = gameHash;
             _playerManager.AddPlayer(gameHash, player);
         }
         else if (!_playerManager.CheckIfPlayerExistsByUsername(gameHash, username))
@@ -113,23 +115,12 @@ public partial class HubConnection : Hub
     }
 
     [HubMethodName(HubMessages.LeaveGame)]
+    [ValidateHubArgument("gameHash", ValidationType.GameHash)]
+    [ValidateHubArgument("token", ValidationType.PlayerToken)]
     public async Task LeaveGame(string gameHash, string token)
     {
-        Game game = _gameManager.GetGame(gameHash);
-            
-        if (game is null)
-        {
-            _logger.LogInformation($"Game #{gameHash} LeaveGame: Game does not exist");
-            return;
-        }
-
-        Player player = _playerManager.GetPlayerByToken(gameHash, token);
-
-        if (player is null)
-        {
-            _logger.LogError($"Game #{gameHash} LeaveGame: Player with the token {token} does not exist");
-            return;
-        }
+        Game game = (Game)Context.Items["Game"]!;
+        Player player = (Player)Context.Items["Player"]!;
 
         _playerManager.RemovePlayer(gameHash, token);
 
