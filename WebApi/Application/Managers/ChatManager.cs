@@ -17,7 +17,7 @@ public class ChatManager : IChatManager
 
     public void AddChatMessage(string gameHash, ChatMessage chatMessage)
     {
-        Game game = _gameRepository.GetGame(gameHash);
+        Game? game = _gameRepository.GetGame(gameHash);
 
         if (game is null)
         {

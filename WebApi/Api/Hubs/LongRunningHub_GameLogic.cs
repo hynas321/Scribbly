@@ -40,7 +40,7 @@ public partial class LongRunningHubConnection : Hub
     [ValidateHubArgument("token", ValidationType.HostToken)]
     public async Task StartGame(string gameHash, string token, GameSettings settings)
     {
-        Game game = Context.Items["Game"] as Game;
+        Game game = (Game)Context.Items["Game"]!;
 
         if (game.GameState.Players.Count < 2)
         {
@@ -110,7 +110,7 @@ public partial class LongRunningHubConnection : Hub
 
                 int randomTokenIndex = random.Next(game.GameState.DrawingPlayersTokens.Count);
                 string drawingToken = game.GameState.DrawingPlayersTokens[randomTokenIndex];
-                string drawingPlayerUsername = _playerManager.GetPlayerByToken(gameHash, drawingToken).Username;
+                string drawingPlayerUsername = _playerManager.GetPlayerByToken(gameHash, drawingToken)?.Username ?? throw new NullReferenceException();
                 string actualSecretWord = await _randomWordService.FetchWordAsync(gameHash, default) ?? throw new NullReferenceException();
                 string hiddenSecretWord = Convert.ToString(actualSecretWord.Length);
 

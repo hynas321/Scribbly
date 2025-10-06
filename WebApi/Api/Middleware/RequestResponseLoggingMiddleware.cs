@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Controllers;
+using System.Diagnostics;
 using System.Text;
 
 namespace WebApi.Api.Middleware;
@@ -18,8 +19,8 @@ public class RequestResponseLoggingMiddleware
 
     public async Task Invoke(HttpContext context)
     {
-        Endpoint endpoint = context.GetEndpoint();
-        ControllerActionDescriptor descriptor =
+        Endpoint? endpoint = context.GetEndpoint();
+        ControllerActionDescriptor? descriptor =
             endpoint?.Metadata.GetMetadata<ControllerActionDescriptor>();
 
         if (descriptor is null)
@@ -28,55 +29,83 @@ public class RequestResponseLoggingMiddleware
             return;
         }
 
-        string controllerName = descriptor.ControllerName;
-        string actionName = descriptor.ActionName;
+        var stopwatch = Stopwatch.StartNew();
+        string controller = descriptor.ControllerName;
+        string action = descriptor.ActionName;
+        string path = context.Request.Path + context.Request.QueryString;
 
-        context.Request.EnableBuffering();
-        Stream requestBodyStream = context.Request.Body;
-        string requestBody = await ReadStreamAsync(requestBodyStream);
-        requestBodyStream.Position = 0;
+        string? requestBody = await TryReadRequestBodyAsync(context.Request);
 
         _logger.LogInformation(
-            "REQUEST {Method} {Path} (Controller: {Controller}/{Action})\n" +
-            "Headers: {@Headers}\nBody: {Body}",
+            "{Method} {Path} ({Controller}/{Action}) | RequestBody: {Body}",
             context.Request.Method,
-            context.Request.Path + context.Request.QueryString,
-            controllerName,
-            actionName,
-            context.Request.Headers,
-            requestBody);
+            path,
+            controller,
+            action,
+            string.IsNullOrWhiteSpace(requestBody) ? "(empty)" : requestBody);
 
-        Stream originalResponseBody = context.Response.Body;
-        MemoryStream responseBuffer = new();
-        context.Response.Body = responseBuffer;
+        Stream originalBody = context.Response.Body;
+        using MemoryStream buffer = new();
+        context.Response.Body = buffer;
 
-        await _next(context);
+        try
+        {
+            await _next(context);
 
-        responseBuffer.Seek(0, SeekOrigin.Begin);
-        string responseBody = await ReadStreamAsync(responseBuffer);
-        responseBuffer.Seek(0, SeekOrigin.Begin);
+            stopwatch.Stop();
 
-        _logger.LogInformation(
-            "RESPONSE {StatusCode} (Controller: {Controller}/{Action})\n" +
-            "Headers: {@Headers}\nBody: {Body}",
-            context.Response.StatusCode,
-            controllerName,
-            actionName,
-            context.Response.Headers,
-            responseBody);
+            buffer.Seek(0, SeekOrigin.Begin);
+            string responseBody = await ReadStreamAsync(buffer);
+            buffer.Seek(0, SeekOrigin.Begin);
 
-        await responseBuffer.CopyToAsync(originalResponseBody);
+            int statusCode = context.Response.StatusCode;
+            LogLevel level = statusCode >= 400 ? LogLevel.Warning : LogLevel.Information;
+
+            _logger.Log(
+                level,
+                "{StatusCode} {Method} {Path} ({Controller}/{Action}) | Elapsed: {Elapsed} ms\nResponseBody: {Body}",
+                statusCode,
+                context.Request.Method,
+                path,
+                controller,
+                action,
+                stopwatch.ElapsedMilliseconds,
+                string.IsNullOrWhiteSpace(responseBody) ? "(no response body)" : responseBody);
+
+            await buffer.CopyToAsync(originalBody);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+        finally
+        {
+            context.Response.Body = originalBody;
+            buffer.Dispose();
+        }
+    }
+
+    private static async Task<string?> TryReadRequestBodyAsync(HttpRequest request)
+    {
+        if (request.ContentLength == 0)
+        {
+            return null;
+        }
+
+        request.EnableBuffering();
+
+        using (StreamReader reader = new(request.Body, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, leaveOpen: true))
+        {
+            string body = await reader.ReadToEndAsync();
+            request.Body.Position = 0;
+
+            return body;
+        }
     }
 
     private static async Task<string> ReadStreamAsync(Stream stream)
     {
-        StreamReader reader = new(
-            stream,
-            Encoding.UTF8,
-            detectEncodingFromByteOrderMarks: false,
-            leaveOpen: true);
-        string content = await reader.ReadToEndAsync();
-        return content;
+        using StreamReader reader = new(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, leaveOpen: true);
+        return await reader.ReadToEndAsync();
     }
 }
-

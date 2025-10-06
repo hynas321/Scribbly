@@ -12,8 +12,8 @@ public partial class HubConnection : Hub
     [ValidateHubArgument("token", ValidationType.PlayerToken)]
     public async Task GetSecretWord(string gameHash, string token)
     {
-        Game game = Context.Items["Game"] as Game;
-        Player player = Context.Items["Player"] as Player;
+        Game game = (Game)Context.Items["Game"]!;
+        Player player = (Player)Context.Items["Player"]!;
 
         string secretWordMessage;
 
@@ -39,7 +39,7 @@ public partial class HubConnection : Hub
             return;
         }
 
-        Player player = _playerManager.GetPlayerByToken(gameHash, token);
+        Player? player = _playerManager.GetPlayerByToken(gameHash, token);
 
         if (player is null)
         {

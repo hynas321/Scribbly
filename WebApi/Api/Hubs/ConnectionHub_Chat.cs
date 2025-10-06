@@ -13,8 +13,8 @@ public partial class HubConnection : Hub
     [ValidateHubArgument("token", ValidationType.PlayerToken)]
     public async Task SendChatMessage(string gameHash, string token, string text)
     {
-        Game game = Context.Items["Game"] as Game;
-        Player player = Context.Items["Player"] as Player;
+        Game game = (Game)Context.Items["Game"]!;
+        Player player = (Player)Context.Items["Player"]!;
 
         if (text.Length < 1)
         {
@@ -67,7 +67,7 @@ public partial class HubConnection : Hub
     [ValidateHubArgument("token", ValidationType.PlayerToken)]
     public async Task LoadChatMessages(string gameHash, string token)
     {
-        Game game = Context.Items["Game"] as Game;
+        Game game = (Game)Context.Items["Game"]!;
 
         await Clients
             .Client(Context.ConnectionId)

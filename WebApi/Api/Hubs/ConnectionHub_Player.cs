@@ -119,8 +119,8 @@ public partial class HubConnection : Hub
     [ValidateHubArgument("token", ValidationType.PlayerToken)]
     public async Task LeaveGame(string gameHash, string token)
     {
-        Game game = Context.Items["Game"] as Game;
-        Player player = Context.Items["Player"] as Player;
+        Game game = (Game)Context.Items["Game"]!;
+        Player player = (Player)Context.Items["Player"]!;
 
         _playerManager.RemovePlayer(gameHash, token);
 

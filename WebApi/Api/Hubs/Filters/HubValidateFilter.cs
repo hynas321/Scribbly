@@ -17,16 +17,16 @@ public class HubValidateFilter : IHubFilter
         _playerManager = playerManager;
     }
 
-    public async ValueTask<object> InvokeMethodAsync(
+    public async ValueTask<object?> InvokeMethodAsync(
         HubInvocationContext context,
-        Func<HubInvocationContext, ValueTask<object>> next)
+        Func<HubInvocationContext, ValueTask<object?>> next)
     {
         MethodInfo method = context.HubMethod;
         Dictionary<string, int> parameters = method.GetParameters()
-            .Select((parameter, index) => new { parameter.Name, Index = index })
+            .Select((parameter, index) => new { Name = parameter.Name ?? string.Empty, Index = index })
             .ToDictionary(x => x.Name, x => x.Index, StringComparer.Ordinal);
 
-        IReadOnlyList<object> arguments = context.HubMethodArguments;
+        IReadOnlyList<object?> arguments = context.HubMethodArguments;
         IEnumerable<ValidateHubArgumentAttribute> attributes = method.GetCustomAttributes<ValidateHubArgumentAttribute>();
 
         foreach (ValidateHubArgumentAttribute attr in attributes)
@@ -36,7 +36,7 @@ public class HubValidateFilter : IHubFilter
                 continue;
             }
 
-            object argument = arguments[index];
+            object? argument = arguments[index];
 
             switch (attr.Type)
             {
@@ -64,7 +64,7 @@ public class HubValidateFilter : IHubFilter
         return await next(context);
     }
 
-    private void ValidateGameHash(HubInvocationContext context, string methodName, object argument)
+    private void ValidateGameHash(HubInvocationContext context, string methodName, object? argument)
     {
         if (argument is not string gameHash || string.IsNullOrWhiteSpace(gameHash))
         {
@@ -77,7 +77,7 @@ public class HubValidateFilter : IHubFilter
         context.Context.Items["Game"] = game;
     }
 
-    private void ValidatePlayerToken(HubInvocationContext context, string methodName, object argument)
+    private void ValidatePlayerToken(HubInvocationContext context, string methodName, object? argument)
     {
         Game game = GetGameFromContext(context, methodName);
 
@@ -92,7 +92,7 @@ public class HubValidateFilter : IHubFilter
         context.Context.Items["Player"] = player;
     }
 
-    private void ValidateDrawingToken(HubInvocationContext context, string methodName, object argument)
+    private void ValidateDrawingToken(HubInvocationContext context, string methodName, object? argument)
     {
         Game game = GetGameFromContext(context, methodName);
 
@@ -107,7 +107,7 @@ public class HubValidateFilter : IHubFilter
         context.Context.Items["Player"] = player;
     }
 
-    private void ValidateHostToken(HubInvocationContext context, string methodName, object argument)
+    private void ValidateHostToken(HubInvocationContext context, string methodName, object? argument)
     {
         Game game = GetGameFromContext(context, methodName);
 

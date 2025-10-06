@@ -14,7 +14,7 @@ public partial class HubConnection
 
     public async Task SetDrawingTimeSeconds(string gameHash, string token, int setting)
     {
-        Game game = Context.Items["Game"] as Game;
+        Game game = (Game)Context.Items["Game"]!;
         GameSettings settings = game.GameSettings;
 
         settings.DrawingTimeSeconds = setting;
@@ -30,7 +30,7 @@ public partial class HubConnection
     [ValidateHubArgument("token", ValidationType.HostToken)]
     public async Task SetRoundsCount(string gameHash, string token, int setting)
     {
-        Game game = Context.Items["Game"] as Game;
+        Game game = (Game)Context.Items["Game"]!;
         GameSettings settings = game.GameSettings;
 
         settings.RoundsCount = setting;
@@ -46,7 +46,7 @@ public partial class HubConnection
     [ValidateHubArgument("token", ValidationType.HostToken)]
     public async Task SetWordLanguageSetting(string gameHash, string token, string setting)
     {
-        Game game = Context.Items["Game"] as Game;
+        Game game = (Game)Context.Items["Game"]!;
         GameSettings settings = game.GameSettings;
 
         settings.WordLanguage = setting;
@@ -63,7 +63,7 @@ public partial class HubConnection
     public async Task LoadGameSettings(string gameHash, string token)
     {
         _logger.LogInformation($"Hub Context Hash: {Context.GetHashCode()}");
-        Game game = Context.Items["Game"] as Game;
+        Game game = (Game)Context.Items["Game"]!;
 
         await Clients
             .Client(Context.ConnectionId)

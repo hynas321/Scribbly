@@ -7,7 +7,7 @@ namespace WebApi.Infrastructure.Repositories
 {
     public class AccountRepository : IAccountRepository
     {
-        private readonly string _connectionString;
+        private readonly string? _connectionString;
 
         public AccountRepository(IConfiguration configuration)
         {

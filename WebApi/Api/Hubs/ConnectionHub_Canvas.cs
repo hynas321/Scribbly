@@ -14,16 +14,11 @@ public partial class HubConnection : Hub
     [ValidateHubArgument("token", ValidationType.DrawingToken)]
     public async Task DrawOnCanvas(string gameHash, string token, string drawnLineSerialized)
     {
-        Game game = Context.Items["Game"] as Game;
-        DrawnLine drawnLine = JsonConvert.DeserializeObject<DrawnLine>(drawnLineSerialized);
+        Game game = (Game)Context.Items["Game"]!;
+        DrawnLine drawnLine = JsonConvert.DeserializeObject<DrawnLine>(drawnLineSerialized)
+            ?? throw new NullReferenceException();
 
-        if (drawnLine is null)
-        {
-            _logger.LogError($"Game #{gameHash} DrawOnCanvas: Serialized drawnline {drawnLineSerialized} has an incorrect format");
-            return;
-        }
-
-        game.GameState.DrawnLines.Add(drawnLine);
+        game?.GameState.DrawnLines.Add(drawnLine);
 
         await Clients.Group(gameHash).SendAsync(HubMessages.OnDrawOnCanvas, JsonHelper.Serialize(drawnLine));
     }
@@ -32,7 +27,7 @@ public partial class HubConnection : Hub
     [ValidateHubArgument("gameHash", ValidationType.GameHash)]
     public async Task LoadCanvas(string gameHash)
     {
-        Game game = Context.Items["Game"] as Game;
+        Game game = (Game)Context.Items["Game"]!;
         List<DrawnLine> drawnLines = game.GameState.DrawnLines;
 
         await Clients
@@ -45,7 +40,7 @@ public partial class HubConnection : Hub
     [ValidateHubArgument("token", ValidationType.DrawingToken)]
     public async Task ClearCanvas(string gameHash, string token)
     {
-        Game game = Context.Items["Game"] as Game;
+        Game game = (Game)Context.Items["Game"]!;
         game.GameState.DrawnLines.Clear();
 
         await Clients.Group(gameHash).SendAsync(HubMessages.OnClearCanvas);
@@ -56,9 +51,8 @@ public partial class HubConnection : Hub
     [ValidateHubArgument("token", ValidationType.DrawingToken)]
     public async Task UndoLine(string gameHash, string token)
     {
-        Game game = Context.Items["Game"] as Game;
-
-        List<DrawnLine> drawnLines = game.GameState.DrawnLines;
+        Game game = (Game)Context.Items["Game"]!;
+        List<DrawnLine> drawnLines = game?.GameState.DrawnLines ?? throw new NullReferenceException();
 
         if (drawnLines.Count > 0)
         {
