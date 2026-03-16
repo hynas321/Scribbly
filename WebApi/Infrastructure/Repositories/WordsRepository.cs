@@ -1,7 +1,7 @@
 using Dapper;
 using WebApi.Api.Models.HttpRequest;
 using WebApi.Infrastructure.Repositories.Interfaces;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 namespace WebApi.Infrastructure.Repositories;
 
@@ -32,8 +32,15 @@ public class WordRepository : IWordRepository
                 cancellationToken: cancellationToken
             );
 
-            int rows = await db.ExecuteAsync(command);
-            return rows > 0;
+            try
+            {
+                int rows = await db.ExecuteAsync(command);
+                return rows > 0;
+            }
+            catch (SqlException ex) when (ex.Number == 2601 || ex.Number == 2627)
+            {
+                return false;
+            }
         }
     }
 

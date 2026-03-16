@@ -72,3 +72,5 @@ app.MapHub<HubConnection>("/hub/connection");
 app.MapHub<LongRunningHubConnection>("/long-running-hub/connection");
 app.MapHub<AccountHubConnection>("/account-hub/connection");
 app.Run();
+
+public partial class Program { }

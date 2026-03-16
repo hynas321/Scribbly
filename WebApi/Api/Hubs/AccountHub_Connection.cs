@@ -25,18 +25,32 @@ public class AccountHubConnection : Hub
     [HubMethodName(HubMessages.CreateSession)]
     public async Task CreateSession(string accountId)
     {
-        if (AccountHubState.AccountConnections.TryGetValue(accountId, out string? value))
-        {
-            string connectionId = value;
-            AccountHubState.AccountConnections.Remove(accountId);
-            await Clients.Client(connectionId).SendAsync(HubMessages.OnSessionEnded);
+        string previousConnectionId = null;
 
-            _logger.LogInformation($"Session {connectionId} ended for the account ID {accountId}");
+        lock (AccountHubState.AccountConnections)
+        {
+            if (AccountHubState.AccountConnections.TryGetValue(accountId, out string value))
+            {
+                previousConnectionId = value;
+                AccountHubState.AccountConnections.Remove(accountId);
+            }
+
+            AccountHubState.AccountConnections.Add(accountId, Context.ConnectionId);
+        }
+
+        if (previousConnectionId != null)
+        {
+            try
+            {
+                await Clients.Client(previousConnectionId).SendAsync(HubMessages.OnSessionEnded);
+                _logger.LogInformation($"Session {previousConnectionId} ended for the account ID {accountId}");
+            }
+            catch
+            {
+            }
         }
 
         _logger.LogInformation($"New Session {Context.ConnectionId} for the account ID {accountId}");
-
-        AccountHubState.AccountConnections.Add(accountId, Context.ConnectionId);
     }
 
     [HubMethodName(HubMessages.EndSession)]
