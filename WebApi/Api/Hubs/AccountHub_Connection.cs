@@ -27,7 +27,6 @@ public class AccountHubConnection : Hub
     {
         string previousConnectionId = null;
 
-        // Check if there's an existing connection for this account
         lock (AccountHubState.AccountConnections)
         {
             if (AccountHubState.AccountConnections.TryGetValue(accountId, out string value))
@@ -36,11 +35,9 @@ public class AccountHubConnection : Hub
                 AccountHubState.AccountConnections.Remove(accountId);
             }
 
-            // Add the new connection
             AccountHubState.AccountConnections.Add(accountId, Context.ConnectionId);
         }
 
-        // Notify the previous connection outside the lock
         if (previousConnectionId != null)
         {
             try
@@ -50,8 +47,6 @@ public class AccountHubConnection : Hub
             }
             catch
             {
-                // Ignore if sending to previous connection fails
-                // The connection might be closed or not listening
             }
         }
 
