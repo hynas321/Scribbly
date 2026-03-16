@@ -150,7 +150,7 @@ public partial class HubConnection : Hub
                 BootstrapBackgroundColor = BootstrapColors.Red
             };
 
-            await Clients.GroupExcept(gameHash, Context.ConnectionId).SendAsync(HubMessages.OnGameProblem, JsonHelper.Serialize(message));
+            await SendToGroupExcept(gameHash, Context.ConnectionId, HubMessages.OnGameProblem, JsonHelper.Serialize(message));
 
             _logger.LogInformation($"Game #{gameHash} LeaveGame: Host left the unstarted game - game removed");
             return;
@@ -166,7 +166,7 @@ public partial class HubConnection : Hub
                 BootstrapBackgroundColor = BootstrapColors.Red
             };
 
-            await Clients.GroupExcept(gameHash, Context.ConnectionId).SendAsync(HubMessages.OnGameProblem, JsonHelper.Serialize(message));
+            await SendToGroupExcept(gameHash, Context.ConnectionId, HubMessages.OnGameProblem, JsonHelper.Serialize(message));
         }
 
         List<PlayerScore> playerScores = _playerManager.GetPlayerScores(gameHash);
@@ -176,7 +176,7 @@ public partial class HubConnection : Hub
         _logger.LogInformation($"Game #{gameHash} Online players: {game.GameState.Players.Count}. Total players: {game.GameState.Players.Count}");
 
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameHash);
-        await Clients.GroupExcept(gameHash, Context.ConnectionId).SendAsync(HubMessages.OnUpdatePlayerScores, playerListSerialized);
+        await SendToGroupExcept(gameHash, Context.ConnectionId, HubMessages.OnUpdatePlayerScores, playerListSerialized);
         await SendAnnouncement(gameHash, $"{player.Username} has left the game", BootstrapColors.Red);
     }
 }
