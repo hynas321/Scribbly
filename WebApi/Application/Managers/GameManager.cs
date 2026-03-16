@@ -18,7 +18,7 @@ public class GameManager : IGameManager
         _gameRepository.AddGame(gameHash, game);
     }
 
-    public Game GetGame(string gameHash)
+    public Game? GetGame(string gameHash)
     {
         return _gameRepository.GetGame(gameHash);
     }

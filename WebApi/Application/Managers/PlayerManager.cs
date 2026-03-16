@@ -15,7 +15,7 @@ public class PlayerManager : IPlayerManager
 
     public void AddPlayer(string gameHash, Player player)
     {
-        Game game = _gameRepository.GetGame(gameHash);
+        Game? game = _gameRepository.GetGame(gameHash);
 
         if (game is null)
         {
@@ -32,7 +32,7 @@ public class PlayerManager : IPlayerManager
 
     public void RemovePlayer(string gameHash, string token)
     {
-        Game game = _gameRepository.GetGame(gameHash);
+        Game? game = _gameRepository.GetGame(gameHash);
 
         if (game is null)
         {
@@ -47,7 +47,7 @@ public class PlayerManager : IPlayerManager
         }
     }
 
-    public (Player player, string gameHash) RemovePlayerByConnectionId(string connectionId)
+    public (Player? player, string? gameHash) RemovePlayerByConnectionId(string connectionId)
     {
         Dictionary<string, Game> games = _gameRepository.GetAllGames();
 
@@ -66,9 +66,9 @@ public class PlayerManager : IPlayerManager
         return (null, null);
     }
 
-    public Player GetPlayerByToken(string gameHash, string token)
+    public Player? GetPlayerByToken(string gameHash, string token)
     {
-        Game game = _gameRepository.GetGame(gameHash);
+        Game? game = _gameRepository.GetGame(gameHash);
 
         if (game is null)
         {
@@ -80,7 +80,7 @@ public class PlayerManager : IPlayerManager
 
     public List<PlayerScore> GetPlayerScores(string gameHash)
     {
-        Game game = _gameRepository.GetGame(gameHash);
+        Game? game = _gameRepository.GetGame(gameHash);
 
         if (game is null)
         {
@@ -96,7 +96,7 @@ public class PlayerManager : IPlayerManager
 
     public List<string> GetOnlinePlayersTokens(string gameHash)
     {
-        Game game = _gameRepository.GetGame(gameHash);
+        Game? game = _gameRepository.GetGame(gameHash);
 
         if (game is null)
         {
@@ -113,26 +113,26 @@ public class PlayerManager : IPlayerManager
 
     public bool CheckIfPlayerExistsByToken(string gameHash, string token)
     {
-        Game game = _gameRepository.GetGame(gameHash);
+        Game? game = _gameRepository.GetGame(gameHash);
         return game is not null && game.GameState.Players.Any(p => p.Token == token);
     }
 
     public bool CheckIfPlayerExistsByUsername(string gameHash, string username)
     {
-        Game game = _gameRepository.GetGame(gameHash);
+        Game? game = _gameRepository.GetGame(gameHash);
         return game is not null && game.GameState.Players.Any(p => p.Username == username);
     }
 
     public void UpdatePlayerScore(string gameHash, string token, int score)
     {
-        Game game = _gameRepository.GetGame(gameHash);
+        Game? game = _gameRepository.GetGame(gameHash);
 
         if (game is null)
         {
             throw new KeyNotFoundException("Game not found.");
         }
 
-        Player player = game.GameState.Players.Find(p => p.Token == token);
+        Player? player = game.GameState.Players.Find(p => p.Token == token);
 
         if (player is not null)
         {

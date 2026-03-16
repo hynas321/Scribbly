@@ -6,5 +6,5 @@ namespace WebApi.Api.Models.HttpRequest;
 public class AddAccountBody
 {
     [Required]
-    public Account Account { get; set; }
+    public Account? Account { get; set; }
 }

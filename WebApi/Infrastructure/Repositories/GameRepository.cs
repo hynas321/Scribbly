@@ -1,39 +1,38 @@
 ﻿using WebApi.Domain.Entities;
 using WebApi.Repositories.Interfaces;
 
-namespace WebApi.Repositories
+namespace WebApi.Repositories;
+
+public class GameRepository : IGameRepository
 {
-    public class GameRepository : IGameRepository
+    private readonly Dictionary<string, Game> _games = new();
+
+    public void AddGame(string gameHash, Game game)
     {
-        private readonly Dictionary<string, Game> _games = new();
-
-        public void AddGame(string gameHash, Game game)
+        if (_games.ContainsKey(gameHash))
         {
-            if (_games.ContainsKey(gameHash))
-            {
-                throw new ArgumentException("Game with the same hash already exists.");
-            }
-
-            _games.Add(gameHash, game);
+            throw new ArgumentException("Game with the same hash already exists.");
         }
 
-        public Game GetGame(string gameHash)
-        {
-            _games.TryGetValue(gameHash, out var game);
-            return game;
-        }
+        _games.Add(gameHash, game);
+    }
 
-        public void RemoveGame(string gameHash)
-        {
-            if (!_games.Remove(gameHash))
-            {
-                throw new KeyNotFoundException("Game not found.");
-            }
-        }
+    public Game? GetGame(string gameHash)
+    {
+        _games.TryGetValue(gameHash, out var game);
+        return game;
+    }
 
-        public Dictionary<string, Game> GetAllGames()
+    public void RemoveGame(string gameHash)
+    {
+        if (!_games.Remove(gameHash))
         {
-            return _games;
+            throw new KeyNotFoundException("Game not found.");
         }
+    }
+
+    public Dictionary<string, Game> GetAllGames()
+    {
+        return _games;
     }
 }

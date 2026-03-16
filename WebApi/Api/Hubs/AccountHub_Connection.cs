@@ -17,7 +17,7 @@ public class AccountHubConnection : Hub
         await base.OnConnectedAsync();
     }
 
-    public override async Task OnDisconnectedAsync(Exception exception)
+    public override async Task OnDisconnectedAsync(Exception? exception)
     {
         await base.OnDisconnectedAsync(exception);
     }
@@ -56,7 +56,7 @@ public class AccountHubConnection : Hub
     [HubMethodName(HubMessages.EndSession)]
     public void EndSession(string accountId)
     {
-        if (AccountHubState.AccountConnections.TryGetValue(accountId, out string value))
+        if (AccountHubState.AccountConnections.TryGetValue(accountId, out string? value))
         {
             string connectionId = value;
 

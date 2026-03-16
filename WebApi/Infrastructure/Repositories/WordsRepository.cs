@@ -7,7 +7,7 @@ namespace WebApi.Infrastructure.Repositories;
 
 public class WordRepository : IWordRepository
 {
-    private readonly string _connectionString;
+    private readonly string? _connectionString;
 
     public WordRepository(IConfiguration configuration)
     {

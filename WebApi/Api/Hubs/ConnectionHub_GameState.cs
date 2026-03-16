@@ -1,29 +1,19 @@
 using WebApi.Api.Hubs.Static;
 using WebApi.Domain.Entities;
 using Microsoft.AspNetCore.SignalR;
+using WebApi.Api.Hubs.Attributes;
 
 namespace WebApi.Hubs;
 
 public partial class HubConnection : Hub
 {
     [HubMethodName(HubMessages.GetSecretWord)]
+    [ValidateHubArgument("gameHash", ValidationType.GameHash)]
+    [ValidateHubArgument("token", ValidationType.PlayerToken)]
     public async Task GetSecretWord(string gameHash, string token)
     {
-        Game game = _gameManager.GetGame(gameHash);
-
-        if (game is null)
-        {
-            _logger.LogError($"Game #{gameHash} GetSecretWord: Game does not exist");
-            return;
-        }
-
-        Player player = _playerManager.GetPlayerByToken(gameHash, token);
-
-        if (player is null)
-        {
-            _logger.LogError($"Game #{gameHash} GetSecretWord: Player with the token {token} does not exist");
-            return;
-        }
+        Game game = (Game)Context.Items["Game"]!;
+        Player player = (Player)Context.Items["Player"]!;
 
         string secretWordMessage;
 
@@ -49,7 +39,7 @@ public partial class HubConnection : Hub
             return;
         }
 
-        Player player = _playerManager.GetPlayerByToken(gameHash, token);
+        Player? player = _playerManager.GetPlayerByToken(gameHash, token);
 
         if (player is null)
         {

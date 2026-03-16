@@ -29,11 +29,11 @@ public partial class HubConnection
         await base.OnConnectedAsync();
     }
 
-    public override async Task OnDisconnectedAsync(Exception exception)
+    public override async Task OnDisconnectedAsync(Exception? exception)
     {   
-        (Player removedPlayer, string gameHash) = _playerManager.RemovePlayerByConnectionId(Context.ConnectionId);
+        (Player? removedPlayer, string? gameHash) = _playerManager.RemovePlayerByConnectionId(Context.ConnectionId);
 
-        if (removedPlayer != null && gameHash != null)
+        if (removedPlayer is not null && gameHash is not null)
         {
             List<PlayerScore> playerScores = _playerManager.GetPlayerScores(gameHash);
             string playerListSerialized = JsonHelper.Serialize(playerScores);
