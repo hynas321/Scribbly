@@ -1,4 +1,5 @@
 import { MainScoreboardScore } from "../interfaces/MainScoreboardScore";
+import { useTranslation } from "../i18n/I18nContext";
 
 interface MainScoreboardProps {
   title: string;
@@ -13,6 +14,7 @@ function MainScoreboard({
   displayPoints,
   displayIndex,
 }: MainScoreboardProps) {
+  const { t } = useTranslation();
   return (
     <>
       <ul className="list-group">
@@ -24,17 +26,15 @@ function MainScoreboard({
         ) : (
           scoreboardScores.map((scoreboardScore, index) => (
             <li
-              key={index}
+              key={`${scoreboardScore.name}-${index}`}
               className="list-group-item d-flex justify-content-between align-items-center"
             >
               {displayIndex && "#" + (index + 1)}
               <div className="d-flex flex-column align-items-center">
-                <span>
-                  {`${scoreboardScore.givenName} (${scoreboardScore.email.split("@")[0]})`}
-                </span>
+                <span>{scoreboardScore.name}</span>
                 {displayPoints && (
                   <span className="badge rounded-pill bg-dark mt-2">
-                    {scoreboardScore.score} points
+                    {t("common.scorePoints", { score: scoreboardScore.score })}
                   </span>
                 )}
               </div>

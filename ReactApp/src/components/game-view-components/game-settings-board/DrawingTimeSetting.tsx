@@ -1,5 +1,8 @@
+import config from "../../../../config.json";
 import { useAppSelector } from "../../../redux/hooks";
-import Range from "../../Range";
+import { useTranslation } from "../../../i18n/I18nContext";
+import RangeInput from "../../forms/RangeInput";
+import SettingReadonlyLabel from "./SettingReadonlyLabel";
 
 interface DrawingTimeSettingProps {
   isPlayerHost: boolean;
@@ -7,27 +10,28 @@ interface DrawingTimeSettingProps {
 }
 
 const DrawingTimeSetting = ({ isPlayerHost, onChange }: DrawingTimeSettingProps) => {
+  const { t } = useTranslation();
   const drawingTimeSeconds = useAppSelector((state) => state.gameSettings.drawingTimeSeconds);
-  
+
   return (
     <div className="mt-4">
       {isPlayerHost ? (
-        <Range
-          title={"Drawing time"}
+        <RangeInput
+          title={t("settings.drawingTime")}
           suffix={"s"}
-          minValue={30}
-          maxValue={120}
-          step={15}
-          defaultValue={drawingTimeSeconds}
+          minValue={config.gameSettings.minDrawingTimeSeconds}
+          maxValue={config.gameSettings.maxDrawingTimeSeconds}
+          step={config.gameSettings.drawingTimeStepSeconds}
+          value={drawingTimeSeconds}
           onChange={onChange}
         />
       ) : (
-        <label className="form-check-label">
-          {"Drawing time"}: <b>{drawingTimeSeconds.valueOf().toString()}s</b>
-        </label>
+        <SettingReadonlyLabel label={t("settings.drawingTime")}>
+          {drawingTimeSeconds}s
+        </SettingReadonlyLabel>
       )}
     </div>
-  )
-}
+  );
+};
 
 export default DrawingTimeSetting;

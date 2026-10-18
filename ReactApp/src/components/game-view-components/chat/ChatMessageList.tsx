@@ -4,7 +4,7 @@ import ChatMessageElement from "../../ChatMessage";
 
 interface ChatMessageListProps {
   chatMessages: ChatMessage[];
-};
+}
 
 const ChatMessageList = ({ chatMessages }: ChatMessageListProps) => {
   const messagesRef = useRef<HTMLDivElement>(null);
@@ -25,7 +25,7 @@ const ChatMessageList = ({ chatMessages }: ChatMessageListProps) => {
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default ChatMessageList;

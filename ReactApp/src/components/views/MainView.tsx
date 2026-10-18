@@ -1,4 +1,4 @@
-import InputForm from "../InputForm";
+import TextInput from "../forms/TextInput";
 import Button from "../Button";
 import Popup from "../Popup";
 import MainScoreboard from "../MainScoreboard";
@@ -10,9 +10,11 @@ import { useState } from "react";
 import { useUsernameValidation } from "../../hooks/useUsernameValidation";
 import { useGameActions } from "../../hooks/useGameActions";
 import { useTopScores } from "../../hooks/useTopScores";
+import { useTranslation } from "../../i18n/I18nContext";
 
 function MainView() {
-  const { username, setUsername, isValid } = useUsernameValidation(1, 18);
+  const { t } = useTranslation();
+  const { username, setUsername, isValid } = useUsernameValidation(1, 25);
   const { createGame, joinGame } = useGameActions(username);
   const { scoreboardScores, isTableDisplayed } = useTopScores();
 
@@ -23,31 +25,40 @@ function MainView() {
     <div className="container">
       <div className="col-lg-4 col-sm-7 col-xs-6 mx-auto text-center">
         <Popup
-          title="Join the game"
-          inputFormPlaceholderText="Paste the invitation URL here"
+          title={t("mainView.popupTitle")}
+          inputFormPlaceholderText={t("mainView.popupPlaceholder")}
           visible={isPopupVisible}
           onSubmit={(value) => joinGame(UrlHelper.getGameHash(value))}
           onClose={() => setIsPopupVisible(false)}
         />
-        <InputForm
-          defaultValue={username}
-          placeholderValue="Enter username"
-          smallTextValue="Allowed username length 1-18"
+        <TextInput
+          value={username}
+          placeholderValue={t("common.usernamePlaceholder")}
+          smallTextValue={t("common.usernameLengthHint", { min: 1, max: 25 })}
           onChange={setUsername}
         />
-        <Button text="Create the Game" type="success" active={isValid} onClick={createGame} />
-        <Button text="Join the Game" active={isValid} onClick={() => setIsPopupVisible(true)} />
+        <Button
+          text={t("mainView.createGame")}
+          type="success"
+          active={isValid}
+          onClick={createGame}
+        />
+        <Button
+          text={t("mainView.joinGame")}
+          active={isValid}
+          onClick={() => setIsPopupVisible(true)}
+        />
       </div>
       <animated.div className="col-lg-4 col-md-8 mt-5 text-center mx-auto" style={{ ...springs }}>
         {isTableDisplayed ? (
           <MainScoreboard
-            title="Top 5 players"
+            title={t("scoreboard.topPlayers")}
             scoreboardScores={scoreboardScores}
             displayPoints
             displayIndex
           />
         ) : (
-          <img src={tableLoading} alt="Table loading" className="img-fluid" />
+          <img src={tableLoading} alt={t("scoreboard.loadingAlt")} className="img-fluid" />
         )}
       </animated.div>
     </div>

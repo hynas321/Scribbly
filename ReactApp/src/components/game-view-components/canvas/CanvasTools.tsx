@@ -1,69 +1,78 @@
-import material from "material-colors";
 import { CirclePicker } from "react-color";
 import Button from "../../Button";
-import Range from "../../Range";
+import RangeInput from "../../forms/RangeInput";
 import { BsArrowReturnLeft, BsEraserFill } from "react-icons/bs";
+import { useTranslation } from "../../../i18n/I18nContext";
+import config from "../../../../config.json";
 
-interface ChatProps {
+interface CanvasToolsProps {
   color: string;
-  setColor: (c: string) => void;
-  setThickness: (t: number) => void;
-  undoLine: () => void;
+  thickness: number;
+  setColor: (color: string) => void;
+  setThickness: (thickness: number) => void;
+  undoStroke: () => void;
   clearCanvas: () => void;
 }
 
-const CanvasTools = ({ color, setColor, setThickness, undoLine, clearCanvas }: ChatProps) => {
-  const circlePickerColors = [
-    material.black,
-    material.red["500"],
-    material.pink["500"],
-    material.purple["500"],
-    material.deepPurple["500"],
-    material.indigo["500"],
-    material.blue["500"],
-    material.green["500"],
-    material.lightGreen["500"],
-    material.yellow["500"],
-    material.amber["500"],
-    material.orange["500"],
-    material.deepOrange["500"],
-    material.brown["500"],
-    material.blueGrey["500"],
-    material.white,
-  ];
+const palette = [
+  "#000000",
+  "#f44336",
+  "#e91e63",
+  "#9c27b0",
+  "#673ab7",
+  "#3f51b5",
+  "#2196f3",
+  "#4caf50",
+  "#8bc34a",
+  "#ffeb3b",
+  "#ffc107",
+  "#ff9800",
+  "#ff5722",
+  "#795548",
+  "#607d8b",
+  "#ffffff",
+];
 
+const CanvasTools = ({
+  color,
+  thickness,
+  setColor,
+  setThickness,
+  undoStroke,
+  clearCanvas,
+}: CanvasToolsProps) => {
+  const { t } = useTranslation();
   return (
     <>
       <div className="custom-muted d-flex justify-content-center rounded py-2 px-3">
         <CirclePicker
           color={color}
           width="100"
-          onChange={(e) => setColor(e.hex)}
-          colors={circlePickerColors}
+          onChange={(value) => setColor(value.hex)}
+          colors={palette}
         />
       </div>
       <div className="d-flex justify-content-center">
-        <Button text={"Undo"} active={true} icon={<BsArrowReturnLeft />} onClick={undoLine} />
+        <Button text={t("canvas.undo")} active icon={<BsArrowReturnLeft />} onClick={undoStroke} />
         <Button
-          text={"Clear canvas"}
-          active={true}
+          text={t("canvas.clearCanvas")}
+          active
           icon={<BsEraserFill />}
           onClick={clearCanvas}
         />
         <div className="mx-3">
-          <Range
-            title={"Thickness"}
-            suffix={""}
-            minValue={3}
-            maxValue={30}
-            step={3}
-            defaultValue={3}
+          <RangeInput
+            title={t("canvas.thickness")}
+            suffix=""
+            minValue={config.canvas.minThickness}
+            maxValue={config.canvas.maxThickness}
+            step={config.canvas.thicknessStep}
+            value={thickness}
             onChange={setThickness}
           />
         </div>
       </div>
     </>
-  )
-}
-
+  );
+};
 export default CanvasTools;

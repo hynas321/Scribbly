@@ -1,0 +1,1 @@
+SET XACT_ABORT ON;\nBEGIN TRANSACTION;\nIF COL_LENGTH('dbo.Account', 'AccessToken') IS NOT NULL\nBEGIN\n    EXEC sp_rename 'dbo.Account.AccessToken', 'CredentialHash', 'COLUMN';\n    EXEC(N'UPDATE dbo.Account SET CredentialHash = NULL;\n           ALTER TABLE dbo.Account ALTER COLUMN CredentialHash NVARCHAR(64) NULL;');\nEND;\nCOMMIT;\n

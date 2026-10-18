@@ -1,20 +1,22 @@
 button:hover {
-    box-shadow: 0 10px 15px 0 rgba(0,0,0,0.05),0 15px 25px 0 rgba(0,0,0,0.05);
+  box-shadow:
+    0 10px 15px 0 rgba(0, 0, 0, 0.05),
+    0 15px 25px 0 rgba(0, 0, 0, 0.05);
 }
 
 a {
-    color:chocolate;
-    text-decoration: none;
+  color: chocolate;
+  text-decoration: none;
 }
 
 a:hover {
-    color:orange;
+  color: orange;
 }
 
 .custom-muted {
-    background-color: #CCCCCC;
+  background-color: #cccccc;
 }
 
 .bg-custom-lime {
-    background-color: rgb(61, 180, 61)
-};
+  background-color: rgb(61, 180, 61);
+}

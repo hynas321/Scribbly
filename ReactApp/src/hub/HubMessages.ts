@@ -1,59 +1,49 @@
 class HubEvents {
-  //GameSettings
-  static LoadGameSettings: string = "LoadGameSettings";
-  static setDrawingTimeSeconds: string = "SetDrawingTimeSeconds";
-  static setRoundsCount: string = "SetRoundsCount";
-  static setWordLanguage: string = "SetWordLanguage";
-  static onLoadGameSettings: string = "OnLoadGameSettings";
-  static onSetDrawingTimeSeconds: string = "OnSetDrawingTimeSeconds";
-  static onSetRoundsCount: string = "OnSetRoundsCount";
-  static onSetWordLanguage: string = "OnSetWordLanguage";
+  static joinGame = "JoinGame";
+  static reconnectGame = "ReconnectGame";
+  static leaveGame = "LeaveGame";
+  static startGame = "StartGame";
+  static getPrompt = "GetPrompt";
+  static sendChatMessage = "SendChatMessage";
+  static loadChatMessages = "LoadChatMessages";
+  static setDrawingTimeSeconds = "SetDrawingTimeSeconds";
+  static setRoundsCount = "SetRoundsCount";
+  static setPromptLanguage = "SetPromptLanguage";
+  static kickPlayer = "KickPlayer";
+  static setMaxPlayers = "SetMaxPlayers";
+  static setPromptCategories = "SetPromptCategories";
+  static loadCanvas = "LoadCanvas";
+  static appendCanvasChunk = "AppendCanvasChunk";
+  static clearCanvas = "ClearCanvas";
+  static undoStroke = "UndoStroke";
+  static setHintSpeed = "SetHintSpeed";
+  static setHintPercentage = "SetHintPercentage";
 
-  //Chat
-  static sendChatMessage: string = "SendChatMessage";
-  static loadChatMessages: string = "LoadChatMessages";
-  static onSendChatMessage: string = "OnSendChatMessage";
-  static onLoadChatMessages: string = "OnLoadChatMessages";
-  static onSendAnnouncement: string = "OnSendAnnouncement";
-
-  //Game
-  static joinGame: string = "JoinGame";
-  static leaveGame: string = "LeaveGame";
-  static findPlayerHost: string = "FindPlayerHost";
-  static onGameProblem: string = "OnGameProblem";
-  static onJoinGame: string = "OnJoinGame";
-  static onJoinGameError: string = "OnJoinGameError";
-  static onFindPlayerHost: string = "OnFindPlayerHost";
-  static onEndGame: string = "OnEndGame";
-
-  //GameState
-  static startGame: string = "StartGame";
-  static getSecretWord: string = "GetSecretWord";
-  static onStartGame: string = "OnStartGame";
-  static onGetSecretWord: string = "OnGetSecretWord";
-  static onRequestSecretWord: string = "OnRequestSecretWord";
-  static onUpdatePlayerScores: string = "OnUpdatePlayerScores";
-  static onUpdateTimer: string = "OnUpdateTimer";
-  static onUpdateTimerVisibility: string = "OnUpdateTimerVisibility";
-  static onUpdateDrawingPlayer: string = "OnUpdateDrawingPlayer";
-  static onUpdateCurrentRound: string = "OnUpdateCurrentRound";
-  static onUpdateCorrectGuessPlayerUsernames: string = "OnUpdateCorrectGuessPlayerUsernames";
-
-  //Canvas
-  static loadCanvas: string = "LoadCanvas";
-  static drawOnCanvas: string = "DrawOnCanvas";
-  static clearCanvas: string = "ClearCanvas";
-  static undoLine: string = "UndoLine";
-  static onLoadCanvas: string = "OnLoadCanvas";
-  static onDrawOnCanvas: string = "OnDrawOnCanvas";
-  static onClearCanvas: string = "OnClearCanvas";
-  static OnSetCanvasText: string = "OnSetCanvasText";
-
-  //Account
-  static createSession = "CreateSession";
-  static endSession = "EndSession";
-  static onSessionEnded = "OnSessionEnded";
-  static onUpdateAccountScore: string = "OnUpdateAccountScore";
+  static onGameProblem = "OnGameProblem";
+  static onGameStarted = "OnGameStarted";
+  static onGameEnded = "OnGameEnded";
+  static onGameSessionFailed = "OnGameSessionFailed";
+  static onChatMessage = "OnChatMessage";
+  static onAnnouncement = "OnAnnouncement";
+  static onPlayerScoresUpdated = "OnPlayerScoresUpdated";
+  static onTimerUpdated = "OnTimerUpdated";
+  static onTimerVisibilityUpdated = "OnTimerVisibilityUpdated";
+  static onDrawingPlayerUpdated = "OnDrawingPlayerUpdated";
+  static onCurrentRoundUpdated = "OnCurrentRoundUpdated";
+  static onCorrectGuessPlayersUpdated = "OnCorrectGuessPlayersUpdated";
+  static onPromptRefreshRequested = "OnPromptRefreshRequested";
+  static onCanvasChunk = "OnCanvasChunk";
+  static onCanvasCleared = "OnCanvasCleared";
+  static onCanvasStrokeUndone = "OnCanvasStrokeUndone";
+  static onCanvasText = "OnCanvasText";
+  static onDrawingTimeChanged = "OnDrawingTimeChanged";
+  static onRoundsCountChanged = "OnRoundsCountChanged";
+  static onPromptLanguageChanged = "OnPromptLanguageChanged";
+  static onPlayerKicked = "OnPlayerKicked";
+  static onHostChanged = "OnHostChanged";
+  static onMaxPlayersChanged = "OnMaxPlayersChanged";
+  static onPromptCategoriesChanged = "OnPromptCategoriesChanged";
+  static onHintSpeedChanged = "OnHintSpeedChanged";
+  static onHintPercentageChanged = "OnHintPercentageChanged";
 }
-
 export default HubEvents;

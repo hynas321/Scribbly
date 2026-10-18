@@ -2,5 +2,28 @@
   "mainClientEndpoint": "/",
   "gameClientEndpoint": "/game",
   "joinGameClientEndpoint": "/join-game",
-  "pageNotFoundEndpoint": "/not-found"
+  "pageNotFoundEndpoint": "/not-found",
+  "canvas": {
+    "width": 670,
+    "height": 470,
+    "maxPointsPerChunk": 64,
+    "sampleIntervalMilliseconds": 25,
+    "flushIntervalMilliseconds": 50,
+    "defaultThickness": 5,
+    "minThickness": 1,
+    "maxThickness": 64,
+    "thicknessStep": 3
+  },
+  "gameSettings": {
+    "minDrawingTimeSeconds": 30,
+    "maxDrawingTimeSeconds": 120,
+    "drawingTimeStepSeconds": 15,
+    "minRounds": 1,
+    "maxRounds": 6,
+    "minPlayers": 2,
+    "maxPlayers": 10,
+    "minHintPercentage": 25,
+    "maxHintPercentage": 75,
+    "hintPercentageStep": 25
+  }
 }

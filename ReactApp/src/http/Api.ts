@@ -1,130 +1,163 @@
 import axios from "axios";
 import ApiEndpoints from "./ApiEndpoints";
-import { CreateGameBody } from "./HttpInterfaces";
+import { CompletedGameResult, CreateGameResponse, JoinCredentialResponse } from "./HttpInterfaces";
 import { MainScoreboardScore } from "../interfaces/MainScoreboardScore";
-import { Account } from "../interfaces/Account";
 
-const httpServerUrl: string = import.meta.env.VITE_SERVER_URL;
+export interface AccountProfile {
+  id: string;
+  name: string;
+  score: number;
+}
+
+const configuredServer = (import.meta.env.VITE_SERVER_URL ?? "").trim();
+const client = axios.create({
+  baseURL: configuredServer || window.location.origin,
+  withCredentials: true,
+  timeout: 12_000,
+  headers: { "Content-Type": "application/json" },
+});
+const bearer = (token: string) => ({ Authorization: `Bearer ${token}` });
 
 const api = {
-  async createGame(username: string): Promise<any> {
-    const requestBody: CreateGameBody = { username };
-
+  async createGame(username: string): Promise<CreateGameResponse> {
     try {
-      const response = await axios.post(
-        `${httpServerUrl}${ApiEndpoints.gameCreate}`,
-        requestBody,
-        { headers: { "Content-Type": "application/json" } }
-      );
-
-      if (response.status !== 201) {
-        throw new Error("Error creating game");
-      }
-
-      return response.data;
-    } catch (error: any) {
-      return error;
+      return (await client.post<CreateGameResponse>(ApiEndpoints.gameCreate, { username })).data;
+    } catch (error) {
+      throw normalizeApiError(error, "Could not create game");
     }
   },
-
-  async checkIfGameExists(gameHash: string): Promise<any> {
+  async issueJoinCredential(gameHash: string, username: string): Promise<JoinCredentialResponse> {
     try {
-      const response = await axios.get(
-        `${httpServerUrl}${ApiEndpoints.gameExists}/${gameHash}`
-      );
-
-      if (response.status !== 200) {
-        throw new Error("Error checking game existence");
-      }
-
-      return response.data;
-    } catch (error: any) {
-      return error;
+      return (
+        await client.post<JoinCredentialResponse>(ApiEndpoints.joinCredential(gameHash), {
+          username,
+        })
+      ).data;
+    } catch (error) {
+      throw normalizeApiError(error, "Could not reserve a place in the lobby");
     }
   },
-
+  async checkIfGameExists(gameHash: string): Promise<boolean> {
+    try {
+      return (
+        (await client.get<boolean>(`${ApiEndpoints.gameExists}/${encodeURIComponent(gameHash)}`))
+          .data === true
+      );
+    } catch (error) {
+      throw normalizeApiError(error, "Could not check game existence");
+    }
+  },
+  async getCompletedGameResult(gameHash: string, token: string): Promise<CompletedGameResult> {
+    try {
+      return (
+        await client.get<CompletedGameResult>(
+          `${ApiEndpoints.gameCompleted}/${encodeURIComponent(gameHash)}`,
+          {
+            headers: bearer(token),
+          },
+        )
+      ).data;
+    } catch (error) {
+      throw normalizeApiError(error, "Could not restore completed game result");
+    }
+  },
+  async fetchGamePlayers(
+    gameHash: string,
+  ): Promise<{ usernames: string[]; playerCount: number; maxPlayers: number }> {
+    try {
+      return (
+        await client.get<{ usernames: string[]; playerCount: number; maxPlayers: number }>(
+          `${ApiEndpoints.gamePlayers}/${encodeURIComponent(gameHash)}`,
+        )
+      ).data;
+    } catch (error) {
+      throw normalizeApiError(error, "Could not fetch players in the lobby");
+    }
+  },
+  async fetchPromptCategories(lang: string): Promise<string[]> {
+    try {
+      return (await client.get<string[]>(ApiEndpoints.promptCategories(lang))).data;
+    } catch (error) {
+      throw normalizeApiError(error, "Could not fetch prompt categories");
+    }
+  },
   async fetchTopAccountScores(): Promise<MainScoreboardScore[]> {
     try {
-      const response = await axios.get(
-        `${httpServerUrl}${ApiEndpoints.accountGetTopScores}`
-      );
-
-      if (response.status !== 200) {
-        throw new Error("Error fetching top scores");
-      }
-
-      return response.data;
-    } catch (error: any) {
-      return error;
+      return (await client.get<MainScoreboardScore[]>(ApiEndpoints.accountGetTopScores)).data;
+    } catch (error) {
+      throw normalizeApiError(error, "Could not fetch top scores");
     }
   },
-
-  async addAccountIfNotExists(profileObj: any, accessToken: string): Promise<any> {
+  async signIn(idToken: string): Promise<AccountProfile> {
     try {
-      const account: Account = {
-        id: profileObj.googleId,
-        accessToken,
-        email: profileObj.email,
-        name: profileObj.name,
-        givenName: profileObj.givenName,
-        familyName: profileObj.familyName,
-        score: 0,
-      };
-
-      const response = await axios.post(
-        `${httpServerUrl}${ApiEndpoints.accountAddIfNotExists}`,
-        { account },
-        { headers: { "Content-Type": "application/json" } }
-      );
-
-      if (response.status !== 200) {
-        throw new Error("Error adding account");
-      }
-
-      return response.status;
-    } catch (error: any) {
-      return error;
+      return (await client.post<AccountProfile>(ApiEndpoints.accountAddIfNotExists, { idToken }))
+        .data;
+    } catch (error) {
+      throw normalizeApiError(error, "Could not sign in");
     }
   },
-
+  async fetchAccountSession(): Promise<AccountProfile | null> {
+    try {
+      return (await client.get<AccountProfile>(ApiEndpoints.accountSession)).data;
+    } catch (error) {
+      if (getHttpStatus(error) === 401) {
+        return null;
+      }
+      throw normalizeApiError(error, "Could not restore account session");
+    }
+  },
+  async signOut(): Promise<void> {
+    try {
+      await client.post(ApiEndpoints.accountLogout, undefined, {
+        headers: { "X-Scribbly-Request": "1" },
+      });
+    } catch (error) {
+      throw normalizeApiError(error, "Could not sign out");
+    }
+  },
   async fetchAccountScore(id: string): Promise<number> {
     try {
-      const response = await axios.get(
-        `${httpServerUrl}${ApiEndpoints.accountGetScore}/${id}`
-      );
-
-      if (response.status !== 200) {
-        throw new Error("Error fetching account score");
-      }
-
-      return response.data;
-    } catch (error: any) {
-      return error;
+      return (await client.get<number>(`${ApiEndpoints.accountGetScore}/${encodeURIComponent(id)}`))
+        .data;
+    } catch (error) {
+      throw normalizeApiError(error, "Could not fetch account score");
     }
   },
-
-  async updateAccountScore(gameHash: string, token: string, accessToken: string): Promise<number> {
+  async updateAccountScore(gameHash: string, token: string): Promise<number> {
     try {
-      const response = await axios.put(
-        `${httpServerUrl}${ApiEndpoints.accountIncrementScore}/${gameHash}`,
-        undefined,
-        {
-          headers: {
-            Token: token,
-            AccessToken: accessToken,
+      return (
+        await client.put<number>(
+          `${ApiEndpoints.accountIncrementScore}/${encodeURIComponent(gameHash)}`,
+          undefined,
+          {
+            headers: bearer(token),
           },
-        }
-      );
-
-      if (response.status !== 200) {
-        throw new Error("Error updating account score");
-      }
-
-      return response.data;
-    } catch (error: any) {
-      return error;
+        )
+      ).data;
+    } catch (error) {
+      throw normalizeApiError(error, "Could not update account score");
     }
   },
 };
 
+type HttpErrorLike = { response?: { status?: number; data?: unknown } };
+
+function asHttpError(error: unknown): HttpErrorLike | null {
+  if (typeof error !== "object" || error === null || !("response" in error)) {
+    return null;
+  }
+  return error as HttpErrorLike;
+}
+
+function getHttpStatus(error: unknown): number | undefined {
+  return asHttpError(error)?.response?.status;
+}
+
+function normalizeApiError(error: unknown, fallbackMessage: string): Error {
+  const detail = asHttpError(error)?.response?.data;
+  if (typeof detail === "string" && detail.length > 0) {
+    return new Error(detail, { cause: error });
+  }
+  return error instanceof Error ? error : new Error(fallbackMessage);
+}
 export default api;

@@ -3,12 +3,14 @@ import CopyToClipboard from "react-copy-to-clipboard";
 import { BsClipboard, BsEmojiSmile } from "react-icons/bs";
 import Button from "../Button";
 import { animated, useSpring } from "@react-spring/web";
+import { useTranslation } from "../../i18n/I18nContext";
 
 interface ClipboardBarProps {
   invitationUrl: string;
 }
 
 function ClipboardBar({ invitationUrl }: ClipboardBarProps) {
+  const { t } = useTranslation();
   const [copiedToClipboardVisible, setcopiedToClipboardVisible] = useState(false);
 
   const clipboardBarAnimationSpring = useSpring({
@@ -27,11 +29,11 @@ function ClipboardBar({ invitationUrl }: ClipboardBarProps) {
   return (
     <animated.div style={{ ...clipboardBarAnimationSpring }}>
       <CopyToClipboard text={invitationUrl} onCopy={handleCopy}>
-        <Button text={"Copy invitation URL"} active={true} icon={<BsClipboard />} />
+        <Button text={t("clipboard.copyInvitationUrl")} active={true} icon={<BsClipboard />} />
       </CopyToClipboard>
       {copiedToClipboardVisible && (
         <h4 className="text-success mt-3">
-          Copied! <BsEmojiSmile />
+          {t("clipboard.copied")} <BsEmojiSmile />
         </h4>
       )}
     </animated.div>

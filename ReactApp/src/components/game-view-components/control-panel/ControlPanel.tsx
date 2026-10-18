@@ -1,12 +1,14 @@
 import { animated, useSpring } from "@react-spring/web";
 import Button from "../../Button";
 import { BsDoorOpen } from "react-icons/bs";
+import { useTranslation } from "../../../i18n/I18nContext";
 
 interface ControlPanelProps {
   onClick: () => void;
 }
 
 const ControlPanel = ({ onClick }: ControlPanelProps) => {
+  const { t } = useTranslation();
   const controlPanelAnimationSpring = useSpring({
     from: { x: -200 },
     to: { x: 0 },
@@ -15,7 +17,7 @@ const ControlPanel = ({ onClick }: ControlPanelProps) => {
   return (
     <animated.div style={{ ...controlPanelAnimationSpring }}>
       <Button
-        text="Leave the game"
+        text={t("common.leaveGame")}
         active={true}
         type="danger"
         icon={<BsDoorOpen />}
@@ -23,6 +25,6 @@ const ControlPanel = ({ onClick }: ControlPanelProps) => {
       />
     </animated.div>
   );
-}
+};
 
 export default ControlPanel;
