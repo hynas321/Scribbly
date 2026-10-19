@@ -14,7 +14,7 @@ import { useTranslation } from "../../i18n/I18nContext";
 
 function MainView() {
   const { t } = useTranslation();
-  const { username, setUsername, isValid } = useUsernameValidation(1, 25);
+  const { username, setUsername, isValid } = useUsernameValidation(1, 18);
   const { createGame, joinGame } = useGameActions(username);
   const { scoreboardScores, isTableDisplayed } = useTopScores();
 
@@ -34,7 +34,7 @@ function MainView() {
         <TextInput
           value={username}
           placeholderValue={t("common.usernamePlaceholder")}
-          smallTextValue={t("common.usernameLengthHint", { min: 1, max: 25 })}
+          smallTextValue={t("common.usernameLengthHint", { min: 1, max: 18 })}
           onChange={setUsername}
         />
         <Button
