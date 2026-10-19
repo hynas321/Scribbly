@@ -1,25 +1,21 @@
-import { PlayerScore } from "../interfaces/PlayerScore";
-
-export interface CreateGameBody {
-  username: string;
-}
-
 export interface CreateGameResponse {
-  hostToken: string;
+  gameHash: string;
+  roomAccessToken: string;
+  maxPlayers: number;
+}
+export interface JoinCredentialResponse {
+  roomAccessToken: string;
+  expiresAtUtc: string;
+  maxPlayers: number;
+}
+export interface CompletedGameResult {
+  completed: boolean;
+  score: number | null;
+  scores: CompletedPlayerScore[];
 }
 
-export interface JoinGameBody {
-  username: string;
-}
-
-export interface JoinGameResponse {
-  playerScores: PlayerScore[];
-}
-
-export interface PlayerIsHostResponse {
-  isHost: boolean;
-}
-
-export interface UsernameExistsBody {
-  username: string;
+export interface CompletedPlayerScore {
+  username: string | null;
+  score: number;
+  isCurrentPlayer: boolean;
 }

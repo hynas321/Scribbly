@@ -1,0 +1,39 @@
+.results-page {
+  max-width: 840px;
+}
+
+.results-winner h3,
+.results-placement h4 {
+  overflow-wrap: anywhere;
+}
+
+.results-placement-details {
+  min-width: 0;
+}
+
+.results-table {
+  table-layout: fixed;
+}
+
+.results-table th,
+.results-table td {
+  overflow-wrap: anywhere;
+}
+
+.results-table th:first-child {
+  width: 96px;
+}
+
+.results-table th:last-child {
+  width: 88px;
+}
+
+.results-table td {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 575px) {
+  .results-table th:first-child {
+    width: 84px;
+  }
+}

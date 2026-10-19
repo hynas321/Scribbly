@@ -1,0 +1,51 @@
+services:
+  redis:
+    image: redis:7.2-alpine
+    container_name: scribbly-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-CU12-ubuntu-20.04
+    container_name: scribbly-mssql
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in Scribbly.Infrastructure/Docker/.env}"
+    ports:
+      - "1433:1433"
+    volumes:
+      - scribbly-mssql-data-v2:/var/opt/mssql
+      - ./sql-healthcheck.sh:/docker/sql-healthcheck.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "/bin/bash /docker/sql-healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  initdb:
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      mssql:
+        condition: service_healthy
+    environment:
+      SQLCMDPASSWORD: "${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in Scribbly.Infrastructure/Docker/.env}"
+    volumes:
+      - ./init.sql:/docker/init.sql:ro
+      - ../Database/Migrations:/docker/migrations:ro
+      - ./init-db.sh:/docker/init-db.sh:ro
+    entrypoint: ["/bin/bash", "/docker/init-db.sh"]
+
+volumes:
+  scribbly-mssql-data-v2:
+  redisdata:

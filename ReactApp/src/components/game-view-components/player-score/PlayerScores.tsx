@@ -1,9 +1,7 @@
-import { useContext } from "react";
-import { ConnectionHubContext } from "../../../context/ConnectionHubContext";
 import { useAppSelector } from "../../../redux/hooks";
 import { animated, useSpring } from "@react-spring/web";
 import { PlayerScore } from "../../../interfaces/PlayerScore";
-import { usePlayerScoresHubEvents } from "../../../hooks/hub-events/usePlayerScoresHubEvents";
+import { useTranslation } from "../../../i18n/I18nContext";
 import PlayerScoreList from "./PlayerScoreList";
 
 interface PlayerScoresProps {
@@ -21,7 +19,7 @@ const PlayerScores = ({
   displayIndex,
   displayRound,
 }: PlayerScoresProps) => {
-  const hub = useContext(ConnectionHubContext);
+  const { t } = useTranslation();
   const gameState = useAppSelector((state) => state.gameState);
   const gameSettings = useAppSelector((state) => state.gameSettings);
 
@@ -30,13 +28,11 @@ const PlayerScores = ({
     to: { x: 0 },
   });
 
-  usePlayerScoresHubEvents(hub);
-
   return (
     <animated.div style={{ ...playerScoresAnimationSpring }}>
       {displayRound && (
         <h5>
-          Round {gameState.currentRound}/{gameSettings.roundsCount}
+          {t("game.round", { current: gameState.currentRound, total: gameSettings.roundsCount })}
         </h5>
       )}
       <PlayerScoreList
@@ -47,6 +43,6 @@ const PlayerScores = ({
       />
     </animated.div>
   );
-}
+};
 
 export default PlayerScores;

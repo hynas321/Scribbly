@@ -1,66 +1,49 @@
-import { useEffect, useState, useContext } from "react";
-import loading from "./../../../assets/loading.gif";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import loading from "../../../assets/loading.gif";
 import { useAppSelector } from "../../../redux/hooks";
-import { PlayerScore } from "../../../redux/slices/player-score-slice";
 import { useStartGameReady } from "../../../hooks/useStartGameReady";
-import UrlHelper from "../../../utils/UrlHelper";
-import { useGameHubEvents } from "../../../hooks/hub-events/useGameHubEvents";
+import { useRoomSession } from "../../../features/game-session/useRoomSession";
 import InGame from "./InGame";
 import InLobby from "./InLobby";
-import { ConnectionHubContext, LongRunningConnectionHubContext } from "../../../context/ConnectionHubContext";
+import { ConnectionHubContext } from "../../../context/ConnectionHubContext";
 import { useLobbyActions } from "../../../hooks/useLobbyActions";
+import { useTranslation } from "../../../i18n/I18nContext";
 
 function GameView() {
-  const location = useLocation();
-  const gameState = useAppSelector(state => state.gameState);
-  const gameSettings = useAppSelector(state => state.gameSettings);
+  const { t } = useTranslation();
+  const gameState = useAppSelector((state) => state.gameState);
+  const gameSettings = useAppSelector((state) => state.gameSettings);
   const hub = useContext(ConnectionHubContext);
-  const longRunningHub = useContext(LongRunningConnectionHubContext);
-
-  const { fromViewNavigation } = location.state ?? false;
-  const [playerScores, setPlayerScores] = useState<PlayerScore[]>([]);
-  const [gameHash, setGameHash] = useState("");
-  const [isPlayerHost, setIsPlayerHost] = useState(false);
-  const [isGameDisplayed, setIsGameDisplayed] = useState(false);
-  const [isGameFinished, setIsGameFinished] = useState(false);
+  const { gameHash = "" } = useParams();
+  const { playerScores, isPlayerHost, isGameDisplayed } = useRoomSession(hub, gameHash);
+  const canStart = useStartGameReady(playerScores);
+  const { handleLeaveGame } = useLobbyActions(hub, gameHash, gameSettings);
+  const [minLoadingElapsed, setMinLoadingElapsed] = useState(false);
 
   useEffect(() => {
-    setGameHash(UrlHelper.getGameHash(window.location.href));
+    const timer = window.setTimeout(() => setMinLoadingElapsed(true), 1000);
+    return () => window.clearTimeout(timer);
   }, []);
 
-  useGameHubEvents(
-    hub,
-    gameHash,
-    setPlayerScores,
-    setIsPlayerHost,
-    setIsGameDisplayed,
-    fromViewNavigation,
-    isGameFinished,
-    setIsGameFinished
-  );
-
-  const isStartGameButtonActive = useStartGameReady(playerScores);
-  const { handleLeaveGame } = useLobbyActions(hub, longRunningHub, gameHash, gameSettings);
-
-  return !isGameDisplayed ? (
-    <div className="d-flex justify-content-center align-items-center mt-4">
-      <img src={loading} alt="Loading" className="w-30 h-30 img-fluid" />
-    </div>
-  ) : gameState.isGameStarted ? (
-    <InGame
-      playerScores={playerScores}
-      onLeave={handleLeaveGame}
-    />
-  ) : (
-    <InLobby
-      playerScores={playerScores}
-      isPlayerHost={isPlayerHost}
-      isStartGameButtonActive={isStartGameButtonActive}
-      onLeave={handleLeaveGame}
-      gameHash={gameHash}
-    />
+  return (
+    <>
+      {!isGameDisplayed || !minLoadingElapsed ? (
+        <div className="d-flex justify-content-center align-items-center mt-4">
+          <img src={loading} alt={t("app.loading")} className="w-30 h-30 img-fluid" />
+        </div>
+      ) : gameState.isGameStarted ? (
+        <InGame playerScores={playerScores} onLeave={handleLeaveGame} />
+      ) : (
+        <InLobby
+          playerScores={playerScores}
+          isPlayerHost={isPlayerHost}
+          isStartGameButtonActive={canStart}
+          onLeave={handleLeaveGame}
+          gameHash={gameHash}
+        />
+      )}
+    </>
   );
 }
-
 export default GameView;

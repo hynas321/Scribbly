@@ -6,20 +6,22 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "format": "prettier --write src",
+    "format:check": "prettier --check src",
+    "test": "vitest run",
+    "e2e": "node e2e-manual.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@microsoft/signalr": "^7.0.5",
+    "@microsoft/signalr": "^8.0.29",
     "@react-spring/web": "^9.7.3",
     "@reduxjs/toolkit": "^1.9.3",
     "axios": "^1.8.2",
     "bootstrap": "^5.2.3",
-    "gapi-script": "^1.2.0",
     "react": "^18.2.0",
     "react-color": "^2.19.3",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "^18.2.0",
-    "react-google-login": "^5.2.2",
     "react-icons": "^4.8.0",
     "react-modal": "^3.16.1",
     "react-redux": "^8.0.5",
@@ -27,14 +29,15 @@
     "react-toastify": "^10.0.6"
   },
   "devDependencies": {
-    "@types/material-colors": "^1.2.0",
     "@types/react": "^18.0.28",
     "@types/react-color": "^3.0.6",
     "@types/react-copy-to-clipboard": "^5.0.4",
     "@types/react-dom": "^18.0.11",
     "@types/react-modal": "^3.13.1",
     "@vitejs/plugin-react": "^3.1.0",
-    "typescript": "^4.9.3",
-    "vite": "^4.2.3"
+    "prettier": "3.6.2",
+    "typescript": "^5.6.3",
+    "vite": "^4.2.3",
+    "vitest": "^0.34.6"
   }
 }

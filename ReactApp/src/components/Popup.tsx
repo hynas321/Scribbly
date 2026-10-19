@@ -1,7 +1,8 @@
 import Modal from "react-modal";
 import Button from "./Button";
-import InputForm from "./InputForm";
-import { useEffect, useState } from "react";
+import TextInput from "./forms/TextInput";
+import { useState } from "react";
+import { useTranslation } from "../i18n/I18nContext";
 
 interface PopupProps {
   title: string;
@@ -12,6 +13,7 @@ interface PopupProps {
 }
 
 function Popup({ title, inputFormPlaceholderText, visible, onSubmit, onClose }: PopupProps) {
+  const { t } = useTranslation();
   const customStyles = {
     content: {
       top: "25%",
@@ -25,33 +27,38 @@ function Popup({ title, inputFormPlaceholderText, visible, onSubmit, onClose }: 
   };
 
   const [inputFormValue, setInputFormValue] = useState("");
-  const [joinLobbyActiveButton, setJoinLobbyActiveButton] = useState(false);
+  const normalizedValue = inputFormValue.trim();
+  const canSubmit = normalizedValue.length > 0;
 
-  const handleInputFormChange = (value: string) => {
-    setInputFormValue(value);
+  const close = () => {
+    setInputFormValue("");
+    onClose();
   };
 
-  useEffect(() => {
-    if (inputFormValue.length != 0) {
-      setJoinLobbyActiveButton(true);
-    } else {
-      setJoinLobbyActiveButton(false);
+  const submit = () => {
+    if (!canSubmit) {
+      return;
     }
-  }, [inputFormValue]);
+    onSubmit(normalizedValue);
+  };
 
   return (
     <Modal isOpen={visible} style={customStyles} ariaHideApp={false}>
       <div className="container">
         <h5>{title}</h5>
-        <InputForm placeholderValue={inputFormPlaceholderText} onChange={handleInputFormChange} />
+        <TextInput
+          value={inputFormValue}
+          placeholderValue={inputFormPlaceholderText}
+          onChange={setInputFormValue}
+          onKeyDown={(_, key) => {
+            if (key === "Enter") {
+              submit();
+            }
+          }}
+        />
         <div className="d-flex justify-content-end">
-          <Button text={"Cancel"} active={true} type={"danger"} onClick={onClose} />
-          <Button
-            text={"Submit"}
-            active={joinLobbyActiveButton}
-            type={"success"}
-            onClick={() => onSubmit(inputFormValue)}
-          />
+          <Button text={t("common.cancel")} active={true} type={"danger"} onClick={close} />
+          <Button text={t("common.submit")} active={canSubmit} type={"success"} onClick={submit} />
         </div>
       </div>
     </Modal>

@@ -3,23 +3,29 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 export interface GameState {
   currentDrawingTimeSeconds: number;
   currentRound: number;
-  hiddenSecretWord: string;
+  hiddenPromptText: string;
+  promptCategory: string;
+  promptKind: string;
   drawingPlayerUsername: string;
   hostPlayerUsername: string;
   isGameStarted: boolean;
   isTimerVisible: boolean;
   correctGuessPlayerUsernames: string[];
+  canvasEpoch: number;
 }
 
 const initialState: GameState = {
   currentDrawingTimeSeconds: 50,
   currentRound: 1,
-  hiddenSecretWord: "? ? ?",
+  hiddenPromptText: "? ? ?",
+  promptCategory: "",
+  promptKind: "word",
   drawingPlayerUsername: "",
   hostPlayerUsername: "",
   isGameStarted: false,
   isTimerVisible: false,
   correctGuessPlayerUsernames: [],
+  canvasEpoch: 1,
 };
 
 const gameStateSlice = createSlice({
@@ -32,8 +38,13 @@ const gameStateSlice = createSlice({
     updatedCurrentRound(state, action: PayloadAction<number>) {
       state.currentRound = action.payload;
     },
-    updatedHiddenSecretWord(state, action: PayloadAction<string>) {
-      state.hiddenSecretWord = action.payload;
+    updatedHiddenPromptText(state, action: PayloadAction<string>) {
+      state.hiddenPromptText = action.payload;
+    },
+    updatedPrompt(state, action: PayloadAction<{ text: string; category: string; kind: string }>) {
+      state.hiddenPromptText = action.payload.text;
+      state.promptCategory = action.payload.category;
+      state.promptKind = action.payload.kind;
     },
     updatedDrawingPlayerUsername(state, action: PayloadAction<string>) {
       state.drawingPlayerUsername = action.payload;
@@ -50,25 +61,14 @@ const gameStateSlice = createSlice({
     updatedCorrectGuessPlayerUsernames(state, action: PayloadAction<string[]>) {
       state.correctGuessPlayerUsernames = action.payload;
     },
-    updatedGameState(state, action: PayloadAction<GameState>) {
-      (state.currentDrawingTimeSeconds = action.payload.currentDrawingTimeSeconds),
-        (state.currentRound = action.payload.currentRound),
-        (state.hiddenSecretWord = action.payload.hiddenSecretWord),
-        (state.drawingPlayerUsername = action.payload.drawingPlayerUsername),
-        (state.hostPlayerUsername = action.payload.hostPlayerUsername),
-        (state.isGameStarted = action.payload.isGameStarted),
-        (state.isTimerVisible = action.payload.isTimerVisible),
-        (state.correctGuessPlayerUsernames = action.payload.correctGuessPlayerUsernames);
+    updatedCanvasEpoch(state, action: PayloadAction<number>) {
+      state.canvasEpoch = action.payload;
     },
-    clearedGameState(state) {
-      (state.currentDrawingTimeSeconds = initialState.currentDrawingTimeSeconds),
-        (state.currentRound = initialState.currentRound),
-        (state.hiddenSecretWord = initialState.hiddenSecretWord),
-        (state.drawingPlayerUsername = initialState.drawingPlayerUsername),
-        (state.hostPlayerUsername = initialState.hostPlayerUsername),
-        (state.isGameStarted = initialState.isGameStarted),
-        (state.isTimerVisible = initialState.isTimerVisible),
-        (state.correctGuessPlayerUsernames = initialState.correctGuessPlayerUsernames);
+    updatedGameState(_state, action: PayloadAction<GameState>) {
+      return { ...action.payload };
+    },
+    clearedGameState() {
+      return { ...initialState };
     },
   },
 });
@@ -76,12 +76,14 @@ const gameStateSlice = createSlice({
 export const {
   updatedCurrentDrawingTimeSeconds,
   updatedCurrentRound,
-  updatedHiddenSecretWord,
+  updatedHiddenPromptText,
+  updatedPrompt,
   updatedDrawingPlayerUsername,
   updatedHostPlayerUsername,
   updatedIsGameStarted,
   updatedIsTimerVisible,
   updatedCorrectGuessPlayerUsernames,
+  updatedCanvasEpoch,
   updatedGameState,
   clearedGameState,
 } = gameStateSlice.actions;

@@ -1,90 +1,86 @@
-import { useContext, useEffect, useRef, useState } from "react";
-import InputForm from "../../InputForm";
+import { useContext, useMemo, useState } from "react";
+import { animated, useSpring } from "@react-spring/web";
+import TextInput from "../../forms/TextInput";
 import Button from "../../Button";
+import ChatMessageList from "./ChatMessageList";
 import { ConnectionHubContext } from "../../../context/ConnectionHubContext";
 import HubEvents from "../../../hub/HubMessages";
 import { useAppSelector } from "../../../redux/hooks";
-import UrlHelper from "../../../utils/UrlHelper";
-import { animated, useSpring } from "@react-spring/web";
-import { ChatMessage } from "../../../interfaces/ChatMessage";
-import { useSessionStorage } from "../../../hooks/useSessionStorage";
-import { useChatHubEvents } from "../../../hooks/hub-events/useChatHubEvents";
-import ChatMessageList from "./ChatMessageList";
+import { useParams } from "react-router-dom";
+import { reportRealtimeError } from "../../../utils/reportRealtimeError";
+import { useRoomChat } from "../../../features/chat/useRoomChat";
+import { translateCategory, useTranslation } from "../../../i18n/I18nContext";
+
+const MAX_MESSAGE_LENGTH = 280;
 
 interface ChatProps {
   placeholderValue: string;
-  displaySecretWord: boolean;
+  displayPrompt: boolean;
 }
 
-const Chat = ({ placeholderValue, displaySecretWord }: ChatProps) => {
+const Chat = ({ placeholderValue, displayPrompt }: ChatProps) => {
+  const { t } = useTranslation();
   const hub = useContext(ConnectionHubContext);
   const player = useAppSelector((state) => state.player);
   const gameState = useAppSelector((state) => state.gameState);
-
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [gameHash, setGameHash] = useState<string>("");
-  const [inputFormValue, setInputFormValue] = useState<string>("");
-  const [isSendButtonActive, setIsSendButtonActive] = useState<boolean>(false);
-
-  const inputFormRef = useRef<HTMLInputElement>(null);
-  const messagesRef = useRef<HTMLDivElement>(null);
-  const { authorizationToken } = useSessionStorage();
-
-  const chatAnimationSpring = useSpring({
-    from: { x: 200 },
-    to: { x: 0 },
-  });
-
-  useChatHubEvents(hub, gameHash, setMessages);
-
-  useEffect(() => {
-    setGameHash(UrlHelper.getGameHash(window.location.href));
-  }, []);
-
-  useEffect(() => {
-    setIsSendButtonActive(inputFormValue.length > 0);
-  }, [inputFormValue]);
-
-  const handleButtonPress = async () => {
-    if (inputFormValue.trim().length < 1) return;
-
-    await hub.invoke(HubEvents.sendChatMessage, gameHash, authorizationToken, inputFormValue);
-
-    if (inputFormRef && inputFormRef.current) {
-      inputFormRef.current.value = "";
-      setInputFormValue("");
+  const { gameHash = "" } = useParams();
+  const messages = useRoomChat(hub, gameHash);
+  const [inputValue, setInputValue] = useState("");
+  const animation = useSpring({ from: { x: 200 }, to: { x: 0 } });
+  const canSend = useMemo(
+    () => inputValue.trim().length > 0 && inputValue.length <= MAX_MESSAGE_LENGTH,
+    [inputValue],
+  );
+  const send = async () => {
+    const text = inputValue.trim();
+    if (!text || text.length > MAX_MESSAGE_LENGTH) {
+      return;
     }
-  };
-
-  const handleEnterPress = (key: string) => {
-    if (key === "Enter") {
-      handleButtonPress();
+    try {
+      await hub.invoke(HubEvents.sendChatMessage, gameHash, text);
+      setInputValue("");
+    } catch {
+      reportRealtimeError(t("error.action.sendMessage"));
     }
   };
 
   return (
-    <animated.div style={{ ...chatAnimationSpring }}>
-      <h5>{displaySecretWord && `${gameState.hiddenSecretWord}`}</h5>
-      <div id="messages" className="rounded-5 p-3 bg-light">
-        <div ref={messagesRef} style={{ height: "450px", overflowY: "auto" }}>
-          <ChatMessageList chatMessages={messages} />
+    <animated.div style={{ ...animation }}>
+      {displayPrompt && (
+        <div className="mb-2">
+          <h5 className="mb-1" style={{ letterSpacing: "0.12em" }}>
+            {gameState.hiddenPromptText}
+          </h5>
+          {gameState.promptCategory && (
+            <small className="text-muted">
+              {t("prompt.categoryLabel")}: {translateCategory(gameState.promptCategory)}
+            </small>
+          )}
         </div>
-      </div>
+      )}
+      <ChatMessageList chatMessages={messages} />
       {(player.username !== gameState.drawingPlayerUsername ||
         gameState.drawingPlayerUsername === "") && (
         <div className="d-flex justify-content-center align-items-center">
-          <Button text={"Send"} active={isSendButtonActive} onClick={handleButtonPress} />
-          <InputForm
-            defaultValue=""
+          <Button
+            text={t("chat.send")}
+            type={canSend ? undefined : "secondary"}
+            active={canSend}
+            onClick={() => void send()}
+          />
+          <TextInput
+            value={inputValue}
             placeholderValue={placeholderValue}
-            onChange={setInputFormValue}
-            onKeyDown={(_, key) => handleEnterPress(key)}
-            ref={inputFormRef}
+            onChange={setInputValue}
+            onKeyDown={(_, key) => {
+              if (key === "Enter") {
+                void send();
+              }
+            }}
           />
         </div>
       )}
     </animated.div>
   );
 };
-
 export default Chat;

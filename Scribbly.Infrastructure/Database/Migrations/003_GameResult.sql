@@ -1,0 +1,1 @@
+IF OBJECT_ID('dbo.GameResult', 'U') IS NULL\nBEGIN\n    CREATE TABLE dbo.GameResult (\n        GameHash NVARCHAR(100) NOT NULL,\n        PlayerToken NVARCHAR(255) NOT NULL,\n        Score INT NOT NULL,\n        CreatedAtUtc DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),\n        CONSTRAINT PK_GameResult PRIMARY KEY (GameHash, PlayerToken)\n    );\nEND;\n

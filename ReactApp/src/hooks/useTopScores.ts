@@ -1,30 +1,35 @@
 import { useEffect, useState } from "react";
 import { MainScoreboardScore } from "../interfaces/MainScoreboardScore";
-import UrlHelper from "../utils/UrlHelper";
 import api from "../http/Api";
+import { reportRealtimeError } from "../utils/reportRealtimeError";
+import { useTranslation } from "../i18n/I18nContext";
 
 export const useTopScores = () => {
+  const { t } = useTranslation();
   const [scoreboardScores, setScoreboardScores] = useState<MainScoreboardScore[]>([]);
-  const [, setGameHash] = useState<string>("");
   const [isTableDisplayed, setIsTableDisplayed] = useState(false);
-
   useEffect(() => {
-    const fetchScores = async () => {
-      setGameHash(UrlHelper.getGameHash(window.location.href));
-      try {
-        const data = await api.fetchTopAccountScores();
-        if (!Array.isArray(data)) {
-          setIsTableDisplayed(false);
-          return;
+    let active = true;
+    void api
+      .fetchTopAccountScores()
+      .then((scores) => {
+        if (active) {
+          setScoreboardScores(scores);
         }
-        setScoreboardScores(data);
-        setTimeout(() => setIsTableDisplayed(true), 1000);
-      } catch (err) {
-        console.error(err);
-      }
+      })
+      .catch(() => {
+        if (active) {
+          reportRealtimeError(t("error.action.loadScoreboard"));
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setIsTableDisplayed(true);
+        }
+      });
+    return () => {
+      active = false;
     };
-    fetchScores();
-  }, []);
-
+  }, [t]);
   return { scoreboardScores, isTableDisplayed };
 };
